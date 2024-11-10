@@ -16,3 +16,12 @@ Repository of feature models in UVL format integrated with Zenodo and flamapy fo
 ## Official documentation
 
 You can consult the official documentation of the project at [docs.uvlhub.io](https://docs.uvlhub.io/)
+
+
+## Fakenodo
+
+Build docker image
+
+```bash
+docker build -f docker/images/Dockerfile.fakenodo -t puchero-hub/fakenodo .
+```
