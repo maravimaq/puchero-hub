@@ -12,6 +12,7 @@ from flask import (
     render_template,
     request,
     jsonify,
+    send_file,
     send_from_directory,
     make_response,
     abort,
@@ -239,6 +240,15 @@ def download_dataset(dataset_id):
         )
 
     return resp
+
+
+@dataset_bp.route("/dataset/download/all", methods=["GET"])
+def download_all_datasets():
+    return send_file(
+        dataset_service.pack_datasets(),
+        as_attachment=True,
+        download_name="uvlhub_datasets.zip"
+    )
 
 
 @dataset_bp.route("/doi/<path:doi>/", methods=["GET"])
