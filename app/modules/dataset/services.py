@@ -166,19 +166,18 @@ class DataSetService(BaseService):
         return f'http://{domain}/doi/{dataset.ds_meta_data.dataset_doi}'
 
     def pack_datasets(self) -> str:
-        
         temp_directory = tempfile.mkdtemp()
         archive_name = "datasets_collection.zip"
         full_archive_path = os.path.join(temp_directory, archive_name)
 
         with ZipFile(full_archive_path, "w") as zip_file:
             user_folders = [folder for folder in os.listdir("uploads") if folder.startswith("user_")]
-        
+
             for user_folder in user_folders:
                 user_folder_path = os.path.join("uploads", user_folder)
 
                 if os.path.isdir(user_folder_path):
-                    dataset_folders = [folder for folder in os.listdir(user_folder_path) 
+                    dataset_folders = [folder for folder in os.listdir(user_folder_path)
                                        if folder.startswith("dataset_")]
 
                     for dataset_folder in dataset_folders:
@@ -189,9 +188,20 @@ class DataSetService(BaseService):
                                 for file_name in files:
                                     file_path = os.path.join(root, file_name)
 
-                                    relative_path = os.path.relpath(file_path, dataset_folder_path)
-                                    zip_file.write(file_path, arcname=os.path.join(dataset_folder, relative_path))
-    
+                                    if file_name.endswith('.uvl'):
+                                        relative_path = os.path.relpath(file_path, dataset_folder_path)
+
+                                        zip_file.write(file_path, arcname=os.path.join(dataset_folder, relative_path))
+
+                                        pdf_file_path = file_path.replace('.uvl', '.pdf')
+                                        convert_uvl_to_pdf(file_path, pdf_file_path)
+
+                                        if os.path.exists(pdf_file_path):
+                                            zip_file.write(pdf_file_path, arcname=os.path.join(dataset_folder, 
+                                                                                               relative_path.replace(
+                                                                                                   '.uvl', '.pdf')))
+                                            os.remove(pdf_file_path)
+
         return full_archive_path
 
 
