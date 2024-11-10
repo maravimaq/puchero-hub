@@ -79,6 +79,25 @@ def convert_uvl_to_json(uvl_file_path: str, json_file_path: str):
         print(f"Error al convertir {uvl_file_path} a JSON: {str(e)}")
 
 
+def convert_uvl_to_cnf(uvl_file_path: str, cnf_file_path: str):
+    try:
+        with open(uvl_file_path, 'r') as uvl_file:
+            content = uvl_file.readlines()
+
+        if not content:
+            raise ValueError(f"El archivo {uvl_file_path} está vacío.")
+
+        with open(cnf_file_path, 'w') as cnf_file:
+            for line in content:
+                cnf_file.write(line)
+
+    except Exception as e:
+        print(f"Error al convertir {uvl_file_path} a CNF: {str(e)}")
+
+
+
+
+
 class DataSetService(BaseService):
     def __init__(self):
         super().__init__(DataSetRepository())
