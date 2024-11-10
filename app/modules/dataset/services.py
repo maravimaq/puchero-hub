@@ -2,10 +2,13 @@ import logging
 import os
 import hashlib
 import shutil
+import tempfile
 from typing import Optional
 import uuid
+from zipfile import ZipFile
 
 from flask import request
+
 
 from app.modules.auth.services import AuthenticationService
 from app.modules.dataset.models import DSViewRecord, DataSet, DSMetaData
@@ -139,6 +142,35 @@ class DataSetService(BaseService):
     def get_uvlhub_doi(self, dataset: DataSet) -> str:
         domain = os.getenv('DOMAIN', 'localhost')
         return f'http://{domain}/doi/{dataset.ds_meta_data.dataset_doi}'
+
+    def pack_datasets(self) -> str:
+        
+        temp_directory = tempfile.mkdtemp()
+        archive_name = "datasets_collection.zip"
+        full_archive_path = os.path.join(temp_directory, archive_name)
+
+        with ZipFile(full_archive_path, "w") as zip_file:
+            user_folders = [folder for folder in os.listdir("uploads") if folder.startswith("user_")]
+        
+            for user_folder in user_folders:
+                user_folder_path = os.path.join("uploads", user_folder)
+
+                if os.path.isdir(user_folder_path):
+                    dataset_folders = [folder for folder in os.listdir(user_folder_path) 
+                                       if folder.startswith("dataset_")]
+
+                    for dataset_folder in dataset_folders:
+                        dataset_folder_path = os.path.join(user_folder_path, dataset_folder)
+
+                        if os.path.isdir(dataset_folder_path):
+                            for root, dirs, files in os.walk(dataset_folder_path):
+                                for file_name in files:
+                                    file_path = os.path.join(root, file_name)
+
+                                    relative_path = os.path.relpath(file_path, dataset_folder_path)
+                                    zip_file.write(file_path, arcname=os.path.join(dataset_folder, relative_path))
+    
+        return full_archive_path
 
 
 class AuthorService(BaseService):
