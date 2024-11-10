@@ -228,7 +228,7 @@ class DataSetService(BaseService):
 
                 if os.path.isdir(user_folder_path):
                     dataset_folders = [folder for folder in os.listdir(user_folder_path)
-                                   if folder.startswith("dataset_")]
+                                       if folder.startswith("dataset_")]
 
                     for dataset_folder in dataset_folders:
                         dataset_folder_path = os.path.join(user_folder_path, dataset_folder)
@@ -247,19 +247,37 @@ class DataSetService(BaseService):
                                         convert_uvl_to_pdf(file_path, pdf_file_path)
                                     
                                         if os.path.exists(pdf_file_path):
-                                            zip_file.write(pdf_file_path, arcname=os.path.join(dataset_folder, 
+                                            zip_file.write(pdf_file_path, arcname=os.path.join(dataset_folder,
                                                                                                relative_path.replace(
-                                                                                                   '.uvl', '.pdf')))
+                                                                                                    '.uvl', '.pdf')))
                                             os.remove(pdf_file_path)
 
                                         json_file_path = file_path.replace('.uvl', '.json')
                                         convert_uvl_to_json(file_path, json_file_path)
                                     
                                         if os.path.exists(json_file_path):
-                                            zip_file.write(json_file_path, arcname=os.path.join(dataset_folder,
+                                            zip_file.write(json_file_path, arcname=os.path.join(dataset_folder, 
                                                                                                 relative_path.replace(
                                                                                                     '.uvl', '.json')))
                                             os.remove(json_file_path)
+
+                                        cnf_file_path = file_path.replace('.uvl', '.cnf')
+                                        convert_uvl_to_cnf(file_path, cnf_file_path)
+                                    
+                                        if os.path.exists(cnf_file_path):
+                                            zip_file.write(cnf_file_path, arcname=os.path.join(dataset_folder,
+                                                                                               relative_path.replace(
+                                                                                                '.uvl', '.cnf')))
+                                            os.remove(cnf_file_path)
+
+                                        splx_file_path = file_path.replace('.uvl', '.splx')
+                                        convert_uvl_to_splx(file_path, splx_file_path)
+                                    
+                                        if os.path.exists(splx_file_path):
+                                            zip_file.write(splx_file_path, arcname=os.path.join(dataset_folder, 
+                                                                                                relative_path.replace(
+                                                                                                    '.uvl', '.splx')))
+                                            os.remove(splx_file_path)
 
         return full_archive_path
 
