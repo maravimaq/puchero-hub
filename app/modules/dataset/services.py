@@ -6,6 +6,7 @@ import tempfile
 from typing import Optional
 import uuid
 from zipfile import ZipFile
+from fpdf import FPDF
 
 from flask import request
 
@@ -37,6 +38,27 @@ def calculate_checksum_and_size(file_path):
         content = file.read()
         hash_md5 = hashlib.md5(content).hexdigest()
         return hash_md5, file_size
+
+
+def convert_uvl_to_pdf(uvl_file_path: str, pdf_file_path: str):
+    try:
+        with open(uvl_file_path, 'r') as uvl_file:
+            content = uvl_file.read()
+
+        if not content:
+            raise ValueError(f"El archivo {uvl_file_path} está vacío.")
+
+        pdf = FPDF()
+        pdf.set_auto_page_break(auto=True, margin=15)
+        pdf.add_page()
+        pdf.set_font("Arial", size=12)
+
+        pdf.multi_cell(0, 10, content)
+
+        pdf.output(pdf_file_path)
+
+    except Exception as e:
+        print(f"Error al convertir {uvl_file_path} a PDF: {str(e)}")
 
 
 class DataSetService(BaseService):
