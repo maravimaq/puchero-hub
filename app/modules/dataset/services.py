@@ -7,6 +7,7 @@ from typing import Optional
 import uuid
 from zipfile import ZipFile
 from fpdf import FPDF
+import json
 
 from flask import request
 
@@ -59,6 +60,23 @@ def convert_uvl_to_pdf(uvl_file_path: str, pdf_file_path: str):
 
     except Exception as e:
         print(f"Error al convertir {uvl_file_path} a PDF: {str(e)}")
+        
+
+def convert_uvl_to_json(uvl_file_path: str, json_file_path: str):
+    try:
+        with open(uvl_file_path, 'r') as uvl_file:
+            content = uvl_file.read()
+        
+        if not content:
+            raise ValueError(f"El archivo {uvl_file_path} está vacío.")
+        
+        json_content = {"data": content}
+
+        with open(json_file_path, 'w') as json_file:
+            json.dump(json_content, json_file, indent=4)
+    
+    except Exception as e:
+        print(f"Error al convertir {uvl_file_path} a JSON: {str(e)}")
 
 
 class DataSetService(BaseService):
