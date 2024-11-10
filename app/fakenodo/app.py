@@ -1,42 +1,76 @@
-from flask import Flask, jsonify
+
+from flask import Flask, request, jsonify
+import uuid
+from datetime import datetime
 
 app = Flask(__name__)
 
-
-@app.route("/api/deposit/depositions", methods=['GET'])
-def get_depositions():
-    data = [{
-        "conceptrecid": "542200",
-        "created": "2020-05-19T11:58:41.606998+00:00",
-        "files": [],
-        "id": 542201,
-        "links": {
-            "bucket": "https://zenodo.org/api/files/568377dd-daf8-4235-85e1-a56011ad454b",
-            "discard": "https://zenodo.org/api/deposit/depositions/542201/actions/discard",
-            "edit": "https://zenodo.org/api/deposit/depositions/542201/actions/edit",
-            "files": "https://zenodo.org/api/deposit/depositions/542201/files",
-            "html": "https://zenodo.org/deposit/542201",
-            "latest_draft": "https://zenodo.org/api/deposit/depositions/542201",
-            "latest_draft_html": "https://zenodo.org/deposit/542201",
-            "publish": "https://zenodo.org/api/deposit/depositions/542201/actions/publish",
-            "self": "https://zenodo.org/api/deposit/depositions/542201"
-        },
-        "metadata": {
-            "prereserve_doi": {
-                "doi": "10.5072/zenodo.542201",
-                "recid": 542201
-            }
-        },
-        "modified": "2020-05-19T11:58:41.607012+00:00",
-        "owner": 12345,
-        "record_id": 542201,
-        "state": "unsubmitted",
-        "submitted": False,
-        "title": ""
-    }]
-    return jsonify(data), 200
+deposits = {}
 
 
-@app.route('/api/deposit/', methods=['POST'])
+@app.route('/api/deposit/depositions/<deposit_id>', methods=['GET'])
+def get_deposit(deposit_id):
+    deposit = deposits.get(deposit_id)
+    if not deposit:
+        return jsonify({"error": "Deposit not found"}), 404
+    return jsonify(deposit), 200
+
+
+@app.route('/api/deposit/depositions', methods=['POST'])
 def create_deposit():
-    return jsonify({"message": "Deposit created successfully"}), 201
+    data = request.get_json()
+
+    if not data or 'title' not in data or 'description' not in data:
+        return jsonify(
+                {
+                    "message": "Request badly formed",
+                    "status": 400
+                }
+            )
+
+    deposit_id = str(uuid.uuid4())
+    doi = f"10.5072/fakenodo.{uuid.uuid4().hex[:8]}"
+
+    metadata = {
+        "upload_type": "dataset",
+        "title": data['title'],
+        "description": data['description'],
+        "publication_date": datetime.now().isoformat(),
+        "creators": [{"name": "del Junco, Juan"}],
+        "access_right": "open",
+        "license": "cc-by-4.0"
+        }
+
+    new_deposit = {
+        "id": deposit_id,
+        "doi": doi,
+        "metadata": metadata,
+        "title": metadata["title"],
+        "submitted": False,
+        "created": datetime.now().isoformat(),
+        "files": [{}],
+        "modify": datetime.now().isoformat(),
+        "owner": 23,
+        "record_url": "url",
+        "state": "inprogress"
+    }
+    deposits[deposit_id] = new_deposit
+
+    return jsonify({
+        "message": "Deposit created successfully",
+        "id": deposit_id,
+        "doi": doi,
+        "links": {
+            "self": f"http://localhost:5000/api/deposit/depositions/{deposit_id}",
+            "publish": f"http://localhost:5000/api/deposit/depositions/{deposit_id}/actions/publish",
+            "edit": f"http://localhost:5000/api/deposit/depositions/{deposit_id}/actions/edit"
+        }
+    }), 201
+
+
+@app.route('/api/deposit/depositions/<int:deposition_id>/files', methods=['POST'])
+def upload_files(deposition_id):
+
+    file = request.json
+    print(file)
+    return jsonify(file), 201
