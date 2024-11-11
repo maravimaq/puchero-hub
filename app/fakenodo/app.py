@@ -102,3 +102,34 @@ def list_files(deposit_id):
 
     files = deposit.get("files", [])
     return jsonify(files), 200
+
+
+@app.route('/api/deposit/depositions/<deposit_id>/files/<file_id>', methods=['GET'])
+def get_file(deposit_id, file_id):
+    deposit = deposits.get(deposit_id)
+    if not deposit:
+        return jsonify({"error": "Deposit not found"}), 404
+
+    file_metadata = next((f for f in deposit["files"] if f["id"] == file_id), None)
+    if not file_metadata:
+        return jsonify({"error": "File not found"}), 404
+
+    return jsonify(file_metadata), 200
+
+
+@app.route('/api/deposit/depositions/<deposit_id>/files/<file_id>', methods=['DELETE'])
+def delete_file(deposit_id, file_id):
+    deposit = deposits.get(deposit_id)
+    if not deposit:
+        return jsonify({"error": "Deposit not found"}), 404
+
+    if deposit.get("submitted"):
+        return jsonify({"error": "Deleting a published deposition is forbidden"}), 403
+
+    file_index = next((index for index, f in enumerate(deposit["files"]) if f["id"] == file_id), None)
+    if file_index is None:
+        return jsonify({"error": "File not found"}), 404
+
+    deposit["files"].pop(file_index)
+
+    return '', 204
