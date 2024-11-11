@@ -2,6 +2,8 @@
 from flask import Flask, request, jsonify
 import uuid
 from datetime import datetime
+import hashlib
+import os
 
 app = Flask(__name__)
 
@@ -21,12 +23,10 @@ def create_deposit():
     data = request.get_json()
 
     if not data or 'title' not in data or 'description' not in data:
-        return jsonify(
-                {
-                    "message": "Request badly formed",
-                    "status": 400
-                }
-            )
+        return jsonify({
+            "message": "Request badly formed",
+            "status": 400
+        }), 400
 
     deposit_id = str(uuid.uuid4())
     doi = f"10.5072/fakenodo.{uuid.uuid4().hex[:8]}"
@@ -39,38 +39,66 @@ def create_deposit():
         "creators": [{"name": "del Junco, Juan"}],
         "access_right": "open",
         "license": "cc-by-4.0"
-        }
+    }
 
     new_deposit = {
         "id": deposit_id,
         "doi": doi,
         "metadata": metadata,
-        "title": metadata["title"],
-        "submitted": False,
         "created": datetime.now().isoformat(),
-        "files": [{}],
-        "modify": datetime.now().isoformat(),
+        "submitted": False,
+        "files": [],
         "owner": 23,
-        "record_url": "url",
         "state": "inprogress"
     }
     deposits[deposit_id] = new_deposit
 
-    return jsonify({
-        "message": "Deposit created successfully",
-        "id": deposit_id,
-        "doi": doi,
-        "links": {
-            "self": f"http://localhost:5000/api/deposit/depositions/{deposit_id}",
-            "publish": f"http://localhost:5000/api/deposit/depositions/{deposit_id}/actions/publish",
-            "edit": f"http://localhost:5000/api/deposit/depositions/{deposit_id}/actions/edit"
-        }
-    }), 201
+    return jsonify(new_deposit), 201
 
 
-@app.route('/api/deposit/depositions/<int:deposition_id>/files', methods=['POST'])
-def upload_files(deposition_id):
+@app.route('/api/deposit/depositions/<deposit_id>/files', methods=['POST'])
+def upload_files(deposit_id):
+    deposit = deposits.get(deposit_id)
+    if not deposit:
+        return jsonify({"error": "Deposit not found"}), 404
 
-    file = request.json
-    print(file)
-    return jsonify(file), 201
+    if 'file' not in request.files:
+        return jsonify({"error": "No file part in the request"}), 400
+
+    file = request.files['file']
+    file_id = str(uuid.uuid4())
+    filename = file.filename
+
+    temp_path = os.path.join('/tmp', filename)
+    file.save(temp_path)
+
+    # MD5 checksum
+    md5_hash = hashlib.md5()
+    with open(temp_path, 'rb') as f:
+        for chunk in iter(lambda: f.read(4096), b""):
+            md5_hash.update(chunk)
+    checksum = f"md5:{md5_hash.hexdigest()}"
+
+    filesize = os.path.getsize(temp_path)
+    os.remove(temp_path)
+
+    file_metadata = {
+        "id": file_id,
+        "filename": filename,
+        "filesize": filesize,
+        "checksum": checksum
+    }
+
+    deposit["files"].append(file_metadata)
+
+    return jsonify(file_metadata), 201
+
+
+@app.route('/api/deposit/depositions/<deposit_id>/files', methods=['GET'])
+def list_files(deposit_id):
+    deposit = deposits.get(deposit_id)
+    if not deposit:
+        return jsonify({"error": "Deposit not found"}), 404
+
+    files = deposit.get("files", [])
+    return jsonify(files), 200
