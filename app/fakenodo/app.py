@@ -133,3 +133,25 @@ def delete_file(deposit_id, file_id):
     deposit["files"].pop(file_index)
 
     return '', 204
+
+
+@app.route('/api/deposit/depositions/<deposit_id>/files/<file_id>', methods=['PUT'])
+def update_file(deposit_id, file_id):
+    deposit = deposits.get(deposit_id)
+    if not deposit:
+        return jsonify({"error": "Deposit not found"}), 404
+
+    if deposit.get("submitted"):
+        return jsonify({"error": "Updating a published deposition is forbidden"}), 403
+
+    file_metadata = next((f for f in deposit["files"] if f["id"] == file_id), None)
+    if not file_metadata:
+        return jsonify({"error": "File not found"}), 404
+
+    data = request.get_json()
+    if not data or 'filename' not in data:
+        return jsonify({"error": "Filename is required"}), 400
+
+    file_metadata["filename"] = data["filename"]
+
+    return jsonify(file_metadata), 200
