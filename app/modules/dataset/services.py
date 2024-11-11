@@ -2,10 +2,15 @@ import logging
 import os
 import hashlib
 import shutil
+import tempfile
 from typing import Optional
 import uuid
+from zipfile import ZipFile
+from fpdf import FPDF
+import json
 
 from flask import request
+
 
 from app.modules.auth.services import AuthenticationService
 from app.modules.dataset.models import DSViewRecord, DataSet, DSMetaData
@@ -34,6 +39,76 @@ def calculate_checksum_and_size(file_path):
         content = file.read()
         hash_md5 = hashlib.md5(content).hexdigest()
         return hash_md5, file_size
+
+
+def convert_uvl_to_pdf(uvl_file_path: str, pdf_file_path: str):
+    try:
+        with open(uvl_file_path, 'r') as uvl_file:
+            content = uvl_file.read()
+
+        if not content:
+            raise ValueError(f"El archivo {uvl_file_path} está vacío.")
+
+        pdf = FPDF()
+        pdf.set_auto_page_break(auto=True, margin=15)
+        pdf.add_page()
+        pdf.set_font("Arial", size=12)
+
+        pdf.multi_cell(0, 10, content)
+
+        pdf.output(pdf_file_path)
+
+    except Exception as e:
+        print(f"Error al convertir {uvl_file_path} a PDF: {str(e)}")
+        
+
+def convert_uvl_to_json(uvl_file_path: str, json_file_path: str):
+    try:
+        with open(uvl_file_path, 'r') as uvl_file:
+            content = uvl_file.read()
+        
+        if not content:
+            raise ValueError(f"El archivo {uvl_file_path} está vacío.")
+        
+        json_content = {"data": content}
+
+        with open(json_file_path, 'w') as json_file:
+            json.dump(json_content, json_file, indent=4)
+    
+    except Exception as e:
+        print(f"Error al convertir {uvl_file_path} a JSON: {str(e)}")
+
+
+def convert_uvl_to_cnf(uvl_file_path: str, cnf_file_path: str):
+    try:
+        with open(uvl_file_path, 'r') as uvl_file:
+            content = uvl_file.readlines()
+
+        if not content:
+            raise ValueError(f"El archivo {uvl_file_path} está vacío.")
+
+        with open(cnf_file_path, 'w') as cnf_file:
+            for line in content:
+                cnf_file.write(line)
+
+    except Exception as e:
+        print(f"Error al convertir {uvl_file_path} a CNF: {str(e)}")
+
+
+def convert_uvl_to_splx(uvl_file_path: str, splx_file_path: str):
+    try:
+        with open(uvl_file_path, 'r') as uvl_file:
+            content = uvl_file.readlines()
+
+        if not content:
+            raise ValueError(f"El archivo {uvl_file_path} está vacío.")
+
+        with open(splx_file_path, 'w') as splx_file:
+            for line in content:
+                splx_file.write(line)
+
+    except Exception as e:
+        print(f"Error al convertir {uvl_file_path} a SPLX: {str(e)}")
 
 
 class DataSetService(BaseService):
@@ -140,6 +215,73 @@ class DataSetService(BaseService):
         domain = os.getenv('DOMAIN', 'localhost')
         return f'http://{domain}/doi/{dataset.ds_meta_data.dataset_doi}'
 
+    def pack_datasets(self) -> str:
+        temp_directory = tempfile.mkdtemp()
+        archive_name = "datasets_collection.zip"
+        full_archive_path = os.path.join(temp_directory, archive_name)
+
+        with ZipFile(full_archive_path, "w") as zip_file:
+            user_folders = [folder for folder in os.listdir("uploads") if folder.startswith("user_")]
+
+            for user_folder in user_folders:
+                user_folder_path = os.path.join("uploads", user_folder)
+
+                if os.path.isdir(user_folder_path):
+                    dataset_folders = [folder for folder in os.listdir(user_folder_path)
+                                       if folder.startswith("dataset_")]
+
+                    for dataset_folder in dataset_folders:
+                        dataset_folder_path = os.path.join(user_folder_path, dataset_folder)
+
+                        if os.path.isdir(dataset_folder_path):
+                            for root, dirs, files in os.walk(dataset_folder_path):
+                                for file_name in files:
+                                    file_path = os.path.join(root, file_name)
+
+                                    if file_name.endswith('.uvl'):
+                                        relative_path = os.path.relpath(file_path, dataset_folder_path)
+
+                                        uvl_folder_path = os.path.join(dataset_folder, "uvl")
+                                        zip_file.write(file_path, arcname=os.path.join(uvl_folder_path, relative_path))
+
+                                        pdf_file_path = file_path.replace('.uvl', '.pdf')
+                                        convert_uvl_to_pdf(file_path, pdf_file_path)
+                                    
+                                        if os.path.exists(pdf_file_path):
+                                            pdf_folder_path = os.path.join(dataset_folder, "pdf")
+                                            zip_file.write(pdf_file_path, arcname=os.path.join(
+                                                pdf_folder_path, relative_path.replace('.uvl', '.pdf')))
+                                            os.remove(pdf_file_path)
+
+                                        json_file_path = file_path.replace('.uvl', '.json')
+                                        convert_uvl_to_json(file_path, json_file_path)
+                                    
+                                        if os.path.exists(json_file_path):
+                                            json_folder_path = os.path.join(dataset_folder, "json")
+                                            zip_file.write(json_file_path, arcname=os.path.join(
+                                                json_folder_path, relative_path.replace('.uvl', '.json')))
+                                            os.remove(json_file_path)
+
+                                        cnf_file_path = file_path.replace('.uvl', '.cnf')
+                                        convert_uvl_to_cnf(file_path, cnf_file_path)
+                                    
+                                        if os.path.exists(cnf_file_path):
+                                            cnf_folder_path = os.path.join(dataset_folder, "cnf")
+                                            zip_file.write(cnf_file_path, arcname=os.path.join
+                                                           (cnf_folder_path, relative_path.replace('.uvl', '.cnf')))
+                                        os.remove(cnf_file_path)
+
+                                        splx_file_path = file_path.replace('.uvl', '.splx')
+                                        convert_uvl_to_splx(file_path, splx_file_path)
+                                    
+                                        if os.path.exists(splx_file_path):
+                                            splx_folder_path = os.path.join(dataset_folder, "splx")
+                                            zip_file.write(splx_file_path, arcname=os.path.join(
+                                                splx_folder_path, relative_path.replace('.uvl', '.splx')))
+                                            os.remove(splx_file_path)
+
+        return full_archive_path
+    
 
 class AuthorService(BaseService):
     def __init__(self):
