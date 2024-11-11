@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Communities Created by Me</title>
+</head>
+<body>
+    <h1>My Comunities</h1>
+
+    {% if communities %}
+        <ul>
+            {% for community in communities %}
+                <li>
+                    <h2>{{ community.name }}</h2>
+                    <p>{{ community.description }}</p>
+                    <p>Created: {{ community.created_at.strftime('%d/%m/%Y') }}</p>
+                    <p>Owner: {{ community.owner.username }}</p>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>You don't have any community</p>
+    {% endif %}
+
+    <h2>Communities I'm Member of</h2>
+    {% if joined_communities %}
+        <ul>
+            {% for community in joined_communities %}
+                <li>
+                    <h3>{{ community.name }}</h3>
+                    <p>{{ community.description }}</p>
+                    <p>Created: {{ community.created_at.strftime('%d/%m/%Y') }}</p>
+                    <p>Owner: {{ community.owner.username }}</p>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>You aren't a member of any community.</p>
+    {% endif %}
+</body>
+</html>
