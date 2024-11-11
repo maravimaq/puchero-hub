@@ -163,6 +163,12 @@ chico sundermann">
                 <ul class="navbar-nav navbar-align">
                     <li class="nav-item dropdown">
 
+                        <li class="nav-item">
+                            <a class="nav-link d-none d-sm-inline-block" href="/dataset/download/all">
+                                <i class="align-middle me-1" data-feather="download"></i> Download all datasets
+                            </a>
+                        </li>
+
                         {% if current_user.is_anonymous %}
                             <a class="nav-link  d-none d-sm-inline-block" href="{{ url_for('auth.login') }}">Login</a>
                             <a class="nav-link  d-none d-sm-inline-block" href="{{ url_for('auth.show_signup_form') }}">Sign
@@ -183,8 +189,6 @@ chico sundermann">
                             <a class="dropdown-item" href="{{ url_for('auth.logout') }}">
                                 <i class="align-middle me-1" data-feather="log-out"></i> Log out</a>
                         </div>
-                        
-                        
 
                         {% endif %}
 
