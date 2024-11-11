@@ -62,7 +62,8 @@ def test_update_file(test_client):
         response = test_client.post(f'/api/deposit/depositions/{deposit_id}/files', data={"file": (f, "sample.txt")})
 
     file_id = response.get_json()["id"]
-    response = test_client.put(f'/api/deposit/depositions/{deposit_id}/files/{file_id}', json={"filename": "renamed.txt"})
+    response = test_client.put(f'/api/deposit/depositions/{deposit_id}/files/{file_id}',
+                               json={"filename": "renamed.txt"})
     assert response.status_code == 200
     data = response.get_json()
     assert data["filename"] == "renamed.txt"
@@ -81,7 +82,8 @@ def test_delete_file(test_client):
     with open("sample.txt", "w") as f:
         f.write("This is a sample file.")
     with open("sample.txt", "rb") as f:
-        file_response = test_client.post(f'/api/deposit/depositions/{deposit_id}/files', data={"file": (f, "sample.txt")})
+        file_response = test_client.post(f'/api/deposit/depositions/{deposit_id}/files',
+                                         data={"file": (f, "sample.txt")})
     file_id = file_response.get_json()["id"]
 
     delete_response = test_client.delete(f'/api/deposit/depositions/{deposit_id}/files/{file_id}')
