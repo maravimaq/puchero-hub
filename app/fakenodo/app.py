@@ -8,9 +8,10 @@ import os
 app = Flask(__name__)
 
 deposits = {}
+deposit_id_counter = 0
 
 
-@app.route('/api/deposit/depositions/<deposit_id>', methods=['GET'])
+@app.route('/api/deposit/depositions/<int:deposit_id>', methods=['GET'])
 def get_deposit(deposit_id):
     deposit = deposits.get(deposit_id)
     if not deposit:
@@ -20,6 +21,7 @@ def get_deposit(deposit_id):
 
 @app.route('/api/deposit/depositions', methods=['POST'])
 def create_deposit():
+    global deposit_id_counter
     data = request.get_json()
 
     if not data or 'title' not in data or 'description' not in data:
@@ -28,7 +30,7 @@ def create_deposit():
             "status": 400
         }), 400
 
-    deposit_id = str(uuid.uuid4())
+    deposit_id = deposit_id_counter
     doi = f"10.5072/fakenodo.{uuid.uuid4().hex[:8]}"
 
     metadata = {
@@ -52,11 +54,26 @@ def create_deposit():
         "state": "inprogress"
     }
     deposits[deposit_id] = new_deposit
+    deposit_id_counter += 1
 
     return jsonify(new_deposit), 201
 
 
-@app.route('/api/deposit/depositions/<deposit_id>/files', methods=['POST'])
+@app.route('/api/deposit/depositions/<int:deposit_id>', methods=['DELETE'])
+def delete_deposit(deposit_id):
+    deposit = deposits.get(deposit_id)
+
+    if not deposit:
+        return jsonify({"error": "Deposit not found"}), 404
+
+    if deposit.get("submitted"):
+        return jsonify({"error": "Deleting a published deposition is forbidden"}), 403
+
+    del deposits[deposit_id]
+    return '', 201
+
+
+@app.route('/api/deposit/depositions/<int:deposit_id>/files', methods=['POST'])
 def upload_files(deposit_id):
     deposit = deposits.get(deposit_id)
     if not deposit:
@@ -94,7 +111,7 @@ def upload_files(deposit_id):
     return jsonify(file_metadata), 201
 
 
-@app.route('/api/deposit/depositions/<deposit_id>/files', methods=['GET'])
+@app.route('/api/deposit/depositions/<int:deposit_id>/files', methods=['GET'])
 def list_files(deposit_id):
     deposit = deposits.get(deposit_id)
     if not deposit:
@@ -104,7 +121,7 @@ def list_files(deposit_id):
     return jsonify(files), 200
 
 
-@app.route('/api/deposit/depositions/<deposit_id>/files/<file_id>', methods=['GET'])
+@app.route('/api/deposit/depositions/<int:deposit_id>/files/<file_id>', methods=['GET'])
 def get_file(deposit_id, file_id):
     deposit = deposits.get(deposit_id)
     if not deposit:
@@ -117,7 +134,7 @@ def get_file(deposit_id, file_id):
     return jsonify(file_metadata), 200
 
 
-@app.route('/api/deposit/depositions/<deposit_id>/files/<file_id>', methods=['DELETE'])
+@app.route('/api/deposit/depositions/<int:deposit_id>/files/<file_id>', methods=['DELETE'])
 def delete_file(deposit_id, file_id):
     deposit = deposits.get(deposit_id)
     if not deposit:
@@ -135,7 +152,7 @@ def delete_file(deposit_id, file_id):
     return '', 204
 
 
-@app.route('/api/deposit/depositions/<deposit_id>/files/<file_id>', methods=['PUT'])
+@app.route('/api/deposit/depositions/<int:deposit_id>/files/<file_id>', methods=['PUT'])
 def update_file(deposit_id, file_id):
     deposit = deposits.get(deposit_id)
     if not deposit:
