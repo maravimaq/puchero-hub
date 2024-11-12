@@ -106,3 +106,10 @@ def show_community(community_id):
 
     members = community_service.get_members_by_id(community_id)
     return render_template('community/show.html', community=community, members=members)
+
+
+@community_bp.route('/communities/not-joined', methods=['GET'])
+@login_required
+def list_communities_not_joined():
+    communities = community_service.get_communities_not_joined_by_user(current_user.id)
+    return render_template('community/not_joined.html', communities=communities)
