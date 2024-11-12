@@ -11,3 +11,6 @@ class CommunityService(BaseService):
 
     def get_all_joined_by_user(self, user_id):
         return self.repository.get_all_joined_by_user(user_id)
+
+    def get_members_by_id(self, community_id):
+        return self.repository.get_with_members_by_id(community_id)
