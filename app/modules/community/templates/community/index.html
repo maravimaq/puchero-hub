@@ -15,7 +15,7 @@
             <div class="list-group-item d-flex justify-content-between align-items-center mb-2">
                 <div>
                     <h5 class="mb-1">
-                        <a href="{{ url_for('community.my_communities', community_id=community.id) }}" class="text-decoration-none">{{ community.name }}</a>
+                        <a href="{{ url_for('community.show_community', community_id=community.id) }}" class="text-decoration-none">{{ community.name }}</a>
                     </h5>
                     <p class="mb-1 text-muted">{{ community.description }}</p>
                 </div>
