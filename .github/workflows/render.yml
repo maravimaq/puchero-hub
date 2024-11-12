@@ -10,7 +10,7 @@ on:
 
 jobs:
 
-    # Job para que se despliegue solo si todas las prubas han pasado
+    # Job para que se despliegue solo si todas las pruebas han pasado
   testing:
 
     name: Run Tests
