@@ -113,3 +113,14 @@ def show_community(community_id):
 def list_communities_not_joined():
     communities = community_service.get_communities_not_joined_by_user(current_user.id)
     return render_template('community/not_joined.html', communities=communities)
+
+@community_bp.route('/community/join/<int:community_id>', methods=['POST'])
+@login_required
+def join_community(community_id):
+    success = community_service.join_community(community_id, current_user)
+    if success:
+        flash('You have successfully joined the community!', 'success')
+    else:
+        flash('Failed to join the community. Please try again.', 'danger')
+    return redirect(url_for('community.list_communities_not_joined'))
+
