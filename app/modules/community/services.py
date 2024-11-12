@@ -1,5 +1,6 @@
 from app.modules.community.repositories import CommunityRepository
 from core.services.BaseService import BaseService
+from app import db
 
 
 class CommunityService(BaseService):
@@ -17,3 +18,11 @@ class CommunityService(BaseService):
 
     def get_communities_not_joined_by_user(self, user_id):
         return self.repository.get_communities_not_joined_by_user(user_id)
+
+    def join_community(self, community_id, user):
+        community = self.repository.get_by_id(community_id)
+        if community and user not in community.members:
+            community.members.append(user)
+            db.session.commit()
+            return True
+        return False
