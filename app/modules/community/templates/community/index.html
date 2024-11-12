@@ -1,41 +1,39 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Communities Created by Me</title>
-</head>
-<body>
-    <h1>My Comunities</h1>
+{% extends "base_template.html" %}
+
+{% block title %}My Communities{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="mb-4 text-center">My Communities</h2>
 
     {% if communities %}
-        <ul>
-            {% for community in communities %}
-                <li>
-                    <h2>{{ community.name }}</h2>
-                    <p>{{ community.description }}</p>
-                    <p>Created: {{ community.created_at.strftime('%d/%m/%Y') }}</p>
-                    <p>Owner: {{ community.owner.username }}</p>
-                </li>
-            {% endfor %}
-        </ul>
+        <div class="list-group">
+        {% for community in communities %}
+            <div class="list-group-item d-flex justify-content-between align-items-center mb-2">
+                <div>
+                    <h5 class="mb-1">
+                        <a href="{{ url_for('community.my_communities', community_id=community.id) }}" class="text-decoration-none">{{ community.name }}</a>
+                    </h5>
+                    <p class="mb-1 text-muted">{{ community.description }}</p>
+                </div>
+                {% if community.owner_id == current_user.id %}
+                <div>
+                    <a href="{{ url_for('community.create_community', community_id=community.id) }}" class="btn btn-outline-primary btn-sm me-2">Edit</a>
+                    <form method="POST" action="{{ url_for('community.create_community', community_id=community.id) }}" class="d-inline">
+                        {{ form.hidden_tag() }}
+                        <button type="submit" class="btn btn-outline-danger btn-sm">Delete</button>
+                    </form>
+                </div>
+                {% endif %}
+            </div>
+        {% endfor %}
+        </div>
     {% else %}
-        <p>You don't have any community</p>
+        <p class="text-center text-muted">You are not part of any communities.</p>
     {% endif %}
+</div>
+{% endblock %}
 
-    <h2>Communities I'm Member of</h2>
-    {% if joined_communities %}
-        <ul>
-            {% for community in joined_communities %}
-                <li>
-                    <h3>{{ community.name }}</h3>
-                    <p>{{ community.description }}</p>
-                    <p>Created: {{ community.created_at.strftime('%d/%m/%Y') }}</p>
-                    <p>Owner: {{ community.owner.username }}</p>
-                </li>
-            {% endfor %}
-        </ul>
-    {% else %}
-        <p>You aren't a member of any community.</p>
-    {% endif %}
-</body>
-</html>
+{% block scripts %}
+    <script src="{{ url_for('community.scripts') }}"></script>
+{% endblock %}
