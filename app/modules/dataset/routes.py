@@ -6,10 +6,12 @@ import tempfile
 import uuid
 from datetime import datetime, timezone
 from zipfile import ZipFile
+from app.modules.dataset.services import pack_datasets
 
 from flask import (
     redirect,
     render_template,
+    render_template_string,
     request,
     jsonify,
     send_file,
@@ -244,11 +246,20 @@ def download_dataset(dataset_id):
 
 @dataset_bp.route("/dataset/download/all", methods=["GET"])
 def download_all_datasets():
+    archive_path = pack_datasets()
+
+    if not archive_path:
+        return render_template_string('''
+            <script type="text/javascript">
+                alert("There are no datasets to download");
+                window.location.href = "/";
+            </script>
+        ''')
+
     return send_file(
-        dataset_service.pack_datasets(),
+        archive_path,
         as_attachment=True,
-        download_name="uvlhub_datasets.zip"
-    )
+        download_name="uvlhub_datasets.zip")
 
 
 @dataset_bp.route("/doi/<path:doi>/", methods=["GET"])
