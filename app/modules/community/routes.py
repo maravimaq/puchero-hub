@@ -1,4 +1,4 @@
-from flask import render_template, redirect, url_for, flash, request
+from flask import render_template, redirect, url_for, flash
 from flask_login import login_required, current_user
 
 from app import db
@@ -8,6 +8,7 @@ from app.modules.community import community_bp
 from app.modules.community.services import CommunityService
 
 community_service = CommunityService()
+
 
 @community_bp.route('/my-communities', methods=['GET'])
 @login_required
@@ -30,9 +31,9 @@ def create_community():
             description=form.description.data,
             owner_id=current_user.id
         )
-        
+
         community.members.append(current_user)
-        
+
         try:
             db.session.add(community)
             db.session.commit()
@@ -74,6 +75,7 @@ def edit_community(community_id):
 
     return render_template('community/edit.html', form=form, community=community)
 
+
 @community_bp.route('/community/delete/<int:community_id>', methods=['POST'])
 @login_required
 def delete_community(community_id):
@@ -92,3 +94,15 @@ def delete_community(community_id):
         flash(f'Error deleting community: {str(e)}', 'danger')
         return redirect(url_for('community.my_communities'))
 
+
+@community_bp.route('/community/<int:community_id>', methods=['GET'])
+@login_required
+def show_community(community_id):
+    community = community_service.get_by_id(community_id)
+
+    if not community:
+        flash('Community not found.', 'danger')
+        return redirect(url_for('community.my_communities'))
+
+    members = community_service.get_members_by_id(community_id)
+    return render_template('community/show.html', community=community, members=members)
