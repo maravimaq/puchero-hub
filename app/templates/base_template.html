@@ -114,6 +114,12 @@ chico sundermann">
                         Options
                     </li>
                     
+                    <li class="sidebar-item {{ 'active' if request.endpoint == 'community.list_communities_not_joined' else '' }}">
+                        <a class="sidebar-link" href="{{ url_for('community.list_communities_not_joined') }}">
+                            <i class="align-middle" data-feather="share-2"></i> <span class="align-middle">Explore Communities</span>
+                        </a>
+                    </li>
+                    
                     <li class="sidebar-item {{ 'active' if request.endpoint == 'community.my_communities' else '' }}">
                         <a class="sidebar-link" href="{{ url_for('community.my_communities') }}">
                             <i class="align-middle" data-feather="globe"></i> <span class="align-middle">My Communities</span>
