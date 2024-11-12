@@ -1,3 +1,4 @@
+from app.modules.auth.models import User
 from app.modules.auth.services import AuthenticationService
 from app.modules.dataset.models import DataSet
 from flask import render_template, redirect, url_for, request
@@ -53,3 +54,11 @@ def my_profile():
         pagination=user_datasets_pagination,
         total_datasets=total_datasets_count
     )
+
+
+@profile_bp.route('/public_profile/<int:user_id>', methods=['GET'])
+@login_required
+def view_user_datasets(user_id):
+    user = User.query.get_or_404(user_id)
+    datasets = DataSet.query.filter_by(user_id=user.id).all()
+    return render_template('public_profile.html', user=user, datasets=datasets)
