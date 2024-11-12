@@ -45,3 +45,50 @@ def create_community():
 
     return render_template('community/create.html', form=form)
 
+
+@community_bp.route('/community/edit/<int:community_id>', methods=['GET', 'POST'])
+@login_required
+def edit_community(community_id):
+    community = community_service.get_by_id(community_id)
+
+    if not community or community.owner_id != current_user.id:
+        flash('Community not found or you do not have permission to edit it.', 'danger')
+        return redirect(url_for('community.my_communities'))
+
+    form = CommunityForm(obj=community)
+
+    if form.validate_on_submit():
+        # Usar el método update de BaseService para actualizar la comunidad
+        updated_community = community_service.update(
+            id=community_id,
+            name=form.name.data,
+            description=form.description.data
+        )
+
+        if updated_community:
+            flash('Community updated successfully!', 'success')
+            return redirect(url_for('community.my_communities'))
+        else:
+            flash('Error updating community. Please try again.', 'danger')
+            return render_template('community/edit.html', form=form, community=community)
+
+    return render_template('community/edit.html', form=form, community=community)
+
+@community_bp.route('/community/delete/<int:community_id>', methods=['POST'])
+@login_required
+def delete_community(community_id):
+    community = community_service.get_by_id(community_id)
+
+    # Verificar si la comunidad existe y si el usuario es el propietario
+    if not community or community.owner_id != current_user.id:
+        flash('Community not found or you do not have permission to delete it.', 'danger')
+        return redirect(url_for('community.my_communities'))
+
+    try:
+        community_service.delete(community_id)
+        flash('Community deleted successfully!', 'success')
+        return redirect(url_for('community.my_communities'))
+    except Exception as e:
+        flash(f'Error deleting community: {str(e)}', 'danger')
+        return redirect(url_for('community.my_communities'))
+
