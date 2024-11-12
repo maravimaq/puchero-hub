@@ -15,3 +15,7 @@ class CommunityRepository(BaseRepository):
 
     def get_with_members_by_id(self, community_id):
         return self.model.query.options(joinedload(Community.members)).filter_by(id=community_id).first()
+    
+    def get_communities_not_joined_by_user(self, user_id):
+        return self.model.query.filter(~self.model.members.any(id=user_id)).all()
+
