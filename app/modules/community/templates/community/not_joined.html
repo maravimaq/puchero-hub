@@ -1,0 +1,25 @@
+{% extends "base_template.html" %}
+
+{% block title %}Communities Not Joined{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="mb-4 text-center">Communities You Haven't Joined</h2>
+    {% if communities %}
+        <ul class="list-group mb-4">
+        {% for community in communities %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                <div>
+                    <strong>{{ community.name }}</strong> - {{ community.description }}
+                </div>
+                <form method="POST" action="{{ url_for('community.join_community', community_id=community.id) }}">
+                    <button type="submit" class="btn btn-primary btn-sm">Join</button>
+                </form>
+            </li>
+        {% endfor %}
+        </ul>
+    {% else %}
+        <p class="text-center text-muted">You have joined all existing communities.</p>
+    {% endif %}
+</div>
+{% endblock %}
