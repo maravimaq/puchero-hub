@@ -31,12 +31,10 @@ jobs:
         import requests
         import os
 
-        # Configuración
         ZENHUB_API_URL = "https://api.zenhub.com/p1/repositories/{repo_id}/issues/{issue_number}/moves"
         ZENHUB_TOKEN = os.getenv("ZENHUB_API_TOKEN")
         REPO_ID = "871646266"  # ID del repositorio de GitHub
 
-        # Pipeline IDs
         PIPELINES = {
             "new_issues": "Z2lkOi8vcmFwdG9yL1BpcGVsaW5lLzMzODc2NzM",
             "in_progress": "Z2lkOi8vcmFwdG9yL1BpcGVsaW5lLzMzODc2Nzc",
@@ -44,7 +42,6 @@ jobs:
             "done": "Z2lkOi8vcmFwdG9yL1BpcGVsaW5lLzMzODc2Nzk"
         }
 
-        # Obtener el número de la issue desde el contexto de GitHub Actions
         ISSUE_NUMBER = os.getenv("ISSUE_NUMBER")
         EVENT_NAME = os.getenv("GITHUB_EVENT_NAME")
 
@@ -52,7 +49,6 @@ jobs:
             print("No ISSUE_NUMBER provided. Skipping Zenhub update.")
             exit(0)
 
-        # Decidir a qué pipeline mover basado en el evento
         if EVENT_NAME == "issues" and os.getenv("GITHUB_EVENT_ACTION") == "opened":
             pipeline_id = PIPELINES["new_issues"]
         elif EVENT_NAME == "pull_request" and os.getenv("GITHUB_EVENT_ACTION") == "opened":
@@ -65,19 +61,16 @@ jobs:
             print("No matching pipeline for this event.")
             exit(0)
 
-        # Encabezados para la solicitud
         headers = {
             "X-Authentication-Token": ZENHUB_TOKEN,
             "Content-Type": "application/json",
         }
 
-        # Datos para mover la issue al pipeline correspondiente
         data = {
             "pipeline_id": pipeline_id,
             "position": "top"
         }
 
-        # Realiza la solicitud a la API de Zenhub
         response = requests.post(
             ZENHUB_API_URL.format(repo_id=REPO_ID, issue_number=ISSUE_NUMBER),
             json=data,

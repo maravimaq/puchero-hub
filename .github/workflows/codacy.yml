@@ -23,14 +23,12 @@ jobs:
           - 3306:3306
         options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
 
-
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
 
     - name: Check for outdated dependencies
-      run: 
-          pip list --outdated
+      run: pip list --outdated
 
     - name: Set up Python
       uses: actions/setup-python@v5
@@ -42,16 +40,47 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
 
-    - name: Security audit with pip-audit
-      run: 
-          pip install pip-audit
-          pip-audit || true
+    #Comprobar que la base de datos está actualizada
+    - name: Run database migrations
+      run: |
+        flask db upgrade
+      env:
+        FLASK_ENV: testing
+        MARIADB_HOSTNAME: 127.0.0.1
+        MARIADB_PORT: 3306
+        MARIADB_TEST_DATABASE: uvlhubdb_test
+        MARIADB_USER: uvlhub_user
+        MARIADB_PASSWORD: uvlhub_password
 
-    - name: Upload coverage to Codacy
+    - name: Security audit with pip-audit
+      run: |
+        pip install pip-audit
+        pip-audit || true
+
+    # Analizar el código para asegurarse de que sigue las guías de estilo PEP 8.
+    - name: Lint code with flake8
+      run: |
+        pip install flake8
+        flake8 app/ --max-line-length=88
+    
+    #Verificar si el código está formateado correctamente
+    - name: Format code with black
+      run: |
+        pip install black
+        black --check app/
+
+    #Analizar el código en busca de vulnerabilidades comunes relacionadas con seguridad, 
+    #como inyecciones SQL o uso inseguro de datos confidenciales.
+    - name: Static code analysis with bandit
+      run: |
+        pip install bandit
+        bandit -r app/
+
+    - name: Run tests and upload coverage to Codacy
       run: |
         pip install codacy-coverage
         coverage run -m pytest app/modules/ --ignore-glob='*selenium*'
-        coverage xml 
+        coverage xml
         python-codacy-coverage -r coverage.xml
       env:
         FLASK_ENV: testing
@@ -61,3 +90,20 @@ jobs:
         MARIADB_USER: uvlhub_user
         MARIADB_PASSWORD: uvlhub_password
         CODACY_PROJECT_TOKEN: ${{ secrets.CODACY_PROJECT_TOKEN }}
+
+    #Guardar el archivo de cobertura de código (coverage.xml) 
+    #para poder descargarlos después de la ejecución del workflow.
+    - name: Save test results
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: test-results
+        path: coverage.xml
+
+    #Si el workflow falla, guarda los logs en el directorio logs/ 
+    - name: Save logs
+      if: failure()
+      uses: actions/upload-artifact@v3
+      with:
+        name: logs
+        path: logs/
