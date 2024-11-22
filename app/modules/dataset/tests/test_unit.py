@@ -11,6 +11,8 @@ from app.modules.dataset.services import (
 )
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
+from app.modules.dataset.routes import dataset_bp
+from flask_wtf.csrf import CSRFProtect
 
 # Mock the Flask app and SQLAlchemy for testing
 db = SQLAlchemy()
@@ -63,9 +65,7 @@ def test_convert_uvl_to_json(mock_json_dump, mock_open):
     convert_uvl_to_json(input_file, output_file)
 
     mock_open.assert_any_call(input_file, "r")
- 
     mock_open.assert_any_call(output_file, "w")
-
     mock_json_dump.assert_called_once_with(
         {"data": "UVL example content"}, mock_open.return_value.__enter__(), indent=4
     )
@@ -79,7 +79,6 @@ def test_convert_uvl_to_cnf(mock_open):
 
     convert_uvl_to_cnf(input_file, output_file)
 
-    # Assert the file was opened and written to
     mock_open.assert_any_call(input_file, "r")
     mock_open.assert_any_call(output_file, "w")
     handle = mock_open()
@@ -95,7 +94,6 @@ def test_convert_uvl_to_splx(mock_open):
 
     convert_uvl_to_splx(input_file, output_file)
 
-    # Assert the file was opened and written to
     mock_open.assert_any_call(input_file, "r")
     mock_open.assert_any_call(output_file, "w")
     handle = mock_open()
@@ -131,3 +129,106 @@ def test_get_synchronized(mock_ds_repo):
     result = service.get_synchronized(1)
     assert result == "mock_dataset"
     mock_ds_repo.return_value.get_synchronized.assert_called_once_with(1)
+
+
+@patch("shutil.move")
+@patch("app.modules.auth.services.AuthenticationService.get_authenticated_user")
+def test_move_feature_models(mock_auth_user, mock_shutil_move):
+    mock_user = Mock()
+    mock_user.id = 123 
+    mock_user.temp_folder.return_value = "/temp"
+    mock_auth_user.return_value = mock_user
+
+    dataset = Mock()
+    dataset.id = 1
+    dataset.feature_models = [
+        Mock(fm_meta_data=Mock(uvl_filename="model1.uvl")),
+        Mock(fm_meta_data=Mock(uvl_filename="model2.uvl")),
+    ]
+
+    service = DataSetService()
+    service.move_feature_models(dataset)
+
+    mock_shutil_move.assert_any_call("/temp/model1.uvl", "/app/uploads/user_123/dataset_1")
+    mock_shutil_move.assert_any_call("/temp/model2.uvl", "/app/uploads/user_123/dataset_1")
+
+
+@patch("app.modules.dataset.services.DSMetaDataRepository.update")
+def test_update_dsmetadata(mock_update):
+    mock_update.return_value = True
+    service = DataSetService()
+    result = service.update_dsmetadata(1, title="New Title")
+    assert result is True
+    mock_update.assert_called_once_with(1, title="New Title")
+
+
+@pytest.fixture
+def client():
+    """Set up a test client for Flask."""
+    app = Flask(__name__)
+    app.config["TESTING"] = True
+    app.config["SECRET_KEY"] = "test_secret_key"  # Required for CSRF
+    app.config["WTF_CSRF_ENABLED"] = False       # Disable CSRF for tests
+    app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///:memory:"
+    app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+    db.init_app(app)
+
+    csrf = CSRFProtect()
+    csrf.init_app(app)
+
+    app.register_blueprint(dataset_bp)
+
+    with app.test_client() as client:
+        with app.app_context():
+            db.create_all()
+        yield client
+
+# Test the `/dataset/upload` route
+@patch("app.modules.fakenodo.services.FakenodoService.create_new_deposition")
+@patch("app.modules.dataset.routes.DataSetForm", autospec=True)
+@patch("app.modules.dataset.routes.DataSetService.create_from_form")
+@patch("app.modules.dataset.routes.DataSetService.move_feature_models")
+@patch("flask_login.utils._get_user", return_value=Mock(temp_folder=lambda: "/temp"))
+def test_create_dataset(
+    mock_user, mock_move, mock_create, mock_form, mock_fakenodo, client
+):
+    """Test the `/dataset/upload` route."""
+    # Mock the dataset creation return value
+    mock_create.return_value = Mock(id=1, ds_meta_data_id=1)
+
+    # Mock Fakenodo service response
+    mock_fakenodo.return_value = {
+        "id": 1,
+        "title": "Test Dataset",
+        "description": "Test Description",
+        "status": "draft",
+    }
+
+    # Mock the form behavior directly
+    mock_form_instance = mock_form.return_value
+    mock_form_instance.validate_on_submit.return_value = True  # Mock form validation
+    mock_form_instance.data = {"title": "Test Dataset"}  # Mock form data
+
+    # Form data for the request
+    data = {
+        "title": "Test Dataset",  # Example form field
+        "file": (b"test content", "file.uvl"),  # Example file upload
+    }
+
+    # Make a POST request to the `/dataset/upload` route
+    response = client.post(
+        "/dataset/upload",
+        data=data,
+        content_type="multipart/form-data",
+    )
+
+    # Debug response content
+    print(f"Response status: {response.status_code}")
+    print(f"Response data: {response.data.decode('utf-8')}")
+
+    # Assertions
+    assert response.status_code == 200
+    assert b"Everything works!" in response.data
+    mock_create.assert_called_once()
+    mock_move.assert_called_once()
+    mock_fakenodo.assert_called_once()
