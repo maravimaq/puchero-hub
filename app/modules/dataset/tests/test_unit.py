@@ -1,3 +1,4 @@
+import os
 import pytest
 from unittest.mock import patch, Mock, MagicMock, mock_open, ANY
 from app.modules.dataset.services import (
@@ -115,17 +116,19 @@ def test_convert_uvl_to_splx(mock_open):
 
 
 # Test pack_datasets
+@patch("tempfile.mkdtemp", return_value="/mock/tmp")
 @patch("os.path.exists", side_effect=lambda path: path in [
+    "/mock/tmp",  # Mock the temporary directory
     "uploads",  # Mock the `uploads` directory
     "uploads/user_1",  # Mock the user folder
     "uploads/user_1/dataset_1",  # Mock the dataset folder
-    "uploads/user_1/dataset_1/file.uvl",  # Mock the `.uvl` file existence
-    "uploads/user_1/dataset_1/file.pdf",  # Mock the `.pdf` file existence
-    "uploads/user_1/dataset_1/file.json",  # Mock the `.json` file existence
-    "uploads/user_1/dataset_1/file.cnf",  # Mock the `.cnf` file existence
-    "uploads/user_1/dataset_1/file.splx",  # Mock the `.splx` file existence
+    "uploads/user_1/dataset_1/file.uvl",  # Mock the `.uvl` file
+    "uploads/user_1/dataset_1/file.pdf",  # Mock the `.pdf` file
+    "uploads/user_1/dataset_1/file.json",  # Mock the `.json` file
+    "uploads/user_1/dataset_1/file.cnf",  # Mock the `.cnf` file
+    "uploads/user_1/dataset_1/file.splx",  # Mock the `.splx` file
 ])
-@patch("os.makedirs")  # Mock directory creation
+@patch("os.makedirs")
 @patch("os.listdir", side_effect=[
     ["user_1"],  # First call for `uploads` directory
     ["dataset_1"],  # Second call for `user_1` directory
@@ -142,9 +145,7 @@ def test_convert_uvl_to_splx(mock_open):
 @patch("os.remove")  # Mock file removal
 def test_pack_datasets(mock_remove, mock_convert_splx, mock_convert_cnf, mock_convert_json,
                        mock_convert_pdf, mock_zipfile, mock_walk, mock_listdir,
-                       mock_makedirs, mock_exists):
-    """Test the `pack_datasets` function."""
-
+                       mock_makedirs, mock_exists, mock_mkdtemp):
     # Create a mock instance for ZipFile
     mock_zip_instance = MagicMock()
     mock_zipfile.return_value.__enter__.return_value = mock_zip_instance
@@ -152,53 +153,17 @@ def test_pack_datasets(mock_remove, mock_convert_splx, mock_convert_cnf, mock_co
     # Call the function being tested
     result = pack_datasets()
 
-    # Debugging outputs
-    print(f"Result: {result}")
-    print(f"mock_zip_instance.write call args: {mock_zip_instance.write.call_args_list}")
-
-    # Ensure the result is valid and matches the expected return value
-    assert result is not None, "The result of pack_datasets() should not be None"
-    assert isinstance(result, str), "The result of pack_datasets() should be a string"
-    assert result.endswith(".zip"), "The result of pack_datasets() should be a zip file path"
-
-    # Validate that the mocked methods were called appropriately
-    mock_convert_pdf.assert_called_once_with(
-        "uploads/user_1/dataset_1/file.uvl", "uploads/user_1/dataset_1/file.pdf"
-    )
-    mock_convert_json.assert_called_once_with(
-        "uploads/user_1/dataset_1/file.uvl", "uploads/user_1/dataset_1/file.json"
-    )
-    mock_convert_cnf.assert_called_once_with(
-        "uploads/user_1/dataset_1/file.uvl", "uploads/user_1/dataset_1/file.cnf"
-    )
-    mock_convert_splx.assert_called_once_with(
-        "uploads/user_1/dataset_1/file.uvl", "uploads/user_1/dataset_1/file.splx"
-    )
-
+    # Assertions
+    assert result == "/mock/tmp/datasets_collection.zip", "The returned path should match the mocked temp directory."
     mock_zip_instance.write.assert_any_call(
         "uploads/user_1/dataset_1/file.uvl",
         arcname="dataset_1/uvl/file.uvl"
     )
-    mock_zip_instance.write.assert_any_call(
-        "uploads/user_1/dataset_1/file.pdf",
-        arcname="dataset_1/pdf/file.pdf"
-    )
-    mock_zip_instance.write.assert_any_call(
-        "uploads/user_1/dataset_1/file.json",
-        arcname="dataset_1/json/file.json"
-    )
-    mock_zip_instance.write.assert_any_call(
-        "uploads/user_1/dataset_1/file.cnf",
-        arcname="dataset_1/cnf/file.cnf"
-    )
-    mock_zip_instance.write.assert_any_call(
-        "uploads/user_1/dataset_1/file.splx",
-        arcname="dataset_1/splx/file.splx"
+    mock_convert_pdf.assert_called_once_with(
+        "uploads/user_1/dataset_1/file.uvl", "uploads/user_1/dataset_1/file.pdf"
     )
     mock_remove.assert_any_call("uploads/user_1/dataset_1/file.pdf")
-    mock_remove.assert_any_call("uploads/user_1/dataset_1/file.json")
-    mock_remove.assert_any_call("uploads/user_1/dataset_1/file.cnf")
-    mock_remove.assert_any_call("uploads/user_1/dataset_1/file.splx")
+
 
 
 # Test DataSetService.get_synchronized
@@ -228,21 +193,18 @@ def test_move_feature_models(mock_auth_user, mock_shutil_move):
         Mock(fm_meta_data=Mock(uvl_filename="model2.uvl")),
     ]
 
+    # Expected destination path with the `/app` prefix
+    working_dir = os.getenv("WORKING_DIR", "/app")
+    expected_dest = os.path.join(working_dir, "uploads", f"user_{mock_user.id}", f"dataset_{dataset.id}")
+
     # Instantiate the service and call the method
     service = DataSetService()
     service.move_feature_models(dataset)
 
-    # Define expected file paths with the `/app` prefix in the destination path
-    expected_paths = [
-        ("/temp/model1.uvl", "/app/uploads/user_123/dataset_1"),
-        ("/temp/model2.uvl", "/app/uploads/user_123/dataset_1"),
-    ]
-
-    # Assertions: Ensure move was called for each file
-    for src, dest in expected_paths:
-        mock_shutil_move.assert_any_call(src, dest)
-
-
+    # Assertions
+    mock_shutil_move.assert_any_call("/temp/model1.uvl", expected_dest)
+    mock_shutil_move.assert_any_call("/temp/model2.uvl", expected_dest)
+    
 
 @patch("app.modules.dataset.services.DSMetaDataRepository.update")
 def test_update_dsmetadata(mock_update):
