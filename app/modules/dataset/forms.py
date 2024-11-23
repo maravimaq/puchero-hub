@@ -1,10 +1,17 @@
+from flask_login import current_user
 from flask_wtf import FlaskForm
 from wtforms_sqlalchemy.fields import QuerySelectField
 from wtforms import StringField, SelectField, FieldList, FormField, SubmitField, TextAreaField
 from wtforms.validators import DataRequired, URL, Optional
 
-from app.modules.community.models import Community
+from app.modules.community.repositories import CommunityRepository
 from app.modules.dataset.models import PublicationType
+
+community_repository = CommunityRepository()
+
+
+def get_user_communities():
+    return community_repository.get_all_by_user(current_user.id)
 
 
 class AuthorForm(FlaskForm):
@@ -61,11 +68,10 @@ class DataSetForm(FlaskForm):
     desc = TextAreaField("Description", validators=[DataRequired()])
     community = QuerySelectField(
         "Community",
-        query_factory=lambda: Community.query.all(),
+        query_factory=get_user_communities,
         get_label="name",
         allow_blank=True,
-        blank_text="No community selected",
-        validators=[Optional()],
+        blank_text="You have not selected any community",
     )
     publication_type = SelectField(
         "Publication type",
