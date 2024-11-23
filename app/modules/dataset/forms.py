@@ -1,7 +1,9 @@
 from flask_wtf import FlaskForm
+from wtforms_sqlalchemy.fields import QuerySelectField
 from wtforms import StringField, SelectField, FieldList, FormField, SubmitField, TextAreaField
 from wtforms.validators import DataRequired, URL, Optional
 
+from app.modules.community.models import Community
 from app.modules.dataset.models import PublicationType
 
 
@@ -57,6 +59,14 @@ class FeatureModelForm(FlaskForm):
 class DataSetForm(FlaskForm):
     title = StringField("Title", validators=[DataRequired()])
     desc = TextAreaField("Description", validators=[DataRequired()])
+    community = QuerySelectField(
+        "Community",
+        query_factory=lambda: Community.query.all(),
+        get_label="name",
+        allow_blank=True,
+        blank_text="No community selected",
+        validators=[Optional()],
+    )
     publication_type = SelectField(
         "Publication type",
         choices=[(pt.value, pt.name.replace("_", " ").title()) for pt in PublicationType],
