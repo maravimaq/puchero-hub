@@ -116,53 +116,42 @@ def test_convert_uvl_to_splx(mock_open):
 
 
 # Test pack_datasets
-@patch("tempfile.mkdtemp", return_value="/mock/tmp")
-@patch("os.path.exists", side_effect=lambda path: path in [
-    "uploads",
-    "uploads/user_1",
-    "uploads/user_1/dataset_1",
-    "uploads/user_1/dataset_1/file.uvl",
-    "uploads/user_1/dataset_1/file.pdf",
-    "uploads/user_1/dataset_1/file.json",
-    "uploads/user_1/dataset_1/file.cnf",
-    "uploads/user_1/dataset_1/file.splx",
-])
-@patch("os.makedirs")
-@patch("os.listdir", side_effect=[
-    ["user_1"],  # First call for `uploads` directory
-    ["dataset_1"],  # Second call for `user_1` directory
-    ["file.uvl"],  # Third call for `dataset_1` directory
-])
-@patch("os.walk", return_value=[
-    ("uploads/user_1/dataset_1", [], ["file.uvl"]),
-])
-@patch("app.modules.dataset.services.ZipFile")  # Mock ZipFile handling
-@patch("app.modules.dataset.services.convert_uvl_to_pdf")  # Mock PDF conversion
-@patch("app.modules.dataset.services.convert_uvl_to_json")  # Mock JSON conversion
-@patch("app.modules.dataset.services.convert_uvl_to_cnf")  # Mock CNF conversion
-@patch("app.modules.dataset.services.convert_uvl_to_splx")  # Mock SPLX conversion
-@patch("os.remove")  # Mock file removal
-def test_pack_datasets(mock_remove, mock_convert_splx, mock_convert_cnf, mock_convert_json,
-                       mock_convert_pdf, mock_zipfile, mock_walk, mock_listdir,
-                       mock_makedirs, mock_exists, mock_mkdtemp):
-    # Create a mock instance for ZipFile
-    mock_zip_instance = MagicMock()
-    mock_zipfile.return_value.__enter__.return_value = mock_zip_instance
+def test_pack_datasets():
+    with patch("tempfile.mkdtemp", return_value="/mock/tmp") as mock_mkdtemp, \
+         patch("os.path.exists", side_effect=lambda path: path in [
+             "uploads",
+             "uploads/user_1",
+             "uploads/user_1/dataset_1",
+             "uploads/user_1/dataset_1/file.uvl",
+             "uploads/user_1/dataset_1/file.pdf",
+             "uploads/user_1/dataset_1/file.json",
+             "uploads/user_1/dataset_1/file.cnf",
+             "uploads/user_1/dataset_1/file.splx",
+         ]) as mock_exists, \
+         patch("os.makedirs") as mock_makedirs, \
+         patch("os.listdir", side_effect=[
+             ["user_1"],
+             ["dataset_1"],
+             ["file.uvl"],
+         ]) as mock_listdir, \
+         patch("os.walk", return_value=[
+             ("uploads/user_1/dataset_1", [], ["file.uvl"]),
+         ]) as mock_walk, \
+         patch("app.modules.dataset.services.ZipFile") as mock_zipfile, \
+         patch("app.modules.dataset.services.convert_uvl_to_pdf"), \
+         patch("app.modules.dataset.services.convert_uvl_to_json"), \
+         patch("app.modules.dataset.services.convert_uvl_to_cnf"), \
+         patch("app.modules.dataset.services.convert_uvl_to_splx"), \
+         patch("os.remove"):
+        
+        # Call the function
+        result = pack_datasets()
 
-    # Debug prints for mocks
-    print(f"os.path.exists calls: {mock_exists.call_args_list}")
-    print(f"os.listdir calls: {mock_listdir.call_args_list}")
-    print(f"os.walk calls: {mock_walk.call_args_list}")
+        # Assertions
+        print(f"Result: {result}")
+        assert result == "/mock/tmp/datasets_collection.zip", \
+            "The returned path should match the mocked temp directory."
 
-    # Call the function being tested
-    result = pack_datasets()
-
-    # Debug prints for the result
-    print(f"Result: {result}")
-    print(f"Mock ZipFile write calls: {mock_zip_instance.write.call_args_list}")
-
-    # Assertions
-    assert result == "/mock/tmp/datasets_collection.zip", "The returned path should match the mocked temp directory."
 
 
 # Test DataSetService.get_synchronized
