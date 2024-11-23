@@ -60,3 +60,46 @@ def test_join_community(test_client):
 
         assert result, "The user failed to join the community."
         assert new_user in community.members, "The user did not successfully join the community."
+
+def test_get_all_communities_by_user(test_client):
+    """
+    Tests if all communities owned by a user are correctly retrieved.
+    """
+    with test_client.application.app_context():
+        owner_user = User.query.filter_by(email='owner@example.com').first()
+
+        communities = service.get_all_by_user(owner_user.id)
+
+        assert len(communities) == 1, "The user should own exactly one community."
+        assert communities[0].name == "Test Community", "The community name does not match."
+
+
+def test_get_all_joined_communities_by_user(test_client):
+    """
+    Tests if all communities a user has joined are correctly retrieved.
+    """
+    with test_client.application.app_context():
+        member_user = User.query.filter_by(email='member@example.com').first()
+
+        joined_communities = service.get_all_joined_by_user(member_user.id)
+
+        assert len(joined_communities) == 1, "The user should have joined exactly one community."
+        assert joined_communities[0].name == "Test Community", "The joined community name does not match."
+
+
+def test_get_members_by_community_id(test_client):
+    """
+    Tests if all members of a community are correctly retrieved by community ID.
+    """
+    with test_client.application.app_context():
+        community = Community.query.filter_by(name="Test Community").first()
+
+        community_with_members = service.get_members_by_id(community.id)
+
+        members = community_with_members.members
+
+        assert len(members) == 3, "The community should have exactly three members."
+        member_emails = [member.email for member in members]
+        assert 'owner@example.com' in member_emails, "Owner is missing in the members list."
+        assert 'member@example.com' in member_emails, "Member is missing in the members list."
+        assert 'new_user@example.com' in member_emails, "New user is missing in the members list."
