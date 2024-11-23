@@ -3,8 +3,12 @@ from app import db
 from app.modules.auth.models import User
 from app.modules.community.models import Community
 from app.modules.community.services import CommunityService
+from app.modules.dataset.models import DSMetaData, DataSet, PublicationType
+from datetime import datetime
+
 
 service = CommunityService()
+
 
 @pytest.fixture(scope='module')
 def test_client(test_client):
@@ -12,7 +16,7 @@ def test_client(test_client):
     Extends the test_client fixture to add additional specific data for module testing.
     """
     with test_client.application.app_context():
-        # Create users
+        # Crear usuarios
         owner_user = User(email='owner@example.com', password='test1234')
         member_user = User(email='member@example.com', password='test1234')
         new_user = User(email='new_user@example.com', password='test1234')
@@ -22,7 +26,19 @@ def test_client(test_client):
         db.session.add(new_user)
         db.session.commit()
 
-        # Create a community
+        # Crear metadatos del dataset
+        ds_meta_data = DSMetaData(
+            title="Test Dataset",
+            description="Dataset description for testing",
+            publication_type=PublicationType.OTHER,
+            publication_doi=None,
+            dataset_doi=None,
+            tags="test,dataset"
+        )
+        db.session.add(ds_meta_data)
+        db.session.commit()
+
+        # Crear una comunidad
         community = Community(
             name="Test Community",
             description="A community for testing",
@@ -30,8 +46,17 @@ def test_client(test_client):
         )
         community.members.append(owner_user)
         community.members.append(member_user)
-
         db.session.add(community)
+        db.session.commit()
+
+        # Asociar un dataset con la comunidad
+        dataset = DataSet(
+            user_id=owner_user.id,
+            community_id=community.id,
+            ds_meta_data_id=ds_meta_data.id,
+            created_at=datetime.utcnow()
+        )
+        db.session.add(dataset)
         db.session.commit()
 
     yield test_client
@@ -60,6 +85,7 @@ def test_join_community(test_client):
 
         assert result, "The user failed to join the community."
         assert new_user in community.members, "The user did not successfully join the community."
+
 
 def test_get_all_communities_by_user(test_client):
     """
@@ -180,3 +206,147 @@ def test_get_members_by_nonexistent_community_id(test_client):
         members = service.get_members_by_id(nonexistent_community_id)
 
         assert members is None, "Nonexistent community should not have any members."
+
+
+def test_create_community_service(test_client):
+    """
+    Test if the CommunityService correctly creates a community.
+    """
+    with test_client.application.app_context():
+        owner_user = User.query.filter_by(email='owner@example.com').first()
+        assert owner_user is not None, "Owner user should already exist."
+
+        new_community_name = "Another Test Community"
+
+        created_community = service.create(
+            name=new_community_name,
+            description="Another community for testing",
+            owner_id=owner_user.id
+        )
+
+        assert created_community is not None, "The community should have been created."
+        assert created_community.name == new_community_name, "The community name does not match."
+        assert created_community.owner_id == owner_user.id, "The owner ID does not match."
+
+
+def test_create_community_with_duplicate_name(test_client):
+    """
+    Test that creating a community with a duplicate name fails.
+    """
+    with test_client.application.app_context():
+        user = User.query.filter_by(email='owner@example.com').first()
+        duplicate_community = Community(
+            name="Test Community",
+            description="This should fail",
+            owner_id=user.id
+        )
+        db.session.add(duplicate_community)
+        try:
+            db.session.commit()
+        except Exception:
+            db.session.rollback()
+
+        duplicate_community_in_db = Community.query.filter_by(description="This should fail").first()
+        assert duplicate_community_in_db is None, "The duplicate community was incorrectly created."
+
+
+def test_edit_community_as_owner(test_client):
+    """
+    Test if the owner can edit a community successfully.
+    """
+    with test_client.application.app_context():
+        User.query.filter_by(email='owner@example.com').first()
+        community = Community.query.filter_by(name="Test Community").first()
+
+        community.name = "Edited Community Name"
+        community.description = "Updated description"
+        db.session.commit()
+
+        edited_community = Community.query.filter_by(id=community.id).first()
+        assert edited_community.name == "Edited Community Name", "The community name was not updated."
+        assert edited_community.description == "Updated description", "The community description was not updated."
+
+
+def test_delete_community_as_owner(test_client):
+    """
+    Test if the owner can delete a community successfully.
+    """
+    with test_client.application.app_context():
+        owner_user = User(email='delete_owner@example.com', password='test1234')
+        db.session.add(owner_user)
+        db.session.commit()
+
+        community = Community(
+            name="Community to Delete",
+            description="This community will be deleted in the test",
+            owner_id=owner_user.id
+        )
+        community.members.append(owner_user)
+
+        db.session.add(community)
+        db.session.commit()
+
+        community_id = community.id
+
+        db.session.delete(community)
+        db.session.commit()
+
+        deleted_community = Community.query.filter_by(id=community_id).first()
+        assert deleted_community is None, "The community was not deleted successfully."
+
+
+def create_community(name, description, owner_user):
+    community = Community(name=name, description=description, owner_id=owner_user.id)
+    community.members.append(owner_user)
+    db.session.add(community)
+    db.session.commit()
+    return community
+
+
+def create_ds_meta_data(title, description, publication_type):
+    ds_meta_data = DSMetaData(
+        title=title,
+        description=description,
+        publication_type=publication_type,
+        publication_doi=None,
+        dataset_doi=None,
+        tags="test,dataset"
+    )
+    db.session.add(ds_meta_data)
+    db.session.commit()
+    return ds_meta_data
+
+
+def create_dataset(user, community, ds_meta_data):
+    dataset = DataSet(
+        user_id=user.id,
+        community_id=community.id,
+        ds_meta_data_id=ds_meta_data.id,
+        created_at=datetime.utcnow()
+    )
+    db.session.add(dataset)
+    db.session.commit()
+    return dataset
+
+
+def test_show_community_with_datasets(test_client):
+    """
+    Test if datasets are correctly shown in a community view.
+    """
+    with test_client.application.app_context():
+        owner_user = User.query.filter_by(email="owner@example.com").first()
+        assert owner_user is not None, "The owner user was not created correctly in the fixture."
+
+        community = create_community("Dataset Test Community", "Community with a dataset for testing", owner_user)
+        ds_meta_data = create_ds_meta_data("Test Dataset", "Dataset description for testing", PublicationType.OTHER)
+        create_dataset(owner_user, community, ds_meta_data)
+
+        community = service.get_with_datasets_by_id(community.id)  # Devuelve un objeto Community
+        assert community is not None, "The test community was not retrieved correctly."
+        assert isinstance(community, Community), "The result should be a Community object."
+
+        datasets = community.datasets
+        assert datasets is not None, "Datasets were not retrieved correctly."
+        assert isinstance(datasets, list), "Datasets should be returned as a list."
+        assert len(datasets) == 1, "The community should have exactly one dataset."
+        assert datasets[0].ds_meta_data.title == "Test Dataset", "The dataset title does not match."
