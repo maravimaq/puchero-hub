@@ -24,6 +24,27 @@
     {% else %}
         <p class="text-muted">No members found in this community.</p>
     {% endif %}
+
+    <h4 class="mt-4">Datasets</h4>
+    {% if community.datasets %}
+        <ul class="list-group">
+        {% for dataset in community.datasets %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                <div>
+                    <a href="{{ url_for('dataset.view_community_dataset', dataset_id=dataset.id) }}">
+                        {{ dataset.name() }}
+                    </a>                    
+                </div>
+                <div class="text-muted">
+                    Uploaded by: {{ dataset.user.profile.name }} {{ dataset.user.profile.surname }}
+                </div>
+            </li>
+        {% endfor %}
+        </ul>
+    {% else %}
+        <p class="text-muted">No datasets found in this community.</p>
+    {% endif %}
+
 </div>
 {% endblock %}
 
