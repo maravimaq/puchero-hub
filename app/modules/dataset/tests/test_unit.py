@@ -149,8 +149,17 @@ def test_pack_datasets(mock_remove, mock_convert_splx, mock_convert_cnf, mock_co
     mock_zip_instance = MagicMock()
     mock_zipfile.return_value.__enter__.return_value = mock_zip_instance
 
+    # Debug prints for mocks
+    print(f"os.path.exists calls: {mock_exists.call_args_list}")
+    print(f"os.listdir calls: {mock_listdir.call_args_list}")
+    print(f"os.walk calls: {mock_walk.call_args_list}")
+
     # Call the function being tested
     result = pack_datasets()
+
+    # Debug prints for the result
+    print(f"Result: {result}")
+    print(f"Mock ZipFile write calls: {mock_zip_instance.write.call_args_list}")
 
     # Assertions
     assert result == "/mock/tmp/datasets_collection.zip", "The returned path should match the mocked temp directory."
