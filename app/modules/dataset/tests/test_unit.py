@@ -125,7 +125,6 @@ def test_convert_uvl_to_splx(mock_open):
     "uploads/user_1/dataset_1/file.cnf",  # Mock the `.cnf` file existence
     "uploads/user_1/dataset_1/file.splx",  # Mock the `.splx` file existence
 ])
-
 @patch("os.makedirs")  # Mock directory creation
 @patch("os.listdir", side_effect=[
     ["user_1"],  # First call for `uploads` directory
@@ -176,7 +175,6 @@ def test_pack_datasets(mock_remove, mock_convert_splx, mock_convert_cnf, mock_co
         "uploads/user_1/dataset_1/file.uvl", "uploads/user_1/dataset_1/file.splx"
     )
 
-    # Use `ANY` for more flexible matching
     mock_zip_instance.write.assert_any_call(
         "uploads/user_1/dataset_1/file.uvl",
         arcname="dataset_1/uvl/file.uvl"
@@ -185,7 +183,22 @@ def test_pack_datasets(mock_remove, mock_convert_splx, mock_convert_cnf, mock_co
         "uploads/user_1/dataset_1/file.pdf",
         arcname="dataset_1/pdf/file.pdf"
     )
-
+    mock_zip_instance.write.assert_any_call(
+        "uploads/user_1/dataset_1/file.json",
+        arcname="dataset_1/json/file.json"
+    )
+    mock_zip_instance.write.assert_any_call(
+        "uploads/user_1/dataset_1/file.cnf",
+        arcname="dataset_1/cnf/file.cnf"
+    )
+    mock_zip_instance.write.assert_any_call(
+        "uploads/user_1/dataset_1/file.splx",
+        arcname="dataset_1/splx/file.splx"
+    )
+    mock_remove.assert_any_call("uploads/user_1/dataset_1/file.pdf")
+    mock_remove.assert_any_call("uploads/user_1/dataset_1/file.json")
+    mock_remove.assert_any_call("uploads/user_1/dataset_1/file.cnf")
+    mock_remove.assert_any_call("uploads/user_1/dataset_1/file.splx")
 
 
 # Test DataSetService.get_synchronized
@@ -219,7 +232,7 @@ def test_move_feature_models(mock_auth_user, mock_shutil_move):
     service = DataSetService()
     service.move_feature_models(dataset)
 
-    # Adjust expected paths to include the /app prefix
+    # Define expected file paths with the `/app` prefix in the destination path
     expected_paths = [
         ("/temp/model1.uvl", "/app/uploads/user_123/dataset_1"),
         ("/temp/model2.uvl", "/app/uploads/user_123/dataset_1"),
@@ -228,7 +241,6 @@ def test_move_feature_models(mock_auth_user, mock_shutil_move):
     # Assertions: Ensure move was called for each file
     for src, dest in expected_paths:
         mock_shutil_move.assert_any_call(src, dest)
-
 
 
 
