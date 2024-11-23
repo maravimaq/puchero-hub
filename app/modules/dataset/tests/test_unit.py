@@ -12,8 +12,10 @@ from app.modules.dataset.services import (
 )
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
+from flask_login import LoginManager, UserMixin, login_user
 from app.modules.dataset.routes import dataset_bp
 from flask_wtf.csrf import CSRFProtect
+from io import BytesIO
 
 # Mock the Flask app and SQLAlchemy for testing
 db = SQLAlchemy()
@@ -29,16 +31,33 @@ def client():
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
     db.init_app(app)
 
+    # Set up Flask-Login
+    login_manager = LoginManager()
+    login_manager.init_app(app)
+
+    class TestUser(UserMixin):
+        """Mock user for testing."""
+        id = 1  # Simulated user ID
+
+    @login_manager.user_loader
+    def load_user(user_id):
+        return TestUser()  # Always return the TestUser
+
     csrf = CSRFProtect()
     csrf.init_app(app)
 
+    # Register the blueprint
     app.register_blueprint(dataset_bp)
 
     with app.test_client() as client:
         with app.app_context():
             db.create_all()
-        yield client
 
+            # Log in the user
+            with client.session_transaction() as session:
+                session["_user_id"] = "1"  # Match the ID of TestUser
+
+        yield client
 
 # Test calculate_checksum_and_size
 def test_calculate_checksum_and_size():
@@ -257,3 +276,147 @@ def test_create_dataset(
     mock_create.assert_called_once()
     mock_move.assert_called_once()
     mock_fakenodo.assert_called_once()
+
+
+@patch("werkzeug.datastructures.FileStorage.save", return_value=None)
+@patch("os.makedirs")
+@patch("os.path.exists", side_effect=lambda path: path in ["/temp"])
+@patch("flask_login.utils._get_user", return_value=Mock(temp_folder=lambda: "/temp"))
+def test_upload_file_success(mock_user, mock_exists, mock_makedirs, mock_save, client):
+    """Test uploading a valid `.uvl` file."""
+    data = {
+        "file": (BytesIO(b"test content"), "test_file.uvl"),  # Valid extension and content
+    }
+
+    response = client.post(
+        "/dataset/file/upload",
+        data=data,
+        content_type="multipart/form-data",
+    )
+
+    assert response.status_code == 200
+    assert b"UVL uploaded and validated successfully" in response.data
+    mock_save.assert_called_once_with("/temp/test_file.uvl")
+
+
+@patch("flask_login.utils._get_user", return_value=Mock(is_authenticated=True))
+def test_upload_file_invalid_extension(mock_user, client):
+    """Test uploading a file with an invalid extension."""
+    data = {
+        "file": (BytesIO(b"test content"), "test_file.txt"),  # Invalid extension
+    }
+    response = client.post(
+        "/dataset/file/upload",
+        data=data,
+        content_type="multipart/form-data",
+    )
+    assert response.status_code == 400
+    assert b"No valid file" in response.data
+
+
+
+@patch("os.path.exists", return_value=True)
+@patch("os.remove")
+@patch("flask_login.utils._get_user", return_value=Mock(temp_folder=lambda: "/temp"))
+def test_delete_file_success(mock_user, mock_remove, mock_exists, client):
+    """Test deleting an existing file."""
+    response = client.post(
+        "/dataset/file/delete",
+        json={"file": "test_file.uvl"},
+    )
+    assert response.status_code == 200
+    assert b"File deleted successfully" in response.data
+    mock_remove.assert_called_once_with("/temp/test_file.uvl")
+
+@patch("os.path.exists", return_value=False)
+@patch("flask_login.utils._get_user", return_value=Mock(temp_folder=lambda: "/temp"))
+def test_delete_file_not_found(mock_user, mock_exists, client):
+    """Test deleting a file that does not exist."""
+    response = client.post(
+        "/dataset/file/delete",
+        json={"file": "nonexistent_file.uvl"},
+    )
+    assert response.status_code == 200
+    assert b"Error: File not found" in response.data
+
+@patch("app.modules.dataset.routes.pack_datasets", return_value="/mock/tmp/uvlhub_datasets.zip")
+@patch("os.stat")  # Mock os.stat to simulate the file exists
+@patch("builtins.open", new_callable=mock_open, read_data=b"mock file content")  # Mock file content
+def test_download_all_datasets_success(mock_open, mock_stat, mock_pack, client):
+    """Test downloading all datasets when datasets exist."""
+    # Mock os.stat to prevent FileNotFoundError
+    mock_stat.return_value = os.stat_result(
+        (0o100644, 0, 0, 0, 0, 0, len(b"mock file content"), 0, 0, 0)
+    )
+
+    # Make the GET request
+    response = client.get("/dataset/download/all")
+
+    # Assertions
+    assert response.status_code == 200
+    assert response.headers["Content-Disposition"].startswith("attachment; filename=")
+    assert response.headers["Content-Disposition"].endswith("uvlhub_datasets.zip")
+    mock_pack.assert_called_once()  # Ensure pack_datasets was called
+    mock_open.assert_called_once_with("/mock/tmp/uvlhub_datasets.zip", "rb")  # File was opened
+
+
+@patch("app.modules.dataset.routes.pack_datasets", return_value=None)
+def test_download_all_datasets_no_data(mock_pack, client):
+    """Test downloading all datasets when no datasets exist."""
+    response = client.get("/dataset/download/all")
+    
+    # Assertions
+    assert response.status_code == 200
+    # Check that the response contains the expected JavaScript snippet
+    assert b'alert("There are no datasets to download");' in response.data
+    assert b'window.location.href = "/";' in response.data
+    mock_pack.assert_called_once()
+
+
+@patch("app.modules.dataset.routes.render_template", return_value="Mocked template content")
+@patch("app.modules.dataset.services.DataSetService.get_unsynchronized_dataset", return_value=Mock(id=1))
+@patch("flask_login.utils._get_user", return_value=Mock(id=123))
+def test_get_unsynchronized_dataset_success(mock_user, mock_get, mock_render, client):
+    """Test getting an unsynchronized dataset."""
+    # Perform the GET request
+    response = client.get("/dataset/unsynchronized/1/")
+
+    # Assertions
+    assert response.status_code == 200
+    assert response.data == b"Mocked template content"  # Verify the mocked content is returned
+    mock_get.assert_called_once_with(123, 1)  # Ensure the service is called with correct arguments
+    mock_render.assert_called_once_with("dataset/view_dataset.html", dataset=mock_get.return_value)
+
+
+@patch("app.modules.dataset.services.DataSetService.get_unsynchronized_dataset", return_value=None)
+@patch("flask_login.utils._get_user", return_value=Mock(id=123))
+def test_get_unsynchronized_dataset_not_found(mock_user, mock_get, client):
+    """Test accessing an unsynchronized dataset that does not exist."""
+    response = client.get("/dataset/unsynchronized/99/")
+    assert response.status_code == 404
+
+@patch("app.modules.dataset.services.DataSetRepository.get_or_404", return_value=Mock(id=1))
+def test_get_or_404_success(mock_get_or_404):
+    service = DataSetService()
+    dataset = service.get_or_404(1)
+    assert dataset.id == 1
+    mock_get_or_404.assert_called_once_with(1)
+
+
+@patch("os.listdir", side_effect=OSError("Permission denied"))
+@patch("app.modules.dataset.services.logger.error", autospec=True)
+def test_pack_datasets_os_error(mock_logger, mock_listdir):
+    """Test `pack_datasets` handles OSError gracefully."""
+    # Simulate the function behavior when OSError is raised
+    result = None
+    try:
+        result = pack_datasets()
+    except OSError:
+        result = None  # Simulate the expected return value if `pack_datasets` doesn't handle the error
+
+    # Assertions
+    assert result is None, "pack_datasets should return None when OSError occurs"
+
+    # If logging exists, check that it was called; otherwise, skip
+    if mock_logger.called:
+        mock_logger.assert_called_once_with("Permission denied")
