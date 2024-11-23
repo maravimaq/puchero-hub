@@ -117,17 +117,18 @@ def test_convert_uvl_to_splx(mock_open):
 
 # Test pack_datasets
 @patch("tempfile.mkdtemp", return_value="/mock/tmp")
-@patch("os.path.exists", side_effect=lambda path: path in [
-    "/mock/tmp",  # Mock the temporary directory
-    "uploads",  # Mock the `uploads` directory
-    "uploads/user_1",  # Mock the user folder
-    "uploads/user_1/dataset_1",  # Mock the dataset folder
-    "uploads/user_1/dataset_1/file.uvl",  # Mock the `.uvl` file
-    "uploads/user_1/dataset_1/file.pdf",  # Mock the `.pdf` file
-    "uploads/user_1/dataset_1/file.json",  # Mock the `.json` file
-    "uploads/user_1/dataset_1/file.cnf",  # Mock the `.cnf` file
-    "uploads/user_1/dataset_1/file.splx",  # Mock the `.splx` file
-])
+@patch("os.path.exists", side_effect=lambda path: any(
+    path.endswith(mocked_path) for mocked_path in [
+        "uploads",  # Mock the `uploads` directory
+        "uploads/user_1",  # Mock the user folder
+        "uploads/user_1/dataset_1",  # Mock the dataset folder
+        "uploads/user_1/dataset_1/file.uvl",  # Mock the `.uvl` file existence
+        "uploads/user_1/dataset_1/file.pdf",  # Mock the `.pdf` file existence
+        "uploads/user_1/dataset_1/file.json",  # Mock the `.json` file existence
+        "uploads/user_1/dataset_1/file.cnf",  # Mock the `.cnf` file existence
+        "uploads/user_1/dataset_1/file.splx",  # Mock the `.splx` file existence
+    ]
+))
 @patch("os.makedirs")
 @patch("os.listdir", side_effect=[
     ["user_1"],  # First call for `uploads` directory
@@ -193,18 +194,23 @@ def test_move_feature_models(mock_auth_user, mock_shutil_move):
         Mock(fm_meta_data=Mock(uvl_filename="model2.uvl")),
     ]
 
-    # Expected destination path with the `/app` prefix
-    working_dir = os.getenv("WORKING_DIR", "/app")
-    expected_dest = os.path.join(working_dir, "uploads", f"user_{mock_user.id}", f"dataset_{dataset.id}")
-
     # Instantiate the service and call the method
     service = DataSetService()
     service.move_feature_models(dataset)
 
-    # Assertions
+    # Get the working directory used in the code
+    working_dir = os.getenv("WORKING_DIR", "")
+    if not working_dir:
+        working_dir = os.getcwd()  # Fallback to current working directory
+
+    # Define expected file paths
+    expected_dest = os.path.join(working_dir, "uploads", f"user_{mock_user.id}", f"dataset_{dataset.id}")
+
+    # Assertions: Ensure move was called for each file
     mock_shutil_move.assert_any_call("/temp/model1.uvl", expected_dest)
     mock_shutil_move.assert_any_call("/temp/model2.uvl", expected_dest)
-    
+
+
 
 @patch("app.modules.dataset.services.DSMetaDataRepository.update")
 def test_update_dsmetadata(mock_update):
