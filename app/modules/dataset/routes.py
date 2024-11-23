@@ -7,6 +7,8 @@ import uuid
 from datetime import datetime, timezone
 from zipfile import ZipFile
 from app.modules.dataset.services import pack_datasets
+from app import db
+
 
 from flask import (
     redirect,
@@ -24,7 +26,8 @@ from flask_login import login_required, current_user
 
 from app.modules.dataset.forms import DataSetForm
 from app.modules.dataset.models import (
-    DSDownloadRecord
+    DSDownloadRecord,
+    DataSet
 )
 from app.modules.dataset import dataset_bp
 from app.modules.dataset.services import (
@@ -61,7 +64,13 @@ def create_dataset():
 
         try:
             logger.info("Creating dataset...")
+            community = form.community.data
             dataset = dataset_service.create_from_form(form=form, current_user=current_user)
+
+            if community:
+                dataset.community_id = community.id
+                db.session.commit()
+
             logger.info(f"Created dataset: {dataset}")
             dataset_service.move_feature_models(dataset)
         except Exception as exc:
@@ -296,6 +305,17 @@ def get_unsynchronized_dataset(dataset_id):
     dataset = dataset_service.get_unsynchronized_dataset(current_user.id, dataset_id)
 
     if not dataset:
+        abort(404)
+
+    return render_template("dataset/view_dataset.html", dataset=dataset)
+
+
+@dataset_bp.route("/dataset/community/<int:dataset_id>/", methods=["GET"])
+@login_required
+def view_community_dataset(dataset_id):
+    dataset = db.session.query(DataSet).filter_by(id=dataset_id).first()
+
+    if not dataset or (dataset.community_id not in [community.id for community in current_user.joined_communities]):
         abort(404)
 
     return render_template("dataset/view_dataset.html", dataset=dataset)
