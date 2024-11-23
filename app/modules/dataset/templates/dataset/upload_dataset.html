@@ -61,6 +61,14 @@
                                 </div>
                             </div>
 
+                            <div class="col-12 mb-3">
+                                <label for="community" class="form-label">Select a Community (Optional)</label>
+                                {{ form.community(class="form-control") }}
+                                {% for error in form.community.errors %}
+                                    <span style="color: red;">{{ error }}</span>
+                                {% endfor %}
+                            </div>                            
+
                             <div class="col-lg-6 col-6">
                                 <div class="mb-3">
                                     {{ form.publication_type.label(class="form-label") }}
