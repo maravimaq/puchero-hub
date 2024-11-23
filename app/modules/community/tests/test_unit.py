@@ -103,3 +103,80 @@ def test_get_members_by_community_id(test_client):
         assert 'owner@example.com' in member_emails, "Owner is missing in the members list."
         assert 'member@example.com' in member_emails, "Member is missing in the members list."
         assert 'new_user@example.com' in member_emails, "New user is missing in the members list."
+
+
+def test_get_communities_not_joined_by_user(test_client):
+    """
+    Tests if all communities not joined by a user are correctly retrieved.
+    """
+    with test_client.application.app_context():
+        new_user = User.query.filter_by(email='new_user@example.com').first()
+
+        communities_not_joined = service.get_communities_not_joined_by_user(new_user.id)
+
+        assert len(communities_not_joined) == 0, "The new user should have joined all available communities."
+
+
+def test_user_cannot_join_community_twice(test_client):
+    """
+    Tests that a user cannot join the same community more than once.
+    """
+    with test_client.application.app_context():
+        new_user = User.query.filter_by(email='new_user@example.com').first()
+        community = Community.query.filter_by(name="Test Community").first()
+
+        # Try joining the same community again
+        result = service.join_community(community.id, new_user)
+
+        assert not result, "The user should not be able to join the same community twice."
+        assert community.members.count(new_user) == 1, "The user appears in the community members list more than once."
+
+
+def test_get_all_owned_communities(test_client):
+    """
+    Tests if all communities owned by a user are correctly retrieved.
+    """
+    with test_client.application.app_context():
+        owner_user = User.query.filter_by(email='owner@example.com').first()
+
+        owned_communities = service.get_all_by_user(owner_user.id)
+
+        assert len(owned_communities) == 1, "The owner should have exactly one owned community."
+        assert owned_communities[0].name == "Test Community", "The community name does not match the owned community."
+
+
+def test_join_nonexistent_community(test_client):
+    """
+    Tests that a user cannot join a community that does not exist.
+    """
+    with test_client.application.app_context():
+        new_user = User.query.filter_by(email='new_user@example.com').first()
+
+        nonexistent_community_id = 99999  # A community ID that doesn't exist
+        result = service.join_community(nonexistent_community_id, new_user)
+
+        assert not result, "The user should not be able to join a nonexistent community."
+
+
+def test_get_all_joined_communities_for_nonexistent_user(test_client):
+    """
+    Tests if querying joined communities for a nonexistent user returns an empty list.
+    """
+    with test_client.application.app_context():
+        nonexistent_user_id = 99999  # A user ID that doesn't exist
+
+        joined_communities = service.get_all_joined_by_user(nonexistent_user_id)
+
+        assert len(joined_communities) == 0, "Nonexistent user should not have joined any communities."
+
+
+def test_get_members_by_nonexistent_community_id(test_client):
+    """
+    Tests if querying members for a nonexistent community returns an empty list.
+    """
+    with test_client.application.app_context():
+        nonexistent_community_id = 99999  # A community ID that doesn't exist
+
+        members = service.get_members_by_id(nonexistent_community_id)
+
+        assert members is None, "Nonexistent community should not have any members."
