@@ -96,7 +96,6 @@ def test_dataset_creation(test_client):
     Tests the creation of a new dataset through the DataSetService.
     """
     with test_client.application.app_context():
-        
         user = User(email="new_user@example.com", password="test1234")
         db.session.add(user)
         db.session.commit()
