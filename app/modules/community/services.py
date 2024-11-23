@@ -26,3 +26,6 @@ class CommunityService(BaseService):
             db.session.commit()
             return True
         return False
+
+    def get_with_datasets_by_id(self, community_id):
+        return self.repository.get_with_datasets_by_id(community_id)
