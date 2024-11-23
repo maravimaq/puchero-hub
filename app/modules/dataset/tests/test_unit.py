@@ -37,11 +37,11 @@ def client():
 
     class TestUser(UserMixin):
         """Mock user for testing."""
-        id = 1  # Simulated user ID
+        id = 1
 
     @login_manager.user_loader
     def load_user(user_id):
-        return TestUser()  # Always return the TestUser
+        return TestUser() 
 
     csrf = CSRFProtect()
     csrf.init_app(app)
@@ -55,7 +55,7 @@ def client():
 
             # Log in the user
             with client.session_transaction() as session:
-                session["_user_id"] = "1"  # Match the ID of TestUser
+                session["_user_id"] = "1"
 
         yield client
 
@@ -70,6 +70,15 @@ def test_calculate_checksum_and_size():
     assert checksum == "b4ed349f78183083dcaf708313c8c99b"  # Example of MD5 checksum
     assert size == len(file_content)
 
+@patch("os.path.getsize", side_effect=FileNotFoundError)
+def test_calculate_checksum_and_size_file_not_found(mock_getsize):
+    with pytest.raises(FileNotFoundError):
+        calculate_checksum_and_size("nonexistent_path")
+
+@patch("os.listdir", return_value=[])
+def test_pack_datasets_empty_uploads(mock_listdir):
+    result = pack_datasets()
+    assert result is None
 
 # Test convert_uvl_to_pdf
 @patch("app.modules.dataset.services.FPDF")
@@ -211,19 +220,36 @@ def test_move_feature_models(mock_auth_user, mock_shutil_move):
     service = DataSetService()
     service.move_feature_models(dataset)
 
-    # Get the working directory used in the code
     working_dir = os.getenv("WORKING_DIR", "")
     if not working_dir:
-        working_dir = os.getcwd()  # Fallback to current working directory
+        working_dir = os.getcwd() 
 
-    # Define expected file paths
     expected_dest = os.path.join(working_dir, "uploads", f"user_{mock_user.id}", f"dataset_{dataset.id}")
 
-    # Assertions: Ensure move was called for each file
     mock_shutil_move.assert_any_call("/temp/model1.uvl", expected_dest)
     mock_shutil_move.assert_any_call("/temp/model2.uvl", expected_dest)
 
+@patch("shutil.move", side_effect=FileNotFoundError)
+@patch("app.modules.auth.services.AuthenticationService.get_authenticated_user")
+def test_move_feature_models_missing_dir(mock_auth_user, mock_move):
+    # Mock the authenticated user
+    mock_user = Mock()
+    mock_user.is_authenticated = True
+    mock_user.id = 123
+    mock_user.temp_folder.return_value = "/temp"
+    mock_auth_user.return_value = mock_user
 
+    # Create a mock dataset with a nonexistent feature model
+    dataset = Mock(feature_models=[Mock(fm_meta_data=Mock(uvl_filename="nonexistent.uvl"))])
+    service = DataSetService()
+
+    # Assert that a FileNotFoundError is raised
+    with pytest.raises(FileNotFoundError):
+        service.move_feature_models(dataset)
+
+    # Ensure the mock was called
+    mock_auth_user.assert_called_once()
+    mock_move.assert_called_once_with("/temp/nonexistent.uvl", ANY)
 
 @patch("app.modules.dataset.services.DSMetaDataRepository.update")
 def test_update_dsmetadata(mock_update):
