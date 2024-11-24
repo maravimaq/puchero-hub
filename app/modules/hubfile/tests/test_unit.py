@@ -1,4 +1,5 @@
 import pytest
+import os
 from app import db
 from app.modules.hubfile.models import Hubfile, HubfileDownloadRecord, HubfileViewRecord
 from app.modules.featuremodel.models import FeatureModel, FMMetaData, FMMetrics
@@ -256,3 +257,96 @@ def test_hubfile_update(test_client):
 
         updated_hubfile.name = original_name
         db.session.commit()
+
+
+def test_hubfile_get_formatted_size_edge_cases(test_client):
+    """
+    Test the `get_formatted_size()` method for various edge cases.
+    """
+    with test_client.application.app_context():
+        hubfile = Hubfile.query.first()
+        assert hubfile is not None, "Hubfile should exist in the database."
+
+        hubfile.size = 2048
+        db.session.commit()
+        assert hubfile.get_formatted_size().startswith("2") and hubfile.get_formatted_size().endswith("KB")
+
+        hubfile.size = 2 * 1024 * 1024 - 1
+        db.session.commit()
+        assert hubfile.get_formatted_size().startswith("2") and hubfile.get_formatted_size().endswith("MB")
+
+
+def test_hubfile_to_dict_edge_cases(test_client):
+    """
+    Test the `to_dict()` method for Hubfile with edge cases.
+    """
+    with test_client.application.app_context():
+        hubfile = Hubfile.query.first()
+        assert hubfile is not None, "Hubfile should exist in the database."
+
+        hubfile.name = "edge_case_file"
+        hubfile.size = 0
+        db.session.commit()
+
+        with test_client.application.test_request_context('/'):
+            hubfile_dict = hubfile.to_dict()
+            assert hubfile_dict["name"] == hubfile.name, f"Expected name '{hubfile.name}', got {hubfile_dict['name']}."
+            assert hubfile_dict["size_in_bytes"] == 0, f"Expected size_in_bytes 0, got {hubfile_dict['size_in_bytes']}."
+            assert "url" in hubfile_dict, "Expected 'url' key in the dictionary."
+
+        hubfile.name = "test_file.uvl"
+        hubfile.size = 2048
+        db.session.commit()
+
+
+def test_get_dataset_by_hubfile(test_client):
+    """
+    Test `HubfileRepository.get_dataset_by_hubfile()` method.
+    """
+    from app.modules.hubfile.repositories import HubfileRepository
+
+    with test_client.application.app_context():
+        repo = HubfileRepository()
+        hubfile = Hubfile.query.first()
+        assert hubfile is not None, "Hubfile should exist in the database."
+
+        dataset = repo.get_dataset_by_hubfile(hubfile)
+
+        assert dataset is not None, "Dataset should exist for a valid Hubfile."
+        assert dataset.ds_meta_data.title == "Sample Dataset", \
+            f"Expected dataset title 'Sample Dataset', got '{dataset.ds_meta_data.title}'."
+
+
+def test_hubfile_with_missing_feature_model(test_client):
+    """
+    Test Hubfile's behavior when the associated FeatureModel is missing.
+    """
+    with test_client.application.app_context():
+        hubfile = Hubfile.query.first()
+        assert hubfile is not None, "Hubfile should exist in the database."
+
+        feature_model_id = hubfile.feature_model_id
+
+        feature_model = FeatureModel.query.get(feature_model_id)
+        assert feature_model is not None, "FeatureModel associated with Hubfile should exist."
+        db.session.delete(feature_model)
+        db.session.commit()
+
+        hubfile = Hubfile.query.filter_by(id=hubfile.id).first()
+        if hubfile is None:
+            assert True, "Hubfile was deleted due to cascading delete from the FeatureModel."
+        else:
+            assert hubfile.feature_model_id == feature_model_id, \
+                "Hubfile should still reference the deleted FeatureModel."
+
+
+
+def test_hubfile_invalid_data(test_client):
+    """
+    Test that invalid data raises exceptions or errors appropriately.
+    """
+    with test_client.application.app_context():
+        with pytest.raises(Exception):
+            invalid_hubfile = Hubfile(name=None, checksum=None, size=-1)
+            db.session.add(invalid_hubfile)
+            db.session.commit()
