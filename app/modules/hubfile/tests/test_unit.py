@@ -5,7 +5,6 @@ from app.modules.featuremodel.models import FeatureModel, FMMetaData, FMMetrics
 from app.modules.dataset.models import DataSet, DSMetaData
 from app.modules.auth.models import User
 from datetime import datetime
-from flask import request
 
 
 @pytest.fixture(scope='module')
@@ -236,7 +235,6 @@ def test_hubfile_update(test_client):
     with test_client.application.app_context():
         hubfile = Hubfile.query.first()
         if hubfile is None:
-            user = User.query.first()
             feature_model = FeatureModel.query.first()
 
             hubfile = Hubfile(
