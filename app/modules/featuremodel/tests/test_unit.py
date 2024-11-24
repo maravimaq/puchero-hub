@@ -114,7 +114,6 @@ def test_retrieve_feature_model_by_dataset(test_client):
     with test_client.application.app_context():
         data_set = DataSet.query.first()
         assert data_set is not None, "DataSet should exist in the database."
-        
         feature_model = FeatureModel.query.filter_by(data_set_id=data_set.id).first()
         assert feature_model is not None, "FeatureModel should exist for the given DataSet."
         assert feature_model.data_set_id == data_set.id, \
