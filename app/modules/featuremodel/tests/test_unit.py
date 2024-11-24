@@ -206,7 +206,7 @@ def test_delete_feature_model_and_metadata(test_client):
         hubfiles = Hubfile.query.filter_by(feature_model_id=feature_model.id).all()
         for hubfile in hubfiles:
             db.session.query(HubfileDownloadRecord).filter_by(file_id=hubfile.id).delete()
-        
+
         db.session.query(Hubfile).filter_by(feature_model_id=feature_model.id).delete()
 
         metadata_id = feature_model.fm_meta_data_id
