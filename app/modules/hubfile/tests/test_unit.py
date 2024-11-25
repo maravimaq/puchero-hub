@@ -350,3 +350,230 @@ def test_hubfile_invalid_data(test_client):
             invalid_hubfile = Hubfile(name=None, checksum=None, size=-1)
             db.session.add(invalid_hubfile)
             db.session.commit()
+
+
+def test_download_file_existing(test_client):
+    """
+    Test `/file/download/<id>` route for an existing file.
+    """
+    with test_client.application.app_context():
+        feature_model = FeatureModel.query.first()
+        if not feature_model:
+            fm_metrics = FMMetrics(solver="SAT Solver", not_solver="Non-SAT Solver")
+            db.session.add(fm_metrics)
+            db.session.commit()
+
+            fm_metadata = FMMetaData(
+                uvl_filename="test_model.uvl",
+                title="Test Feature Model",
+                description="Feature Model for testing",
+                publication_type="REPORT",
+                tags="test,featuremodel",
+                uvl_version="1.0",
+                fm_metrics_id=fm_metrics.id
+            )
+            db.session.add(fm_metadata)
+            db.session.commit()
+
+            feature_model = FeatureModel(
+                data_set_id=1,
+                fm_meta_data_id=fm_metadata.id
+            )
+            db.session.add(feature_model)
+            db.session.commit()
+
+        hubfile = Hubfile.query.first()
+        if not hubfile:
+            hubfile = Hubfile(
+                name="test_file.uvl",
+                checksum="checksum123",
+                size=2048,
+                feature_model_id=feature_model.id
+            )
+            db.session.add(hubfile)
+            db.session.commit()
+
+        file_directory = os.path.join(
+            os.path.dirname(test_client.application.root_path),
+            f"uploads/user_{feature_model.data_set_id}/dataset_{feature_model.data_set_id}/"
+        )
+        os.makedirs(file_directory, exist_ok=True)
+        file_path = os.path.join(file_directory, hubfile.name)
+        with open(file_path, "w") as f:
+            f.write("Test content")
+
+    response = test_client.get(f"/file/download/{hubfile.id}")
+
+    assert response.status_code == 200, f"Expected status code 200, got {response.status_code}."
+    assert "Content-Disposition" in response.headers, "Response should contain Content-Disposition header."
+    assert f"filename={hubfile.name}" in response.headers["Content-Disposition"], \
+        f"Expected filename in Content-Disposition, got {response.headers['Content-Disposition']}."
+
+
+def test_download_file_nonexistent(test_client):
+    """
+    Test `/file/download/<id>` route for a non-existent file.
+    """
+    invalid_file_id = 9999
+    response = test_client.get(f"/file/download/{invalid_file_id}")
+
+    assert response.status_code == 404, f"Expected status code 404, got {response.status_code}."
+
+    assert "text/html" in response.content_type, f"Expected content type 'text/html', got {response.content_type}."
+
+    assert b"Page Not Found" in response.data, "Expected 'Page Not Found' in the HTML response."
+
+
+def test_view_file_existing(test_client):
+    """
+    Test `/file/view/<id>` route for an existing file.
+    """
+    with test_client.application.app_context():
+        feature_model = FeatureModel.query.first()
+        if not feature_model:
+            fm_metrics = FMMetrics(solver="SAT Solver", not_solver="Non-SAT Solver")
+            db.session.add(fm_metrics)
+            db.session.commit()
+
+            fm_metadata = FMMetaData(
+                uvl_filename="test_model.uvl",
+                title="Test Feature Model",
+                description="Feature Model for testing",
+                publication_type="REPORT",
+                tags="test,featuremodel",
+                uvl_version="1.0",
+                fm_metrics_id=fm_metrics.id
+            )
+            db.session.add(fm_metadata)
+            db.session.commit()
+
+            feature_model = FeatureModel(
+                data_set_id=1,
+                fm_meta_data_id=fm_metadata.id
+            )
+            db.session.add(feature_model)
+            db.session.commit()
+
+        hubfile = Hubfile.query.first()
+        if not hubfile:
+            hubfile = Hubfile(
+                name="test_file.uvl",
+                checksum="checksum123",
+                size=2048,
+                feature_model_id=feature_model.id
+            )
+            db.session.add(hubfile)
+            db.session.commit()
+
+        file_directory = os.path.join(
+            os.path.dirname(test_client.application.root_path),
+            f"uploads/user_{feature_model.data_set_id}/dataset_{feature_model.data_set_id}/"
+        )
+        os.makedirs(file_directory, exist_ok=True)
+        file_path = os.path.join(file_directory, hubfile.name)
+        with open(file_path, "w") as f:
+            f.write("Test content for viewing")
+
+    response = test_client.get(f"/file/view/{hubfile.id}")
+
+    assert response.status_code == 200, f"Expected status code 200, got {response.status_code}."
+    assert response.is_json, "Expected JSON response."
+    data = response.get_json()
+    assert data["success"], "Expected success to be True in the JSON response."
+    assert "content" in data, "Expected 'content' key in the JSON response."
+    assert data["content"] == "Test content for viewing", "Unexpected file content in response."
+
+
+def test_view_file_nonexistent(test_client):
+    """
+    Test `/file/view/<id>` route for a nonexistent file.
+    """
+    invalid_file_id = 9999
+    response = test_client.get(f"/file/view/{invalid_file_id}")
+
+    assert response.status_code == 404, f"Expected status code 404, got {response.status_code}."
+    assert "text/html" in response.content_type, f"Expected content type 'text/html', got {response.content_type}."
+    assert b"Page Not Found" in response.data, "Expected 'Page Not Found' in the HTML response."
+
+
+def test_get_owner_user_by_hubfile(test_client):
+    """
+    Test `get_owner_user_by_hubfile` method.
+    """
+    from app.modules.hubfile.services import HubfileService
+
+    with test_client.application.app_context():
+        service = HubfileService()
+        hubfile = Hubfile.query.first()
+        assert hubfile is not None, "Hubfile should exist in the database."
+
+        owner_user = service.get_owner_user_by_hubfile(hubfile)
+        assert owner_user is not None, "Owner user should be returned."
+        assert owner_user.email == "test@example.com", \
+            f"Expected email 'test@example.com', got '{owner_user.email}'."
+
+
+def test_get_path_by_hubfile(test_client):
+    """
+    Test `get_path_by_hubfile` method.
+    """
+    from app.modules.hubfile.services import HubfileService
+
+    with test_client.application.app_context():
+        service = HubfileService()
+        hubfile = Hubfile.query.first()
+        assert hubfile is not None, "Hubfile should exist in the database."
+
+        os.environ["WORKING_DIR"] = "/test/working/dir"
+
+        path = service.get_path_by_hubfile(hubfile)
+        expected_path = f"/test/working/dir/uploads/user_1/dataset_1/{hubfile.name}"
+        assert path == expected_path, f"Expected path '{expected_path}', got '{path}'."
+
+
+def test_total_hubfile_views(test_client):
+    """
+    Test `total_hubfile_views` method.
+    """
+    from app.modules.hubfile.services import HubfileService
+
+    with test_client.application.app_context():
+        service = HubfileService()
+
+        total_views = service.total_hubfile_views()
+        assert total_views == 2, f"Expected total views 2, got {total_views}."
+
+
+def test_total_hubfile_downloads(test_client):
+    """
+    Test `total_hubfile_downloads` method.
+    """
+    from app.modules.hubfile.services import HubfileService
+
+    with test_client.application.app_context():
+        service = HubfileService()
+
+        total_downloads = service.total_hubfile_downloads()
+        assert total_downloads == 2, f"Expected total downloads 2, got {total_downloads}."
+
+
+def test_create_download_record(test_client):
+    """
+    Test creating a new download record using `HubfileDownloadRecordService`.
+    """
+    from app.modules.hubfile.services import HubfileDownloadRecordService
+
+    with test_client.application.app_context():
+        service = HubfileDownloadRecordService()
+        hubfile = Hubfile.query.first()
+        assert hubfile is not None, "Hubfile should exist in the database."
+
+        new_record = service.create(
+            user_id=1,
+            file_id=hubfile.id,
+            download_date=datetime.utcnow(),
+            download_cookie="new_download_cookie"
+        )
+        assert new_record is not None, "Download record should be created."
+        assert new_record.download_cookie == "new_download_cookie", \
+            f"Expected download cookie 'new_download_cookie', got '{new_record.download_cookie}'."
