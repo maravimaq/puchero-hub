@@ -490,7 +490,7 @@ def test_view_file_nonexistent(test_client):
     """
     invalid_file_id = 9999
     response = test_client.get(f"/file/view/{invalid_file_id}")
-    
+
     assert response.status_code == 404, f"Expected status code 404, got {response.status_code}."
     
     assert "text/html" in response.content_type, f"Expected content type 'text/html', got {response.content_type}."
@@ -579,3 +579,60 @@ def test_create_download_record(test_client):
         assert new_record is not None, "Download record should be created."
         assert new_record.download_cookie == "new_download_cookie", \
             f"Expected download cookie 'new_download_cookie', got '{new_record.download_cookie}'."
+
+
+def test_hubfile_to_dict_edge_cases(test_client):
+    """
+    Test the `to_dict()` method of Hubfile for edge cases.
+    """
+    with test_client.application.app_context():
+        hubfile = Hubfile.query.first()
+        assert hubfile is not None, "Hubfile should exist in the database."
+
+        hubfile.name = ""
+        hubfile.checksum = ""
+        db.session.commit()
+
+        with test_client.application.test_request_context('/'):
+            hubfile_dict = hubfile.to_dict()
+            assert hubfile_dict["name"] == "", "Expected empty name."
+            assert hubfile_dict["checksum"] == "", "Expected empty checksum."
+            assert hubfile_dict["size_in_bytes"] == hubfile.size, "Expected size to remain the same."
+            assert "url" in hubfile_dict, "Expected 'url' key even for edge cases."
+
+        hubfile.name = "test_file.uvl"
+        hubfile.checksum = "checksum123"
+        db.session.commit()
+
+
+def test_hubfile_get_formatted_size_extended(test_client):
+    """
+    Extended test for `get_formatted_size` method of Hubfile, without mocking.
+    """
+    with test_client.application.app_context():
+        hubfile = Hubfile.query.first()
+        assert hubfile is not None, "Hubfile should exist in the database."
+
+        hubfile.size = 0
+        db.session.commit()
+        formatted_size = hubfile.get_formatted_size()
+        assert formatted_size == "0 bytes", f"Expected '0 bytes', got '{formatted_size}'."
+
+        hubfile.size = -1024
+        db.session.commit()
+        formatted_size = hubfile.get_formatted_size()
+        assert formatted_size == "-1024 bytes", f"Expected '-1024 bytes', got '{formatted_size}' for negative size."
+
+        hubfile.size = 2 * 1024 * 1024 * 1024 - 1
+        db.session.commit()
+        formatted_size = hubfile.get_formatted_size()
+        assert "GB" in formatted_size, f"Expected size in GB, got '{formatted_size}'."
+
+        hubfile.size = 1024 * 1024 + 1
+        db.session.commit()
+        formatted_size = hubfile.get_formatted_size()
+        assert "MB" in formatted_size, f"Expected size close to 1 MB, got '{formatted_size}'."
+
+        # Revert changes
+        hubfile.size = 2048
+        db.session.commit()
