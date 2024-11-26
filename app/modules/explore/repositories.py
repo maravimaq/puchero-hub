@@ -1,8 +1,7 @@
-import re
-from sqlalchemy import any_, or_
-import unidecode
+from sqlalchemy import any_, and_, func, select
+from app import db
 from app.modules.dataset.models import Author, DSMetaData, DataSet, PublicationType
-from app.modules.featuremodel.models import FMMetaData, FeatureModel
+from app.modules.featuremodel.models import FMMetaData
 from core.repositories.BaseRepository import BaseRepository
 
 
@@ -10,33 +9,42 @@ class ExploreRepository(BaseRepository):
     def __init__(self):
         super().__init__(DataSet)
 
-    def filter(self, query="", sorting="newest", publication_type="any", tags=[], **kwargs):
-        # Normalize and remove unwanted characters
-        normalized_query = unidecode.unidecode(query).lower()
-        cleaned_query = re.sub(r'[,.":\'()\[\]^;!¡¿?]', "", normalized_query)
+    def filter(self, title="", author="", date_from=None, date_to=None,
+               publication_doi="", files_count="", format="", size_from=None, 
+               size_to=None, publication_type="any",
+               sorting="newest", tags=None, **kwargs):
+        # Normalize and remove unwanted characters 
 
         filters = []
-        for word in cleaned_query.split():
-            filters.append(DSMetaData.title.ilike(f"%{word}%"))
-            filters.append(DSMetaData.description.ilike(f"%{word}%"))
-            filters.append(Author.name.ilike(f"%{word}%"))
-            filters.append(Author.affiliation.ilike(f"%{word}%"))
-            filters.append(Author.orcid.ilike(f"%{word}%"))
-            filters.append(FMMetaData.uvl_filename.ilike(f"%{word}%"))
-            filters.append(FMMetaData.title.ilike(f"%{word}%"))
-            filters.append(FMMetaData.description.ilike(f"%{word}%"))
-            filters.append(FMMetaData.publication_doi.ilike(f"%{word}%"))
-            filters.append(FMMetaData.tags.ilike(f"%{word}%"))
-            filters.append(DSMetaData.tags.ilike(f"%{word}%"))
+        if title:
+            filters.append(DSMetaData.title.ilike(f"%{title}%"))
+        if author:
+            filters.append(Author.name.ilike(f"%{author}%"))
+        if date_from:
+            filters.append(DataSet.created_at >= date_from)
+        if date_to:
+            filters.append(DataSet.created_at <= date_to)
+        if publication_doi:
+            filters.append(FMMetaData.dataset_doi.ilike(f"%{publication_doi}%"))
+        if files_count:
+            subquery = (
+                select(func.count(FMMetaData.id))
+                .where(FMMetaData.id == DataSet.id)
+                .scalar_subquery()
+            )
+            filters.append(subquery == int(files_count))
+        if size_from:
+            filters.append(DataSet.get_file_total_size() >= float(size_from)*1024)
+        if size_to:
+            filters.append(DataSet.get_file_total_size() <= float(size_to)*1024)
+        if format:
+            filters.append(DSMetaData.tags.ilike(f"%{format}%"))
 
         datasets = (
-            self.model.query
+            db.session.query(DataSet)
             .join(DataSet.ds_meta_data)
             .join(DSMetaData.authors)
-            .join(DataSet.feature_models)
-            .join(FeatureModel.fm_meta_data)
-            .filter(or_(*filters))
-            .filter(DSMetaData.dataset_doi.isnot(None))  # Exclude datasets with empty dataset_doi
+            .filter(and_(*filters))
         )
 
         if publication_type != "any":
@@ -49,7 +57,7 @@ class ExploreRepository(BaseRepository):
             if matching_type is not None:
                 datasets = datasets.filter(DSMetaData.publication_type == matching_type.name)
 
-        if tags:
+        if tags is not None:
             datasets = datasets.filter(DSMetaData.tags.ilike(any_(f"%{tag}%" for tag in tags)))
 
         # Order by created_at
