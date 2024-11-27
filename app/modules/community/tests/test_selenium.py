@@ -14,7 +14,7 @@ class TestUntitled:
         options = Options()
         service = Service("/usr/bin/chromedriver")
         self.driver = webdriver.Chrome(service=service, options=options)
-        self.driver.get("http://localhost:5000/")
+        self.driver.get("http://localhost/")
 
     def teardown_method(self, method):
         # Cerrar el navegador después de cada prueba
@@ -22,7 +22,7 @@ class TestUntitled:
 
     def test_empty_communities_message(self):
         # Navegación en la aplicación web
-        self.driver.get("http://localhost:5000/")
+        self.driver.get("http://localhost/")
         self.driver.set_window_size(927, 1012)
 
         # Interactuar con el login
@@ -38,7 +38,9 @@ class TestUntitled:
         self.driver.find_element(By.LINK_TEXT, "My Communities").click()
 
         no_communities_message = self.driver.find_element(By.CSS_SELECTOR, ".text-muted").text
-        assert "You are not part of any communities." in no_communities_message, "Message for no communities is missing."
+        assert (
+            "You are not part of any communities." in no_communities_message
+        ), "Message for no communities is missing."
 
         # Cerrar sesión
         self.driver.find_element(By.CSS_SELECTOR, ".text-dark").click()
@@ -46,7 +48,7 @@ class TestUntitled:
 
     def test_user_communities_list(self):
         # Navegación en la aplicación web
-        self.driver.get("http://localhost:5000/")
+        self.driver.get("http://localhost/")
         self.driver.set_window_size(927, 1012)
 
         # Interactuar con el login
@@ -71,7 +73,7 @@ class TestUntitled:
 
     def test_create_new_community_button(self):
         # Navegación en la aplicación web
-        self.driver.get("http://localhost:5000/")
+        self.driver.get("http://localhost/")
         self.driver.set_window_size(927, 1012)
 
         # Interactuar con el login
@@ -98,7 +100,7 @@ class TestUntitled:
 
     def test_edit_community_button(self):
         # Navegación en la aplicación web
-        self.driver.get("http://localhost:5000/")
+        self.driver.get("http://localhost/")
         self.driver.set_window_size(927, 1012)
 
         # Interactuar con el login
@@ -129,7 +131,7 @@ class TestUntitled:
 
     def test_delete_community_button(self):
         # Navegación en la aplicación web
-        self.driver.get("http://localhost:5000/")
+        self.driver.get("http://localhost/")
         self.driver.set_window_size(927, 1012)
 
         # Interactuar con el login
@@ -150,7 +152,9 @@ class TestUntitled:
 
         delete_buttons[0].click()
         alert = self.driver.switch_to.alert
-        assert "Are you sure you want to delete this community?" in alert.text, "Delete confirmation alert did not appear."
+        assert (
+            "Are you sure you want to delete this community?" in alert.text
+        ), "Delete confirmation alert did not appear."
         alert.dismiss()  # Cancela la eliminación
 
         # Cerrar sesión
@@ -159,7 +163,7 @@ class TestUntitled:
 
     def test_create_valid_community(self):
         # Navegación en la aplicación web
-        self.driver.get("http://localhost:5000/")
+        self.driver.get("http://localhost/")
         self.driver.set_window_size(927, 1012)
 
         # Interactuar con el login
@@ -190,7 +194,7 @@ class TestUntitled:
 
     def test_create_community_empty_fields(self):
         # Navegación en la aplicación web
-        self.driver.get("http://localhost:5000/")
+        self.driver.get("http://localhost/")
         self.driver.set_window_size(927, 1012)
 
         # Interactuar con el login
@@ -219,7 +223,7 @@ class TestUntitled:
 
     def test_create_duplicated_community(self):
         # Navegación en la aplicación web
-        self.driver.get("http://localhost:5000/")
+        self.driver.get("http://localhost/")
         self.driver.set_window_size(927, 1012)
 
         # Interactuar con el login
@@ -244,7 +248,7 @@ class TestUntitled:
         )
         self.driver.find_element(By.ID, "submit").click()
 
-        assert self.driver.current_url == "http://localhost:5000/community/create"
+        assert self.driver.current_url == "http://localhost/community/create"
 
         # Cerrar sesión
         self.driver.find_element(By.CSS_SELECTOR, ".text-dark").click()
@@ -252,7 +256,7 @@ class TestUntitled:
 
     def test_successful_edit(self):
         # Navegación en la aplicación web
-        self.driver.get("http://localhost:5000/")
+        self.driver.get("http://localhost/")
         self.driver.set_window_size(927, 1012)
 
         # Interactuar con el login
@@ -282,7 +286,7 @@ class TestUntitled:
         self.driver.find_element(By.CSS_SELECTOR, "input[type='submit']").click()
 
         # Verifica que se redirige correctamente
-        assert self.driver.current_url == "http://localhost:5000/my-communities"
+        assert self.driver.current_url == "http://localhost/my-communities"
 
         # Cerrar sesión
         self.driver.find_element(By.CSS_SELECTOR, ".text-dark").click()
@@ -290,7 +294,7 @@ class TestUntitled:
 
     def test_show_community_details(self):
         # Navegación en la aplicación web
-        self.driver.get("http://localhost:5000/")
+        self.driver.get("http://localhost/")
         self.driver.set_window_size(927, 1012)
 
         # Interactuar con el login
@@ -319,7 +323,7 @@ class TestUntitled:
 
     def test_list_not_joined_communities(self):
         # Navegación en la aplicación web
-        self.driver.get("http://localhost:5000/")
+        self.driver.get("http://localhost/")
         self.driver.set_window_size(927, 1012)
 
         # Interactuar con el login
@@ -343,7 +347,9 @@ class TestUntitled:
         community_menu_item.click()
 
         # Verificar que estamos en la página de comunidades no unidas
-        assert "Communities You Haven't Joined" in self.driver.page_source, "No se cargó la página de comunidades no unidas correctamente"
+        assert (
+            "Communities You Haven't Joined" in self.driver.page_source
+        ), "No se cargó la página de comunidades no unidas correctamente"
 
         # Verificar que hay comunidades listadas
         communities = self.driver.find_elements(By.CSS_SELECTOR, ".list-group-item")
@@ -360,7 +366,7 @@ class TestUntitled:
 
     def test_joim_community(self):
         # Navegación en la aplicación web
-        self.driver.get("http://localhost:5000/")
+        self.driver.get("http://localhost/")
         self.driver.set_window_size(927, 1012)
 
         # Interactuar con el login
@@ -384,7 +390,9 @@ class TestUntitled:
         community_menu_item.click()
 
         # Verificar que estamos en la página de comunidades no unidas
-        assert "Communities You Haven't Joined" in self.driver.page_source, "No se cargó la página de comunidades no unidas correctamente"
+        assert (
+            "Communities You Haven't Joined" in self.driver.page_source
+        ), "No se cargó la página de comunidades no unidas correctamente"
 
         # Verificar que hay comunidades listadas
         communities = self.driver.find_elements(By.CSS_SELECTOR, ".list-group-item")
@@ -401,7 +409,9 @@ class TestUntitled:
         # Verificar que la comunidad unida está listada
         joined_communities = self.driver.find_elements(By.CSS_SELECTOR, ".list-group-item h5 a")
         joined_community_names = [community.text for community in joined_communities]
-        assert first_community_name in joined_community_names, f"La comunidad '{first_community_name}' no aparece en 'Mis comunidades'."
+        assert (
+            first_community_name in joined_community_names
+        ), f"La comunidad '{first_community_name}' no aparece en 'Mis comunidades'."
 
         # Cerrar sesión
         self.driver.find_element(By.CSS_SELECTOR, ".text-dark").click()
@@ -409,7 +419,7 @@ class TestUntitled:
 
     def test_empty_not_joined_communities(self):
         # Navegación en la aplicación web
-        self.driver.get("http://localhost:5000/")
+        self.driver.get("http://localhost/")
         self.driver.set_window_size(927, 1012)
 
         # Interactuar con el login
