@@ -5,6 +5,7 @@ from app.modules.auth.models import User
 from app.modules.community.models import Community
 from app.modules.profile.models import UserProfile
 from app.modules.conftest import login, logout
+from unittest.mock import patch
 
 
 @pytest.fixture(scope="module")
@@ -13,17 +14,14 @@ def test_client(test_client):
     Extends the test_client fixture to add additional specific data for module testing.
     """
     with test_client.application.app_context():
-        # Crear usuario principal de prueba
         user_test = User(email='testuser@example.com', password='test1234')
         db.session.add(user_test)
         db.session.commit()
 
-        # Crear perfil para el usuario principal
         profile = UserProfile(user_id=user_test.id, name="Test", surname="User")
         db.session.add(profile)
         db.session.commit()
 
-        # Crear un par de comunidades para el usuario principal
         community1 = Community(name='Community Test 1',
                                description='Description for Community 1', owner_id=user_test.id)
         community2 = Community(name='Community Test 2',
@@ -31,7 +29,6 @@ def test_client(test_client):
         db.session.add(community1)
         db.session.add(community2)
 
-        # Crear un segundo usuario sin comunidades
         user_test2 = User(email='testuser2@example.com', password='test1234')
         db.session.add(user_test2)
         db.session.commit()
@@ -39,12 +36,10 @@ def test_client(test_client):
         profile2 = UserProfile(user_id=user_test2.id, name="Second", surname="User")
         db.session.add(profile2)
 
-        # Crear una comunidad para que el segundo usuario pueda unirse
         joinable_community = Community(name='Joinable Community',
                                        description='Community for testing join', owner_id=user_test.id)
         db.session.add(joinable_community)
 
-        # Confirmar los cambios
         db.session.commit()
 
     yield test_client
@@ -65,16 +60,34 @@ def test_create_community(test_client):
     login_response = login(test_client, "testuser@example.com", "test1234")
     assert login_response.status_code == 200, "Login was unsuccessful."
 
-    # Crear comunidad
     response = test_client.post('/community/create', data={
         'name': 'Test Community',
         'description': 'This is a test community description.'
     }, follow_redirects=True)
     assert response.status_code == 200
 
-    # Verificar que la comunidad fue creada
     community = get_community_by_name('Test Community', test_client)
     assert community is not None, "Community was not found in the database."
+
+    logout(test_client)
+
+
+def test_create_community_error_handling(test_client):
+    """
+    Test error handling when an exception occurs during community creation.
+    """
+    login_response = login(test_client, "testuser@example.com", "test1234")
+    assert login_response.status_code == 200, "Login was unsuccessful."
+
+    with patch("app.db.session.add", side_effect=Exception("Simulated Database Error")):
+        response = test_client.post('/community/create', data={
+            'name': 'Faulty Community',
+            'description': 'This should fail due to a simulated error.'
+        }, follow_redirects=True)
+
+    assert response.status_code == 200, "Error handling did not return a proper response."
+    assert b"Error creating community" in response.data, "Error message not displayed to the user."
+    assert b"Simulated Database Error" in response.data, "Exception details not included in the flash message."
 
     logout(test_client)
 
@@ -171,22 +184,18 @@ def test_view_community_details(test_client):
     """
     Test viewing the details of a community.
     """
-    # Log in as the test user
     login_response = login(test_client, "testuser@example.com", "test1234")
     assert login_response.status_code == 200, "Login was unsuccessful."
 
-    # Create a community via POST request
     response = test_client.post('/community/create', data={
         'name': 'Test Community for Details',
         'description': 'Description for Test Community Details'
     }, follow_redirects=True)
     assert response.status_code == 200, "Community creation failed."
 
-    # Fetch the newly created community from the database
     community = get_community_by_name('Test Community for Details', test_client)
     assert community is not None, "Test Community for Details was not found in the database."
 
-    # Access the community details page
     response = test_client.get(f'/community/{community.id}', follow_redirects=True)
     assert response.status_code == 200, "Could not access the community details page."
     assert b"Test Community for Details" in response.data, "Community name not found on details page."
@@ -194,5 +203,4 @@ def test_view_community_details(test_client):
         b"Description for Test Community Details" in response.data
         ), "Community description not found on details page."
 
-    # Log out
     logout(test_client)
