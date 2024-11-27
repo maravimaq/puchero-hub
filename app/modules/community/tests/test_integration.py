@@ -345,8 +345,12 @@ def test_show_nonexistent_community(test_client):
     assert login_response.status_code == 200, "Login was unsuccessful."
 
     response = test_client.get('/community/99999', follow_redirects=True)
+
     assert response.status_code == 200, "Redirection failed."
-    assert b"Community not found." in response.data, "Error message for nonexistent community not displayed."
+
+    with test_client.session_transaction() as session:
+        flashed_messages = session['_flashes']
+        assert any("Community not found." in msg[1] for msg in flashed_messages), \
+            "Message 'Community not found.' was not flashed."
 
     logout(test_client)
-
