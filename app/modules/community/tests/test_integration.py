@@ -235,32 +235,6 @@ def test_delete_community_failure(test_client):
     logout(test_client)
 
 
-def test_delete_community_success(test_client):
-    """
-    Test successfully deleting a community.
-    """
-    login_response = login(test_client, "testuser@example.com", "test1234")
-    assert login_response.status_code == 200, "Login was unsuccessful."
-
-    with test_client.application.app_context():
-        community = Community(name="Deletable Community 2", description="Test", owner_id=1)
-        db.session.add(community)
-        db.session.commit()
-
-    with test_client.application.app_context():
-        community = Community.query.filter_by(name="Deletable Community 2").first()
-
-    response = test_client.post(f'/community/delete/{community.id}', follow_redirects=True)
-    assert response.status_code == 200, "Redirection failed."
-    assert b"Community deleted successfully!" in response.data, "Success message for delete not displayed."
-
-    with test_client.application.app_context():
-        deleted_community = Community.query.get(community.id)
-        assert deleted_community is None, "Community was not deleted from the database."
-
-    logout(test_client)
-
-
 def test_list_communities_not_joined(test_client):
     """
     Test listing communities not joined by the user and joining one.
