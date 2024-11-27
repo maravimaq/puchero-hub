@@ -113,6 +113,60 @@ def test_edit_community(test_client):
     logout(test_client)
 
 
+def test_edit_nonexistent_or_unauthorized_community(test_client):
+    """
+    Test editing a nonexistent or unauthorized community.
+    """
+    login_response = login(test_client, "testuser@example.com", "test1234")
+    assert login_response.status_code == 200, "Login was unsuccessful."
+
+    response = test_client.get('/community/edit/99999', follow_redirects=True)
+    assert response.status_code == 200, "Redirection failed."
+    assert b"Community not found or you do not have permission to edit it." in response.data, \
+        "Error message for nonexistent community not displayed."
+
+    with test_client.application.app_context():
+        user = User.query.filter_by(email="testuser2@example.com").first()
+        community = Community(name="Other User's Community", description="Test", owner_id=user.id)
+        db.session.add(community)
+        db.session.commit()
+
+    response = test_client.get(f'/community/edit/{community.id}', follow_redirects=True)
+    assert response.status_code == 200, "Redirection failed."
+    assert b"Community not found or you do not have permission to edit it." in response.data, \
+        "Error message for unauthorized access not displayed."
+
+    logout(test_client)
+
+
+def test_edit_community_update_failure(test_client):
+    """
+    Test handling a failure when updating a community.
+    """
+    login_response = login(test_client, "testuser@example.com", "test1234")
+    assert login_response.status_code == 200, "Login was unsuccessful."
+
+    with test_client.application.app_context():
+        community = Community(name="Editable Community", description="Original Description", owner_id=1)
+        db.session.add(community)
+        db.session.commit()
+
+    with test_client.application.app_context():
+        community = Community.query.filter_by(name="Editable Community").first()
+
+    with patch("app.modules.community.services.CommunityService.update", return_value=None):
+        response = test_client.post(f'/community/edit/{community.id}', data={
+            'name': 'Updated Community',
+            'description': 'Updated Description'
+        }, follow_redirects=True)
+
+    assert response.status_code == 200, "Redirection failed."
+    assert b"Error updating community. Please try again." in response.data, \
+        "Error message for update failure not displayed."
+
+    logout(test_client)
+
+
 def test_delete_community(test_client):
     login(test_client, "testuser@example.com", "test1234")
 
@@ -126,6 +180,83 @@ def test_delete_community(test_client):
     with test_client.application.app_context():
         deleted_community = Community.query.get(community.id)
         assert deleted_community is None
+
+    logout(test_client)
+
+
+def test_delete_nonexistent_or_unauthorized_community(test_client):
+    """
+    Test deleting a nonexistent or unauthorized community.
+    """
+    login_response = login(test_client, "testuser@example.com", "test1234")
+    assert login_response.status_code == 200, "Login was unsuccessful."
+
+    response = test_client.post('/community/delete/99999', follow_redirects=True)
+    assert response.status_code == 200, "Redirection failed."
+    assert b"Community not found or you do not have permission to delete it." in response.data, \
+        "Error message for nonexistent community not displayed."
+
+    with test_client.application.app_context():
+        user = User.query.filter_by(email="testuser2@example.com").first()
+        community = Community(name="Other User's Community", description="Test", owner_id=user.id)
+        db.session.add(community)
+        db.session.commit()
+
+    response = test_client.post(f'/community/delete/{community.id}', follow_redirects=True)
+    assert response.status_code == 200, "Redirection failed."
+    assert b"Community not found or you do not have permission to delete it." in response.data, \
+        "Error message for unauthorized access not displayed."
+
+    logout(test_client)
+
+
+def test_delete_community_failure(test_client):
+    """
+    Test handling a failure when deleting a community.
+    """
+    login_response = login(test_client, "testuser@example.com", "test1234")
+    assert login_response.status_code == 200, "Login was unsuccessful."
+
+    with test_client.application.app_context():
+        community = Community(name="Deletable Community", description="Test", owner_id=1)
+        db.session.add(community)
+        db.session.commit()
+
+    with test_client.application.app_context():
+        community = Community.query.filter_by(name="Deletable Community").first()
+
+    with patch("app.modules.community.services.CommunityService.delete", 
+               side_effect=Exception("Simulated Delete Error")):
+        response = test_client.post(f'/community/delete/{community.id}', follow_redirects=True)
+
+    assert response.status_code == 200, "Redirection failed."
+    assert b"Error deleting community" in response.data, "Error message for delete failure not displayed."
+
+    logout(test_client)
+
+
+def test_delete_community_success(test_client):
+    """
+    Test successfully deleting a community.
+    """
+    login_response = login(test_client, "testuser@example.com", "test1234")
+    assert login_response.status_code == 200, "Login was unsuccessful."
+
+    with test_client.application.app_context():
+        community = Community(name="Deletable Community 2", description="Test", owner_id=1)
+        db.session.add(community)
+        db.session.commit()
+
+    with test_client.application.app_context():
+        community = Community.query.filter_by(name="Deletable Community 2").first()
+
+    response = test_client.post(f'/community/delete/{community.id}', follow_redirects=True)
+    assert response.status_code == 200, "Redirection failed."
+    assert b"Community deleted successfully!" in response.data, "Success message for delete not displayed."
+
+    with test_client.application.app_context():
+        deleted_community = Community.query.get(community.id)
+        assert deleted_community is None, "Community was not deleted from the database."
 
     logout(test_client)
 
@@ -204,3 +335,18 @@ def test_view_community_details(test_client):
         ), "Community description not found on details page."
 
     logout(test_client)
+
+
+def test_show_nonexistent_community(test_client):
+    """
+    Test showing a nonexistent community.
+    """
+    login_response = login(test_client, "testuser@example.com", "test1234")
+    assert login_response.status_code == 200, "Login was unsuccessful."
+
+    response = test_client.get('/community/99999', follow_redirects=True)
+    assert response.status_code == 200, "Redirection failed."
+    assert b"Community not found." in response.data, "Error message for nonexistent community not displayed."
+
+    logout(test_client)
+
