@@ -1,4 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
+    const form = document.getElementById('filters');
     const initialLoad = document.getElementById('initial_load').value === 'true';
 
     if (initialLoad) {
@@ -6,16 +7,24 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('initial_load').value = 'false';
     }
 
-   // form.addEventListener('submit', function(event) {
-   //     event.preventDefault();
-  //      send_query();
-  //  });
+    form.addEventListener('submit', function(event) {
+        event.preventDefault();
+       send_query();
+    });
 
   const searchButton = document.getElementById('search_button');
     searchButton.addEventListener('click', function(event) {
         event.preventDefault();
         send_query();
     });
+
+    const inputs = form.querySelectorAll('input, select');
+    inputs.forEach(input => {
+        input.addEventListener('input', () => {
+            send_query();
+        });
+    });
+});
 
 
 function send_query() {
@@ -32,7 +41,7 @@ function send_query() {
         date_to: document.getElementById('date_to').value,
         size_from: document.getElementById('size_from').value,
         size_to: document.getElementById('size_to').value,
-        format: document.getElementById('format').value,
+      //  format: document.getElementById('format').value,
         files_count: document.getElementById('files_count').value,
         publication_type: document.getElementById('publication_type').value,
         sorting: document.getElementById('sorting').value
@@ -148,11 +157,31 @@ function clearFilters() {
     queryInput.value = "";
     // queryInput.dispatchEvent(new Event('input', {bubbles: true}));
 
+    // Reset the author
+    let authorInput = document.getElementById('author');
+    authorInput.value = "";
+  
+    // Reset the date range
+    let dateFromInput = document.getElementById('date_from');
+    dateFromInput.value = "";
+    let dateToInput = document.getElementById('date_to');
+    dateToInput.value = "";
+  
+    // Reset the size range
+    let sizeFromInput = document.getElementById('size_from');
+    sizeFromInput.value = "";
+    let sizeToInput = document.getElementById('size_to');
+    sizeToInput.value = "";
+  
+    // Reset the files count
+    let filesCountInput = document.getElementById('files_count');
+    filesCountInput.value = "";
     // Reset the publication type to its default value
-    let publicationTypeSelect = document.querySelector('publication_type');
-    publicationTypeSelect.value = "any"; // replace "any" with whatever your default value is
-    // publicationTypeSelect.dispatchEvent(new Event('input', {bubbles: true}));
-
+    if (document.getElementById('publication_type')) {
+        let publicationTypeSelect = document.getElementById('publication_type');
+        publicationTypeSelect.value = "any"; // replace "any" with whatever your default value is
+        // publicationTypeSelect.dispatchEvent(new Event('input', {bubbles: true}));
+    }
     // Reset the sorting option
     let sortingOptions = document.querySelectorAll('[name="sorting"]');
     sortingOptions.forEach(option => {
@@ -162,6 +191,7 @@ function clearFilters() {
 
     // Perform a new search with the reset filters
     queryInput.dispatchEvent(new Event('input', {bubbles: true}));
+    send_query();
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -177,4 +207,4 @@ document.addEventListener('DOMContentLoaded', () => {
         const queryInput = document.getElementById('title');
         queryInput.dispatchEvent(new Event('input', {bubbles: true}));
     }
-});})
+});

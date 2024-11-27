@@ -1,7 +1,9 @@
-from sqlalchemy import any_, and_, func, select
+from sqlalchemy import any_, and_, func
+from sqlalchemy.sql import select
 from app import db
 from app.modules.dataset.models import Author, DSMetaData, DataSet, PublicationType
-from app.modules.featuremodel.models import FMMetaData
+from app.modules.featuremodel.models import FMMetaData, FeatureModel
+from app.modules.hubfile.models import Hubfile
 from core.repositories.BaseRepository import BaseRepository
 
 
@@ -10,10 +12,10 @@ class ExploreRepository(BaseRepository):
         super().__init__(DataSet)
 
     def filter(self, title="", author="", date_from=None, date_to=None,
-               publication_doi="", files_count="", format="", size_from=None, 
+               publication_doi="", files_count="", size_from=None,
                size_to=None, publication_type="any",
                sorting="newest", tags=None, **kwargs):
-        # Normalize and remove unwanted characters 
+        # Normalize and remove unwanted characters
 
         filters = []
         if title:
@@ -26,19 +28,43 @@ class ExploreRepository(BaseRepository):
             filters.append(DataSet.created_at <= date_to)
         if publication_doi:
             filters.append(FMMetaData.dataset_doi.ilike(f"%{publication_doi}%"))
-        if files_count:
-            subquery = (
-                select(func.count(FMMetaData.id))
-                .where(FMMetaData.id == DataSet.id)
+            
+        # Subconsulta para files_count
+        if files_count != "" and files_count is not None and files_count != "0":
+            subquery_files_count = (
+                select(func.count(FeatureModel.id))
+                .where(FeatureModel.data_set_id == DataSet.id)
                 .scalar_subquery()
             )
-            filters.append(subquery == int(files_count))
-        if size_from:
-            filters.append(DataSet.get_file_total_size() >= float(size_from)*1024)
-        if size_to:
-            filters.append(DataSet.get_file_total_size() <= float(size_to)*1024)
-        if format:
-            filters.append(DSMetaData.tags.ilike(f"%{format}%"))
+            filters.append(subquery_files_count == int(files_count))
+
+        # Subconsulta para size_from y size_to
+        if size_from != "" and size_from is not None and size_from != "0":
+            subquery_size_from = (
+                select(func.sum(Hubfile.size))
+                .join(FeatureModel, FeatureModel.id == Hubfile.feature_model_id)
+                .where(FeatureModel.data_set_id == DataSet.id)
+                .scalar_subquery()
+            )
+            filters.append(subquery_size_from / 1024 >= float(size_from))
+
+        if size_to != "" and size_to is not None and size_to != "0":
+            subquery_size_to = (
+                select(func.sum(Hubfile.size))
+                .join(FeatureModel, FeatureModel.id == Hubfile.feature_model_id)
+                .where(FeatureModel.data_set_id == DataSet.id)
+                .scalar_subquery()
+            )
+            filters.append(subquery_size_to / 1024 <= float(size_to))
+#        if files_count != "" and files_count is not None:
+#            filters.append(DataSet.get_files_count(inst) == int(files_count))
+#        print(f"Files count: {files_count}")
+#        if size_from != "" and size_from is not None:
+#            filters.append(float(DataSet.get_file_total_size(inst)) >= float(size_from)/1024)
+#        if size_to != "" and size_to is not None:
+#            filters.append(DataSet.get_file_total_size(inst) <= int(size_to)/1024)
+#        if format:
+#            filters.append(DSMetaData.tags.ilike(f"%{format}%"))
 
         datasets = (
             db.session.query(DataSet)
