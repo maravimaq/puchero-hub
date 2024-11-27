@@ -3,151 +3,127 @@
 {% block title %}Explore{% endblock %}
 
 {% block content %}
-
     <h1 class="h2 mb-3"><b>Explore</b></h1>
 
     <div class="row">
+        <div class="col-lg-5 fixed-column" id="filters">
+            <form method="GET" id="filters">
+                {{ form.hidden_tag() }}
+                <input type="hidden" id="initial_load" value="true">
 
-        <h3 class="h3 mb-3">
-                <span id="results_number"></span>
-            </h3>
+                <div class="mb-3">
+                    {{ form.title.label(class="form-label") }}
+                    {{ form.title(class="form-control", id="title") }}
+                </div>
+                <div class="mb-3">
+                    {{ form.author.label(class="form-label") }}
+                    {{ form.author(class="form-control", id="author") }}
+                </div>
+                <div class="mb-3">
+                    {{ form.date_from.label(class="form-label") }}
+                    {{ form.date_from(class="form-control", id="date_from") }}
+                </div>
+                <div class="mb-3">
+                    {{ form.date_to.label(class="form-label") }}
+                    {{ form.date_to(class="form-control", id="date_to") }}
+                </div>
+                <div class="mb-3">
+                    {{ form.size_from.label(class="form-label") }}
+                    {{ form.size_from(class="form-control", id="size_from") }}
+                </div>
+                <div class="mb-3">
+                    {{ form.size_to.label(class="form-label") }}
+                    {{ form.size_to(class="form-control", id="size_to") }}
+                </div>
+                <div class="mb-3">
+                    {{ form.files_count.label(class="form-label") }}
+                    {{ form.files_count(class="form-control", id="files_count") }}
+                </div>
+                <div class="mb-3">
+                    {{ form.format.label(class="form-label") }}
+                    {{ form.format(class="form-control", id="format") }}
+                </div>
+                <div class="mb-3">
+                    {{ form.publication_type.label(class="form-label") }}
+                    {{ form.publication_type(class="form-control", id="publication_type") }}
+                </div>
+                <div class="mb-3">
+                    {{ form.sorting.label(class="form-label") }}
+                    {{ form.sorting(class="form-control", id="sorting") }}
+                </div>
+                <button id="search_button" type="submit" class="btn btn-primary">{{ form.submit.label }}</button>
+            </form>
+            <button id="clear-filters" class="btn btn-outline-primary">
+                <i data-feather="x-circle" style="vertical-align: middle; margin-top: -2px"></i>
+                Clear filters
+            </button>
+        </div>
 
         <div class="col-lg-7 scrollable-column">
-
-
             <div class="row">
-
-                <div id="results"></div>
-
-                <div class="col text-center" id="results_not_found">
+                <div id="results_number" class="col-12 mb-3"></div>
+                <div id="results">
+                    {% for dataset in datasets %}
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <h3><a href="{{ dataset.url }}">{{ dataset.title }}</a></h3>
+                                        <div>
+                                            <span class="badge bg-primary" style="cursor: pointer;" onclick="set_publication_type_as_query('{{ dataset.publication_type }}')">{{ dataset.publication_type }}</span>
+                                        </div>
+                                    </div>
+                                    <p class="text-secondary">{{ dataset.created_at }}</p>
+                                    <div class="row mb-2">
+                                        <div class="col-md-4 col-12">
+                                            <span class="text-secondary">Description</span>
+                                        </div>
+                                        <div class="col-md-8 col-12">
+                                            <p class="card-text">{{ dataset.description }}</p>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-2">
+                                        <div class="col-md-4 col-12">
+                                            <span class="text-secondary">Authors</span>
+                                        </div>
+                                        <div class="col-md-8 col-12">
+                                            {% for author in dataset.authors %}
+                                                <p class="p-0 m-0">{{ author.name }}{% if author.affiliation %} ({{ author.affiliation }}){% endif %}{% if author.orcid %} ({{ author.orcid }}){% endif %}</p>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                    <div class="row mb-2">
+                                        <div class="col-md-4 col-12">
+                                            <span class="text-secondary">Tags</span>
+                                        </div>
+                                        <div class="col-md-8 col-12">
+                                            {% for tag in dataset.tags %}
+                                                <span class="badge bg-primary me-1" style="cursor: pointer;" onclick="set_tag_as_query('{{ tag }}')">{{ tag }}</span>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-4 col-12"></div>
+                                        <div class="col-md-8 col-12">
+                                            <a href="{{ dataset.url }}" class="btn btn-outline-primary btn-sm" id="search" style="border-radius: 5px;">View dataset</a>
+                                            <a href="/dataset/download/{{ dataset.id }}" class="btn btn-outline-primary btn-sm" id="search" style="border-radius: 5px;">Download ({{ dataset.total_size_in_human_format }})</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+                <div class="col text-center" id="results_not_found" style="display: none;">
                     <img src="{{ url_for('static', filename='img/items/not_found.svg') }}"
                          style="width: 50%; max-width: 100px; height: auto; margin-top: 30px"/>
                     <p style="margin-top: 20px">
                         We have not found any datasets that meet your search criteria. <br>How about trying some others?
                     </p>
                 </div>
-
-                <div id="results_not_found" style="text-align: center;">
-
-                </div>
-
-
             </div>
         </div>
-
-        <div class="col-lg-5 fixed-column" id="filters">
-
-            {{ form.hidden_tag() }}
-
-            <div class="row">
-
-                <div class="col-12">
-
-                    <div class="row">
-
-                        <div class="col-12">
-                            <div class="mb-3">
-                                <label class="form-label" for="query">
-                                    Search for datasets by title, description, authors, tags, UVL files...
-                                </label>
-                                <input class="form-control" id="query" name="query" required="" type="text"
-                                       value="" autofocus>
-                            </div>
-                        </div>
-
-                        <div class="col-lg-6">
-                            <div class="mb-3">
-                                <label class="form-label" for="publication_type">Filter by publication
-                                    type</label>
-                                <select class="form-control" id="publication_type" name="publication_type"
-                                        required="">
-                                    <option value="any">Any</option>
-                                    <option value="none">None</option>
-                                    <option value="annotationcollection">Annotation Collection</option>
-                                    <option value="book">Book</option>
-                                    <option value="section">Book Section</option>
-                                    <option value="conferencepaper">Conference Paper</option>
-                                    <option value="datamanagementplan">Data Management Plan</option>
-                                    <option value="article">Journal Article</option>
-                                    <option value="patent">Patent</option>
-                                    <option value="preprint">Preprint</option>
-                                    <option value="deliverable">Project Deliverable</option>
-                                    <option value="milestone">Project Milestone</option>
-                                    <option value="proposal">Proposal</option>
-                                    <option value="report">Report</option>
-                                    <option value="softwaredocumentation">Software Documentation</option>
-                                    <option value="taxonomictreatment">Taxonomic Treatment</option>
-                                    <option value="technicalnote">Technical Note</option>
-                                    <option value="thesis">Thesis</option>
-                                    <option value="workingpaper">Working Paper</option>
-                                    <option value="other">Other</option>
-                                </select>
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                    <div class="row">
-
-                        <div class="col-6">
-
-                            <div>
-                                Sort results by creation date
-                                <label class="form-check">
-                                    <input class="form-check-input" type="radio" value="newest" name="sorting"
-                                           checked="">
-                                    <span class="form-check-label">
-                                      Newest first
-                                    </span>
-                                </label>
-                                <label class="form-check">
-                                    <input class="form-check-input" type="radio" value="oldest" name="sorting">
-                                    <span class="form-check-label">
-                                      Oldest first
-                                    </span>
-                                </label>
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                    <div class="row">
-
-                        <div class="col-12">
-
-                            <div class="mt-3">
-
-                                <div id="authors">
-
-                                </div>
-
-                                <button id="clear-filters" class="btn btn-outline-primary">
-                                    <i data-feather="x-circle" style="vertical-align: middle; margin-top: -2px"></i>
-                                    Clear filters
-                                </button>
-
-
-                            </div>
-
-                        </div>
-                    </div>
-
-                </div>
-
-            </div>
-
-            <div class="row">
-
-            </div>
-
-        </div>
-
-
     </div>
-
-
 {% endblock %}
 
 {% block scripts %}
