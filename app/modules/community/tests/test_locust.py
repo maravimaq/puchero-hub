@@ -1,5 +1,5 @@
+from secrets import randbelow
 from locust import HttpUser, task, between
-import random
 
 
 class CommunityUser(HttpUser):
@@ -23,7 +23,7 @@ class CommunityUser(HttpUser):
     @task(2)
     def create_community(self):
         new_community = {
-            "name": f"Community Locust {random.randint(1, 100000)}",
+            "name": f"Community Locust {randbelow(100000)}",
             "description": "Test community created during load testing."
         }
         with self.client.post("/community/create", data=new_community, catch_response=True) as response:
@@ -35,7 +35,7 @@ class CommunityUser(HttpUser):
 
     @task(2)
     def edit_community(self):
-        community_id = random.randint(1, 100000)
+        community_id = randbelow(100000)
         updated_data = {
             "name": f"Updated Community {community_id}",
             "description": "Updated description for load testing."
@@ -49,7 +49,7 @@ class CommunityUser(HttpUser):
 
     @task(2)
     def delete_community(self):
-        community_id = random.randint(1, 100000)
+        community_id = randbelow(100000) 
         with self.client.post(f"/community/delete/{community_id}", catch_response=True) as response:
             if response.status_code == 200:
                 print(f"Comunidad {community_id} eliminada exitosamente.")
@@ -59,7 +59,7 @@ class CommunityUser(HttpUser):
 
     @task(2)
     def view_specific_community(self):
-        community_id = random.randint(1, 100000)
+        community_id = randbelow(100000) 
         with self.client.get(f"/community/{community_id}", catch_response=True) as response:
             if response.status_code == 200:
                 print(f"Detalles de la comunidad {community_id} cargados exitosamente.")
@@ -78,7 +78,7 @@ class CommunityUser(HttpUser):
 
     @task(2)
     def join_community(self):
-        community_id = random.randint(1, 100000)
+        community_id = randbelow(100000) 
         with self.client.post(f"/community/join/{community_id}", catch_response=True) as response:
             if response.status_code == 200:
                 print(f"Unido a la comunidad {community_id} exitosamente.")
