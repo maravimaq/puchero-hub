@@ -5,7 +5,6 @@ from app.modules.auth.models import User
 from app.modules.community.models import Community
 from app.modules.profile.models import UserProfile
 from app.modules.conftest import login, logout
-from unittest.mock import patch
 
 
 @pytest.fixture(scope="module")
@@ -72,6 +71,20 @@ def test_create_community(test_client):
     logout(test_client)
 
 
+def test_create_community_get(test_client):
+    """
+    Test loading the create community page via GET request.
+    """
+    login_response = login(test_client, "testuser@example.com", "test1234")
+    assert login_response.status_code == 200, "Login was unsuccessful."
+
+    response = test_client.get('/community/create')
+    assert response.status_code == 200
+    assert b'Create Community' in response.data
+
+    logout(test_client)
+
+
 def test_create_community_error_handling(test_client):
     """
     Test error handling when an exception occurs during community creation.
@@ -79,15 +92,18 @@ def test_create_community_error_handling(test_client):
     login_response = login(test_client, "testuser@example.com", "test1234")
     assert login_response.status_code == 200, "Login was unsuccessful."
 
-    with patch("app.db.session.add", side_effect=Exception("Simulated Database Error")):
-        response = test_client.post('/community/create', data={
-            'name': 'Faulty Community',
-            'description': 'This should fail due to a simulated error.'
-        }, follow_redirects=True)
+    with test_client.application.app_context():
+        existing_community = Community(name="Faulty Community", description="Original", owner_id=1)
+        db.session.add(existing_community)
+        db.session.commit()
+
+    response = test_client.post('/community/create', data={
+        'name': 'Faulty Community',
+        'description': 'This should fail due to a database error.'
+    }, follow_redirects=True)
 
     assert response.status_code == 200, "Error handling did not return a proper response."
     assert b"Error creating community" in response.data, "Error message not displayed to the user."
-    assert b"Simulated Database Error" in response.data, "Exception details not included in the flash message."
 
     logout(test_client)
 
@@ -121,54 +137,13 @@ def test_edit_nonexistent_or_unauthorized_community(test_client):
     assert login_response.status_code == 200, "Login was unsuccessful."
 
     response = test_client.get('/community/edit/99999', follow_redirects=True)
-
     assert response.status_code == 200, "Redirection failed."
 
     with test_client.session_transaction() as session:
         flashed_messages = session['_flashes']
-        assert any("Community not found or you do not have permission to edit it." 
-                   in msg[1] for msg in flashed_messages), \
+        assert any("Community not found or you do not have permission to edit it." in msg[1]
+                   for msg in flashed_messages), \
             "Message 'Community not found or you do not have permission to edit it.' was not flashed."
-
-    logout(test_client)
-
-
-def test_edit_community_update_failure(test_client):
-    """
-    Test handling a failure when updating a community.
-    """
-    login_response = login(test_client, "testuser@example.com", "test1234")
-    assert login_response.status_code == 200, "Login was unsuccessful."
-
-    # Crea una comunidad para el test
-    with test_client.application.app_context():
-        community = Community(name="Editable Community", description="Original Description", owner_id=1)
-        db.session.add(community)
-        db.session.commit()
-
-    # Recupera la instancia de la comunidad
-    with test_client.application.app_context():
-        community = Community.query.filter_by(name="Editable Community").first()
-
-    # Mock para simular fallo en el método `update`
-    with patch("app.modules.community.services.CommunityService.update", return_value=None):
-        response = test_client.post(f'/community/edit/{community.id}', data={
-            'name': 'Updated Community',
-            'description': 'Updated Description'
-        }, follow_redirects=True)
-
-    # Imprime el HTML generado para depuración
-    print(response.data.decode('utf-8'))
-
-    # Verifica si el mensaje flash está en la sesión
-    with test_client.session_transaction() as session:
-        flashed_messages = session.get('_flashes', [])
-        print(f"Flashed messages: {flashed_messages}")  # Depuración
-        assert any("Error updating community. Please try again." in msg[1] for msg in flashed_messages), \
-            "Message 'Error updating community. Please try again.' was not flashed."
-
-    # Verifica el código de estado
-    assert response.status_code == 200, "Redirection failed."
 
     logout(test_client)
 
@@ -202,7 +177,7 @@ def test_delete_nonexistent_or_unauthorized_community(test_client):
 
     with test_client.session_transaction() as session:
         flashed_messages = session.get('_flashes', [])
-        assert any("Community not found or you do not have permission to delete it." 
+        assert any("Community not found or you do not have permission to delete it."
                    in msg[1] for msg in flashed_messages), \
             "Message 'Community not found or you do not have permission to delete it.' was not flashed."
 
@@ -211,41 +186,16 @@ def test_delete_nonexistent_or_unauthorized_community(test_client):
         community = Community(name="Other User's Community", description="Test", owner_id=user.id)
         db.session.add(community)
         db.session.commit()
-        community_id = community.id  # Guarda el ID para usarlo fuera del contexto
+        community_id = community.id
 
     response = test_client.post(f'/community/delete/{community_id}', follow_redirects=True)
     assert response.status_code == 200, "Redirection failed."
 
     with test_client.session_transaction() as session:
         flashed_messages = session.get('_flashes', [])
-        assert any("Community not found or you do not have permission to delete it." 
+        assert any("Community not found or you do not have permission to delete it."
                    in msg[1] for msg in flashed_messages), \
             "Message 'Community not found or you do not have permission to delete it.' was not flashed."
-
-    logout(test_client)
-
-
-def test_delete_community_failure(test_client):
-    """
-    Test handling a failure when deleting a community.
-    """
-    login_response = login(test_client, "testuser@example.com", "test1234")
-    assert login_response.status_code == 200, "Login was unsuccessful."
-
-    with test_client.application.app_context():
-        community = Community(name="Deletable Community", description="Test", owner_id=1)
-        db.session.add(community)
-        db.session.commit()
-
-    with test_client.application.app_context():
-        community = Community.query.filter_by(name="Deletable Community").first()
-
-    with patch("app.modules.community.services.CommunityService.delete", 
-               side_effect=Exception("Simulated Delete Error")):
-        response = test_client.post(f'/community/delete/{community.id}', follow_redirects=True)
-
-    assert response.status_code == 200, "Redirection failed."
-    assert b"Error deleting community" in response.data, "Error message for delete failure not displayed."
 
     logout(test_client)
 

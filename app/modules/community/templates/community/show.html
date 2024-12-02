@@ -4,20 +4,8 @@
 
 {% block content %}
 <div class="container mt-5">
-    {% with messages = get_flashed_messages(with_categories=true) %}
-      {% if messages %}
-        <div class="alert-container mb-3">
-          {% for category, message in messages %}
-            <div class="alert alert-{{ category }}" role="alert">
-              {{ message }}
-            </div>
-          {% endfor %}
-        </div>
-      {% endif %}
-    {% endwith %}
     <h2 class="mb-4 text-center">{{ community.name }}</h2>
     <p class="text-muted">{{ community.description }}</p>
-
     <h4 class="mt-4">Members</h4>
     {% if community.members %}
         <ul class="list-group mb-4">
