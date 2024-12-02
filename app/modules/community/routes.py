@@ -59,7 +59,6 @@ def edit_community(community_id):
     form = CommunityForm(obj=community)
 
     if form.validate_on_submit():
-        # Usar el método update de BaseService para actualizar la comunidad
         updated_community = community_service.update(
             id=community_id,
             name=form.name.data,
@@ -81,7 +80,6 @@ def edit_community(community_id):
 def delete_community(community_id):
     community = community_service.get_by_id(community_id)
 
-    # Verificar si la comunidad existe y si el usuario es el propietario
     if not community or community.owner_id != current_user.id:
         flash('Community not found or you do not have permission to delete it.', 'danger')
         return redirect(url_for('community.my_communities'))
@@ -125,4 +123,3 @@ def join_community(community_id):
     else:
         flash('Failed to join the community. Please try again.', 'danger')
     return redirect(url_for('community.list_communities_not_joined'))
-

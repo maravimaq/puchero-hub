@@ -5,6 +5,17 @@
 {% block content %}
 <div class="container mt-5">
     <h2 class="mb-4 text-center">Create a New Community</h2>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div class="alert-container mb-3">
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }}" role="alert">
+            {{ message }}
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+    {% endwith %}
     <form method="POST" action="{{ url_for('community.create_community') }}">
         {{ form.hidden_tag() }}
         <div class="form-group mb-3">
