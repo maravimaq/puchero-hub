@@ -59,7 +59,6 @@ def edit_community(community_id):
     form = CommunityForm(obj=community)
 
     if form.validate_on_submit():
-        # Usar el método update de BaseService para actualizar la comunidad
         updated_community = community_service.update(
             id=community_id,
             name=form.name.data,

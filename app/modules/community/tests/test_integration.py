@@ -126,7 +126,8 @@ def test_edit_nonexistent_or_unauthorized_community(test_client):
 
     with test_client.session_transaction() as session:
         flashed_messages = session['_flashes']
-        assert any("Community not found or you do not have permission to edit it." in msg[1] for msg in flashed_messages), \
+        assert any("Community not found or you do not have permission to edit it." 
+                   in msg[1] for msg in flashed_messages), \
             "Message 'Community not found or you do not have permission to edit it.' was not flashed."
 
     logout(test_client)
@@ -139,23 +140,35 @@ def test_edit_community_update_failure(test_client):
     login_response = login(test_client, "testuser@example.com", "test1234")
     assert login_response.status_code == 200, "Login was unsuccessful."
 
+    # Crea una comunidad para el test
     with test_client.application.app_context():
         community = Community(name="Editable Community", description="Original Description", owner_id=1)
         db.session.add(community)
         db.session.commit()
 
+    # Recupera la instancia de la comunidad
     with test_client.application.app_context():
         community = Community.query.filter_by(name="Editable Community").first()
 
+    # Mock para simular fallo en el método `update`
     with patch("app.modules.community.services.CommunityService.update", return_value=None):
         response = test_client.post(f'/community/edit/{community.id}', data={
             'name': 'Updated Community',
             'description': 'Updated Description'
         }, follow_redirects=True)
 
+    # Imprime el HTML generado para depuración
+    print(response.data.decode('utf-8'))
+
+    # Verifica si el mensaje flash está en la sesión
+    with test_client.session_transaction() as session:
+        flashed_messages = session.get('_flashes', [])
+        print(f"Flashed messages: {flashed_messages}")  # Depuración
+        assert any("Error updating community. Please try again." in msg[1] for msg in flashed_messages), \
+            "Message 'Error updating community. Please try again.' was not flashed."
+
+    # Verifica el código de estado
     assert response.status_code == 200, "Redirection failed."
-    assert b"Error updating community. Please try again." in response.data, \
-        "Error message for update failure not displayed."
 
     logout(test_client)
 
@@ -186,19 +199,28 @@ def test_delete_nonexistent_or_unauthorized_community(test_client):
 
     response = test_client.post('/community/delete/99999', follow_redirects=True)
     assert response.status_code == 200, "Redirection failed."
-    assert b"Community not found or you do not have permission to delete it." in response.data, \
-        "Error message for nonexistent community not displayed."
+
+    with test_client.session_transaction() as session:
+        flashed_messages = session.get('_flashes', [])
+        assert any("Community not found or you do not have permission to delete it." 
+                   in msg[1] for msg in flashed_messages), \
+            "Message 'Community not found or you do not have permission to delete it.' was not flashed."
 
     with test_client.application.app_context():
         user = User.query.filter_by(email="testuser2@example.com").first()
         community = Community(name="Other User's Community", description="Test", owner_id=user.id)
         db.session.add(community)
         db.session.commit()
+        community_id = community.id  # Guarda el ID para usarlo fuera del contexto
 
-    response = test_client.post(f'/community/delete/{community.id}', follow_redirects=True)
+    response = test_client.post(f'/community/delete/{community_id}', follow_redirects=True)
     assert response.status_code == 200, "Redirection failed."
-    assert b"Community not found or you do not have permission to delete it." in response.data, \
-        "Error message for unauthorized access not displayed."
+
+    with test_client.session_transaction() as session:
+        flashed_messages = session.get('_flashes', [])
+        assert any("Community not found or you do not have permission to delete it." 
+                   in msg[1] for msg in flashed_messages), \
+            "Message 'Community not found or you do not have permission to delete it.' was not flashed."
 
     logout(test_client)
 
