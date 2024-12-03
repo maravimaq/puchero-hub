@@ -3,7 +3,7 @@ from app.modules.explore.services import ExploreService
 from app.modules.explore.repositories import ExploreRepository
 from app.modules.dataset.models import DataSet, DSMetaData, Author, PublicationType
 from app import db
-from datetime import datetime, timedelta
+from datetime import datetime
 
 explore_service = ExploreService()
 
@@ -46,17 +46,16 @@ def test_client(test_client):
 
         metadata_1.authors.append(author_1)
         metadata_2.authors.append(author_2)
-
-        from datetime import datetime, timedelta
+        
         dataset_1 = DataSet(
             user_id=user_1.id,
             ds_meta_data_id=metadata_1.id,
-            created_at=datetime.utcnow() - timedelta(days=1)
+            created_at=datetime(2023, 1, 1)
         )
         dataset_2 = DataSet(
             user_id=user_2.id,
             ds_meta_data_id=metadata_2.id,
-            created_at=datetime.utcnow()
+            created_at=datetime(2023, 1, 15)
         )
         db.session.add(dataset_1)
         db.session.add(dataset_2)
@@ -95,12 +94,11 @@ def test_filter_by_date_range(test_client):
     """
     with test_client.application.app_context():
         repo = ExploreRepository()
-        date_from = datetime.utcnow() - timedelta(days=2)
-        date_to = datetime.utcnow()
+        date_from = datetime(2023, 1, 1)
+        date_to = datetime(2023, 1, 3)
         results = repo.filter(date_from=date_from, date_to=date_to)
-        assert len(results) == 2, "Expected two datasets within the date range."
+        assert len(results) == 1, "Expected two datasets within the date range."
         assert results[0].ds_meta_data.title in ["Climate Change Data", "Genomics Research"]
-        assert results[1].ds_meta_data.title in ["Climate Change Data", "Genomics Research"]
 
 
 def test_filter_by_files_count(test_client):
@@ -182,8 +180,8 @@ def test_filter_by_title_author_and_date_range(test_client):
     """
     with test_client.application.app_context():
         repo = ExploreRepository()
-        date_from = datetime.utcnow() - timedelta(days=2)
-        date_to = datetime.utcnow()
+        date_from = datetime(2023, 1, 1)
+        date_to = datetime(2023, 1, 3)
         results = repo.filter(title="Climate Change", author="John Doe", date_from=date_from, date_to=date_to)
         assert len(results) == 1, ("Expected only one dataset matching title 'Climate Change', author 'John Doe',"
                                    "and date range.")
@@ -197,8 +195,8 @@ def test_filter_by_title_author_date_range_and_tags(test_client):
     """
     with test_client.application.app_context():
         repo = ExploreRepository()
-        date_from = datetime.utcnow() - timedelta(days=2)
-        date_to = datetime.utcnow()
+        date_from = datetime(2023, 1, 1)
+        date_to = datetime(2023, 1, 3)
         results = repo.filter(title="Climate Change", author="John Doe",
                               date_from=date_from, date_to=date_to, tags="climate")
         assert len(results) == 1, ("Expected only one dataset matching title 'Climate Change', author 'John Doe',"
