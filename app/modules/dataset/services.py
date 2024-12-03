@@ -298,6 +298,9 @@ class DataSetService(BaseService):
         archive_name = "datasets_collection.zip"
         full_archive_path = os.path.join(temp_directory, archive_name)
 
+        if not os.path.exists("uploads"):
+            return None
+
         with ZipFile(full_archive_path, "w") as zip_file:
             user_folders = [folder for folder in os.listdir("uploads") if folder.startswith("user_")]
 
