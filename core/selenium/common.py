@@ -1,15 +1,24 @@
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 from webdriver_manager.chrome import ChromeDriverManager
 
 
-def initialize_driver():
-    # Initializes the browser options
-    options = webdriver.ChromeOptions()
+from selenium.webdriver.chrome.options import Options
 
-    # Initialise the browser using WebDriver Manager
-    service = Service(ChromeDriverManager().install())
-    driver = webdriver.Chrome(service=service, options=options)
+def initialize_driver():
+    options = Options()
+    options.add_argument("--no-sandbox")
+    options.add_argument("--disable-dev-shm-usage")
+    options.add_argument("--headless")  # Run in headless mode for Docker
+    options.add_argument("--disable-gpu")
+    options.add_argument("--window-size=1920,1080")
+    options.add_argument("--remote-debugging-port=9222")  # Enable DevTools debugging
+
+    driver = webdriver.Remote(
+        command_executor="http://selenium_container:4444/wd/hub",
+        options=options
+    )
     return driver
 
 
