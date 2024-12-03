@@ -1,23 +1,21 @@
 # Documentación de Fallos Arreglados en los Tests
 
-
 ## **test_pack_datasets_no_uploads_folder**
 
----
 
-#### **Alcance del Problema**
+### **Alcance del Problema**
 
 El test fallaba porque la función `pack_datasets` no manejaba correctamente el caso en el que la carpeta `uploads` no existía. En lugar de devolver `None`, creaba archivos temporales innecesarios.
 
-#### **Verificación del Problema**
+### **Verificación del Problema**
 
 - Se verificó que el fallo estaba aislado a la ausencia de la carpeta `uploads`.
 
-#### **Corrección Aplicada**
+### **Corrección Aplicada**
 
 - Se actualizó la lógica en `pack_datasets` para que devuelva `None` inmediatamente si la carpeta `uploads` no existe.
 
-#### **Estado Tras la Corrección**
+### **Estado Tras la Corrección**
 
 - El test ahora pasa correctamente y confirma que la función `pack_datasets` se comporta como se espera cuando falta la carpeta `uploads`.
 
