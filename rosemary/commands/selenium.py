@@ -1,67 +1,31 @@
+import click
 import os
 import subprocess
-import click
 
 
-@click.command('selenium', help="Executes Selenium tests based on the environment.")
-@click.argument('module', required=False)
-def selenium(module):
-    # Absolute paths
-    working_dir = os.getenv('WORKING_DIR', '')
-    modules_dir = os.path.join(working_dir, 'app/modules')
+@click.command('selenium', help="Run Selenium tests for the project.")
+@click.option('--headless', is_flag=True, help="Run tests in headless mode.")
+def selenium(headless):
+    base_path = os.path.join(os.getenv('WORKING_DIR', ''), 'app/modules')
 
-    def validate_module(module):
-        """Check if the module exists."""
-        if module:
-            module_path = os.path.join(modules_dir, module)
-            if not os.path.exists(module_path):
-                raise click.UsageError(f"Module '{module}' does not exist.")
-            selenium_test_path = os.path.join(module_path, 'tests', 'test_selenium.py')
-            if not os.path.exists(selenium_test_path):
-                raise click.UsageError(
-                    f"Selenium test for module '{module}' does not exist at path "
-                    f"'{selenium_test_path}'."
-                )
+    test_paths = []
+    for root, dirs, files in os.walk(base_path):
+        for file in files:
+            if file.startswith('test_selenium') and file.endswith('.py'):
+                test_paths.append(os.path.join(root, file))
 
-    def run_selenium_tests_in_local(module):
-        """Run the Selenium tests."""
-        if module:
-            selenium_test_path = os.path.join(modules_dir, module, 'tests', 'test_selenium.py')
-            test_command = ['python', selenium_test_path]
-        else:
-            selenium_test_paths = []
-            for module in os.listdir(modules_dir):
-                tests_dir = os.path.join(modules_dir, module, 'tests')
-                selenium_test_path = os.path.join(tests_dir, 'test_selenium.py')
-                if os.path.exists(selenium_test_path):
-                    selenium_test_paths.append(selenium_test_path)
-            test_command = ['python'] + selenium_test_paths
+    if not test_paths:
+        click.echo(click.style("No Selenium tests found.", fg='yellow'))
+        return
 
-        click.echo(f"Running Selenium tests with command: {' '.join(test_command)}")
-        subprocess.run(test_command, check=True)
+    pytest_cmd = ['pytest', '-v'] + test_paths
 
-    # Validate module if provided
-    if module:
-        validate_module(module)
+    if headless:
+        pytest_cmd.extend(['--chrome-headless'])
 
-    if working_dir == '/app/':
-
-        click.echo(click.style(
-            "Currently it is not possible to run this "
-            "command from a Docker environment, do you want to implement it yourself? ^^",
-            fg='red'
-        ))
-
-    elif working_dir == '':
-        run_selenium_tests_in_local(module)
-
-    elif working_dir == '/vagrant/':
-
-        click.echo(click.style(
-            "Currently it is not possible to run this "
-            "command from a Vagrant environment, do you want to implement it yourself? ^^",
-            fg='red'
-        ))
-
-    else:
-        click.echo(click.style(f"Unrecognized WORKING_DIR: {working_dir}", fg='red'))
+    click.echo("Running Selenium tests...")
+    try:
+        subprocess.run(pytest_cmd, check=True)
+    except subprocess.CalledProcessError as e:
+        click.echo(click.style(f"Selenium tests failed: {e}", fg='red'))
+        raise SystemExit(1)
