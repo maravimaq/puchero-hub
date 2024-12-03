@@ -1,3 +1,5 @@
+import tempfile
+from unittest.mock import patch
 import pytest
 from app import db
 from app.modules.auth.models import User
@@ -5,6 +7,7 @@ from app.modules.dataset.models import DataSet, DSMetaData, PublicationType
 from app.modules.dataset.services import DataSetService
 
 dataset_service = DataSetService()
+
 
 @pytest.fixture(scope='module')
 def test_client(test_client):
@@ -114,3 +117,10 @@ def test_dataset_creation(test_client):
 
         assert new_dataset.id is not None, "Failed to create a new dataset."
         assert new_dataset.ds_meta_data.title == "New Dataset", "Dataset title mismatch."
+
+
+def test_pack_datasets_no_uploads_folder():
+    service = DataSetService()
+    with patch("os.path.exists", return_value=False):
+        result = service.pack_datasets()
+        assert result is None
