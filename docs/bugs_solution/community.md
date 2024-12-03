@@ -103,7 +103,7 @@ El test ahora pasa correctamente y valida que el mensaje flash aparece en caso d
    Se actualizaron los tests para incluir validaciones de mensajes flash desde la sesión (`_flashes`).
 
 6. **Hacer commit y push de los cambios**  
-   Se realizó un commit con el mensaje: `"Fix: Ensure flash messages are displayed in community routes."`
+   Se realizó un commit con los cambios realizados.
 
 7. **Crear un Pull Request**  
    Se abrió un PR desde la rama `fix/community_flash_messages` hacia `main`, incluyendo el número del issue y un resumen de la solución.
