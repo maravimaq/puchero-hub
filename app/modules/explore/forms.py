@@ -24,3 +24,4 @@ class ExploreForm(FlaskForm):
         validators=[Optional()]
     )
     submit = SubmitField('Search')
+    

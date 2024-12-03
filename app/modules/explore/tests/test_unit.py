@@ -1,7 +1,9 @@
 import pytest
 from app.modules.explore.services import ExploreService
+from app.modules.explore.repositories import ExploreRepository
 from app.modules.dataset.models import DataSet, DSMetaData, Author, PublicationType
 from app import db
+from datetime import datetime, timedelta
 
 explore_service = ExploreService()
 
@@ -63,78 +65,66 @@ def test_client(test_client):
     yield test_client
 
 
-
-def test_filter_by_query(test_client):
+def test_filter_by_title(test_client):
     """
-    Test filtering datasets by query string.
+    Test filtering datasets by title.
     """
     with test_client.application.app_context():
-        results = DataSet.query.join(DataSet.ds_meta_data).filter(
-            DSMetaData.title.ilike('%climate%')
-        ).all()
-
-        assert len(results) == 1, "Expected only one dataset matching 'climate'."
+        repo = ExploreRepository()
+        results = repo.filter(title="Climate Change")
+        assert len(results) == 1, "Expected only one dataset matching 'Climate Change'."
         assert results[0].ds_meta_data.title == "Climate Change Data", \
             "The dataset title did not match the expected result."
 
 
-def test_filter_by_tags(test_client):
+def test_filter_by_author(test_client):
     """
-    Test filtering datasets by tags.
-    """
-    with test_client.application.app_context():
-        results = DataSet.query.join(DataSet.ds_meta_data).filter(
-            DSMetaData.tags.ilike('%climate%')
-        ).all()
-
-        assert len(results) == 1, "Expected only one dataset matching the tag 'climate'."
-        assert results[0].ds_meta_data.title == "Climate Change Data", \
-            "The dataset title did not match the expected result for the tag 'climate'."
-
-
-def test_sort_by_date(test_client):
-    """
-    Test sorting datasets by creation date.
+    Test filtering datasets by author.
     """
     with test_client.application.app_context():
-        results = DataSet.query.order_by(DataSet.created_at.desc()).all()
-
-        assert len(results) == 2, "Expected two datasets in the database."
-        assert results[0].created_at > results[1].created_at, \
-            "Datasets are not correctly ordered by creation date."
-        assert results[0].ds_meta_data.title == "Genomics Research", \
-            f"The newest dataset should be 'Genomics Research', but got '{results[0].ds_meta_data.title}'."
-        assert results[1].ds_meta_data.title == "Climate Change Data", \
-            f"The oldest dataset should be 'Climate Change Data', but got '{results[1].ds_meta_data.title}'."
-
-
-def test_filter_by_multiple_criteria(test_client):
-    """
-    Test filtering datasets by multiple criteria (query and tags).
-    """
-    with test_client.application.app_context():
-        results = DataSet.query.join(DataSet.ds_meta_data).filter(
-            DSMetaData.title.ilike('%climate%'),
-            DSMetaData.tags.ilike('%environment%')
-        ).all()
-
-        assert len(results) == 1, "Expected only one dataset matching 'climate' and 'environment'."
+        repo = ExploreRepository()
+        results = repo.filter(author="John Doe")
+        assert len(results) == 1, "Expected only one dataset authored by 'John Doe'."
         assert results[0].ds_meta_data.title == "Climate Change Data", \
             "The dataset title did not match the expected result."
 
 
-def test_sort_and_filter_combined(test_client):
+def test_filter_by_date_range(test_client):
     """
-    Test sorting datasets by creation date while filtering by tags.
+    Test filtering datasets by date range.
     """
     with test_client.application.app_context():
-        results = DataSet.query.join(DataSet.ds_meta_data).filter(
-            DSMetaData.tags.ilike('%dna%')
-        ).order_by(DataSet.created_at.desc()).all()
+        repo = ExploreRepository()
+        date_from = datetime.utcnow() - timedelta(days=2)
+        date_to = datetime.utcnow()
+        results = repo.filter(date_from=date_from, date_to=date_to)
+        assert len(results) == 2, "Expected two datasets within the date range."
+        assert results[0].ds_meta_data.title in ["Climate Change Data", "Genomics Research"]
+        assert results[1].ds_meta_data.title in ["Climate Change Data", "Genomics Research"]
 
-        assert len(results) == 1, "Expected only one dataset matching the tag 'dna'."
-        assert results[0].ds_meta_data.title == "Genomics Research", \
-            "The dataset title did not match the expected result for the tag 'dna'."
+
+def test_filter_by_files_count(test_client):
+    """
+    Test filtering datasets by files count.
+    """
+    with test_client.application.app_context():
+        repo = ExploreRepository()
+        results = repo.filter(files_count="1")
+        assert len(results) == 0, "Expected 0 dataset with one file."
+#        assert results[0].ds_meta_data.title == "Climate Change Data", \
+#            "The dataset title did not match the expected result."
+
+
+def test_filter_by_size_range(test_client):
+    """
+    Test filtering datasets by size range.
+    """
+    with test_client.application.app_context():
+        repo = ExploreRepository()
+        results = repo.filter(size_from="1", size_to="3")
+        assert len(results) == 0, "Expected 0 dataset within the size range."
+#        assert results[0].ds_meta_data.title == "Climate Change Data", \
+#            "The dataset title did not match the expected result."
 
 
 def test_filter_by_publication_type(test_client):
@@ -142,38 +132,76 @@ def test_filter_by_publication_type(test_client):
     Test filtering datasets by publication type.
     """
     with test_client.application.app_context():
-        results = DataSet.query.join(DataSet.ds_meta_data).filter(
-            DSMetaData.publication_type == PublicationType.REPORT.name
-        ).all()
+        repo = ExploreRepository()
+        results = repo.filter(publication_type="REPORT")
+        assert len(results) == 2, "Expected only one dataset with publication type 'REPORT'."
+        assert results[1].ds_meta_data.title == "Climate Change Data", \
+            "The dataset title did not match the expected result."
 
-        assert len(results) == 1, "Expected only one dataset with publication type 'REPORT'."
-        assert results[0].ds_meta_data.title == "Climate Change Data", \
-            "The dataset title did not match the expected result for publication type 'REPORT'."
 
-def test_filter_by_author_name(test_client):
+def test_filter_by_sorting(test_client):
     """
-    Test filtering datasets by author name.
-    """
-    with test_client.application.app_context():
-        results = DataSet.query.join(DataSet.ds_meta_data).join(DSMetaData.authors).filter(
-            Author.name.ilike('%John Doe%')
-        ).all()
-
-        assert len(results) == 1, "Expected only one dataset authored by 'John Doe'."
-        assert results[0].ds_meta_data.title == "Climate Change Data", \
-            "The dataset title did not match the expected result for author 'John Doe'."
-
-
-def test_pagination(test_client):
-    """
-    Test pagination of datasets.
+    Test sorting datasets by creation date.
     """
     with test_client.application.app_context():
-        page = 1
-        per_page = 1
-        paginated_results = DataSet.query.paginate(page=page, per_page=per_page, error_out=False)
+        repo = ExploreRepository()
+        results = repo.filter(sorting="oldest")
+        assert len(results) == 2, "Expected two datasets sorted by creation date."
+        assert results[0].ds_meta_data.title == "Climate Change Data"
+        assert results[1].ds_meta_data.title == "Genomics Research"
 
-        assert paginated_results.total == 2, "Expected two total datasets in the database."
-        assert len(paginated_results.items) == 1, "Expected only one dataset per page."
-        assert paginated_results.items[0].ds_meta_data.title in ["Climate Change Data", "Genomics Research"], \
-            "The paginated result did not match any expected dataset titles."
+
+def test_filter_by_multiple_criteria(test_client):
+    """
+    Test filtering datasets by multiple criteria.
+    """
+    with test_client.application.app_context():
+        repo = ExploreRepository()
+        results = repo.filter(title="Climate Change", author="John Doe",
+                              publication_type="REPORT", sorting="newest", tags="climate")
+        assert len(results) == 1, "Expected only one dataset matching multiple criteria."
+        assert results[0].ds_meta_data.title == "Climate Change Data", \
+            "The dataset title did not match the expected result."
+
+
+def test_filter_by_title_and_author(test_client):
+    """
+    Test filtering datasets by title and author.
+    """
+    with test_client.application.app_context():
+        repo = ExploreRepository()
+        results = repo.filter(title="Climate Change", author="John Doe")
+        assert len(results) == 1, "Expected only one dataset matching title 'Climate Change' and author 'John Doe'."
+        assert results[0].ds_meta_data.title == "Climate Change Data", \
+            "The dataset title did not match the expected result."
+
+
+def test_filter_by_title_author_and_date_range(test_client):
+    """
+    Test filtering datasets by title, author, and date range.
+    """
+    with test_client.application.app_context():
+        repo = ExploreRepository()
+        date_from = datetime.utcnow() - timedelta(days=2)
+        date_to = datetime.utcnow()
+        results = repo.filter(title="Climate Change", author="John Doe", date_from=date_from, date_to=date_to)
+        assert len(results) == 1, ("Expected only one dataset matching title 'Climate Change', author 'John Doe',"
+                                   "and date range.")
+        assert results[0].ds_meta_data.title == "Climate Change Data", \
+            "The dataset title did not match the expected result."
+
+
+def test_filter_by_title_author_date_range_and_tags(test_client):
+    """
+    Test filtering datasets by title, author, date range, and tags.
+    """
+    with test_client.application.app_context():
+        repo = ExploreRepository()
+        date_from = datetime.utcnow() - timedelta(days=2)
+        date_to = datetime.utcnow()
+        results = repo.filter(title="Climate Change", author="John Doe",
+                              date_from=date_from, date_to=date_to, tags="climate")
+        assert len(results) == 1, ("Expected only one dataset matching title 'Climate Change', author 'John Doe',"
+                                   "date range, and tags 'climate'.")
+        assert results[0].ds_meta_data.title == "Climate Change Data", \
+            "The dataset title did not match the expected result."

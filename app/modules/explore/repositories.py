@@ -1,8 +1,9 @@
-from sqlalchemy import any_, and_, func
+from sqlalchemy import and_, func
 from sqlalchemy.sql import select
 from app import db
 from app.modules.dataset.models import Author, DSMetaData, DataSet, PublicationType
-from app.modules.featuremodel.models import FMMetaData, FeatureModel
+from app.modules.featuremodel.models import FeatureModel
+# FMMetaData
 from app.modules.hubfile.models import Hubfile
 from core.repositories.BaseRepository import BaseRepository
 
@@ -26,8 +27,6 @@ class ExploreRepository(BaseRepository):
             filters.append(DataSet.created_at >= date_from)
         if date_to:
             filters.append(DataSet.created_at <= date_to)
-        if publication_doi:
-            filters.append(FMMetaData.dataset_doi.ilike(f"%{publication_doi}%"))
             
         # Subconsulta para files_count
         if files_count != "" and files_count is not None and files_count != "0":
@@ -56,15 +55,6 @@ class ExploreRepository(BaseRepository):
                 .scalar_subquery()
             )
             filters.append(subquery_size_to / 1024 <= float(size_to))
-#        if files_count != "" and files_count is not None:
-#            filters.append(DataSet.get_files_count(inst) == int(files_count))
-#        print(f"Files count: {files_count}")
-#        if size_from != "" and size_from is not None:
-#            filters.append(float(DataSet.get_file_total_size(inst)) >= float(size_from)/1024)
-#        if size_to != "" and size_to is not None:
-#            filters.append(DataSet.get_file_total_size(inst) <= int(size_to)/1024)
-#        if format:
-#            filters.append(DSMetaData.tags.ilike(f"%{format}%"))
 
         datasets = (
             db.session.query(DataSet)
@@ -83,8 +73,8 @@ class ExploreRepository(BaseRepository):
             if matching_type is not None:
                 datasets = datasets.filter(DSMetaData.publication_type == matching_type.name)
 
-        if tags is not None:
-            datasets = datasets.filter(DSMetaData.tags.ilike(any_(f"%{tag}%" for tag in tags)))
+#        if tags is not None:
+#            datasets = datasets.filter(DSMetaData.tags.ilike(any_(f"%{tag}%" for tag in tags)))
 
         # Order by created_at
         if sorting == "oldest":
