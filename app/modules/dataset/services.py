@@ -60,21 +60,21 @@ def convert_uvl_to_pdf(uvl_file_path: str, pdf_file_path: str):
 
     except Exception as e:
         print(f"Error al convertir {uvl_file_path} a PDF: {str(e)}")
-        
+
 
 def convert_uvl_to_json(uvl_file_path: str, json_file_path: str):
     try:
         with open(uvl_file_path, 'r') as uvl_file:
             content = uvl_file.read()
-        
+
         if not content:
             raise ValueError(f"El archivo {uvl_file_path} está vacío.")
-        
+
         json_content = {"data": content}
 
         with open(json_file_path, 'w') as json_file:
             json.dump(json_content, json_file, indent=4)
-    
+
     except Exception as e:
         print(f"Error al convertir {uvl_file_path} a JSON: {str(e)}")
 
@@ -327,7 +327,7 @@ class DataSetService(BaseService):
 
                                         pdf_file_path = file_path.replace('.uvl', '.pdf')
                                         convert_uvl_to_pdf(file_path, pdf_file_path)
-                                    
+
                                         if os.path.exists(pdf_file_path):
                                             pdf_folder_path = os.path.join(dataset_folder, "pdf")
                                             zip_file.write(pdf_file_path, arcname=os.path.join(
@@ -336,7 +336,7 @@ class DataSetService(BaseService):
 
                                         json_file_path = file_path.replace('.uvl', '.json')
                                         convert_uvl_to_json(file_path, json_file_path)
-                                    
+
                                         if os.path.exists(json_file_path):
                                             json_folder_path = os.path.join(dataset_folder, "json")
                                             zip_file.write(json_file_path, arcname=os.path.join(
@@ -345,7 +345,7 @@ class DataSetService(BaseService):
 
                                         cnf_file_path = file_path.replace('.uvl', '.cnf')
                                         convert_uvl_to_cnf(file_path, cnf_file_path)
-                                    
+
                                         if os.path.exists(cnf_file_path):
                                             cnf_folder_path = os.path.join(dataset_folder, "cnf")
                                             zip_file.write(cnf_file_path, arcname=os.path.join
@@ -354,7 +354,7 @@ class DataSetService(BaseService):
 
                                         splx_file_path = file_path.replace('.uvl', '.splx')
                                         convert_uvl_to_splx(file_path, splx_file_path)
-                                    
+
                                         if os.path.exists(splx_file_path):
                                             splx_folder_path = os.path.join(dataset_folder, "splx")
                                             zip_file.write(splx_file_path, arcname=os.path.join(
@@ -362,7 +362,7 @@ class DataSetService(BaseService):
                                             os.remove(splx_file_path)
 
         return full_archive_path
-    
+
 
 class AuthorService(BaseService):
     def __init__(self):
