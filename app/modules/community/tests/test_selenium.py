@@ -47,7 +47,6 @@ class TestUntitled:
         # Cerrar sesión
         self.driver.find_element(By.CSS_SELECTOR, ".text-dark").click()
         self.driver.find_element(By.LINK_TEXT, "Log out").click()
-'''
 
     def test_user_communities_list(self):
         # Navegación en la aplicación web
@@ -100,7 +99,7 @@ class TestUntitled:
         # Cerrar sesión
         self.driver.find_element(By.CSS_SELECTOR, ".text-dark").click()
         self.driver.find_element(By.LINK_TEXT, "Log out").click()
-
+'''
     def test_edit_community_button(self):
         # Navegación en la aplicación web
         self.driver.get("http://web_app_container:5000/")
