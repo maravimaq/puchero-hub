@@ -37,7 +37,6 @@ def test_login_and_check_element():
 
         try:
             driver.find_element(By.XPATH, "//h1[contains(@class, 'h2 mb-3') and contains(., 'Latest datasets')]")
-            print('Test passed!')
 
         except NoSuchElementException:
             raise AssertionError('Test failed!')
@@ -55,23 +54,11 @@ def test_register_user():
 
         # Open the signup page
         driver.get(f'{host}/signup/')
-        print("Navigated to:", driver.current_url)
-
-        # Debugging: Ensure the page is correct
-        if "signup" not in driver.current_url:
-            raise AssertionError("Failed to load the signup page!")
 
         # Wait for the email field to be present
-        try:
-            email_field = WebDriverWait(driver, 10).until(
-                EC.visibility_of_element_located((By.NAME, "email"))
-            )
-        except TimeoutException:
-            print("Email field not found!")
-            print("Current URL:", driver.current_url)
-            with open("page_source.html", "w") as f:
-                f.write(driver.page_source)  # Save the page source for debugging
-            raise
+        email_field = WebDriverWait(driver, 10).until(
+            EC.visibility_of_element_located((By.NAME, "email"))
+        )
 
         # Use a unique email for registration
         email = f"testuser_{int(time.time())}@example.com"
@@ -84,20 +71,14 @@ def test_register_user():
 
         # Submit the form
         submit_button = WebDriverWait(driver, 10).until(
-            EC.element_to_be_clickable((By.CLASS_NAME, 'btn-primary'))  # Matches the class for the submit button
+            EC.element_to_be_clickable((By.CLASS_NAME, 'btn-primary'))
         )
         submit_button.click()
 
         # Wait for the signup success
-        try:
-            WebDriverWait(driver, 10).until(
-                lambda driver: "Welcome" in driver.page_source or driver.current_url == f"{host}/"
-            )
-            print('Signup test passed!')
-        except TimeoutException:
-            print('Signup test failed! Success message or redirection not found.')
-            print("Page Source:\n", driver.page_source)
-            raise
+        WebDriverWait(driver, 10).until(
+            lambda driver: "Welcome" in driver.page_source or driver.current_url == f"{host}/"
+        )
 
     finally:
         close_driver(driver)
