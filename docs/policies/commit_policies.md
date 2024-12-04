@@ -51,6 +51,7 @@ Notas (opcional):
 ## Ejemplo de Commit
 
 ### **1. Feat (Nueva funcionalidad):**
+
 ```plaintext
 feat(auth): Añadida funcionalidad de login con autenticación OAuth
 
@@ -65,6 +66,7 @@ Notas:
 ```
 
 ### **2. Fix (Corrección de errores):**
+
 ```plaintext
 fix(api): Corregido error en la validación de los datos del usuario
 
@@ -77,6 +79,7 @@ Notas:
 ```
 
 ### **3. Docs (Documentación):**
+
 ```plaintext
 docs(readme): Actualizada la sección de instalación del proyecto
 
@@ -89,6 +92,7 @@ Notas:
 ```
 
 ### **4. Test (Pruebas):**
+
 ```plaintext
 test(api): Añadidas pruebas unitarias para las nuevas validaciones
 
@@ -103,7 +107,9 @@ Notas:
 ---
 
 ## Cómo Configurar la Plantilla
+
 1. Guarda este archivo como `commit_template.txt` en la carpeta `docs` del proyecto.
+
 2. Configura Git para usar la plantilla:
    ```bash
    git config commit.template ./docs/commit_template.txt
