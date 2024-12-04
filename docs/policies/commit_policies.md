@@ -34,6 +34,7 @@ Esta plantilla define el formato estándar que deben seguir los mensajes de comm
 ---
 
 ## Estructura del Mensaje de Commit
+
 ```plaintext
 <Tipo>(<Contexto>): Breve descripción del cambio realizado
 
