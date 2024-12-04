@@ -99,7 +99,7 @@ class TestUntitled:
         # Cerrar sesión
         self.driver.find_element(By.CSS_SELECTOR, ".text-dark").click()
         self.driver.find_element(By.LINK_TEXT, "Log out").click()
-'''
+
     def test_edit_community_button(self):
         # Navegación en la aplicación web
         self.driver.get("http://web_app_container:5000/")
@@ -250,7 +250,7 @@ class TestUntitled:
         )
         self.driver.find_element(By.ID, "submit").click()
 
-        assert self.driver.current_url == "http://localhost/community/create"
+        assert self.driver.current_url == "http://web_app_container:5000/community/create"
 
         # Cerrar sesión
         self.driver.find_element(By.CSS_SELECTOR, ".text-dark").click()
@@ -288,7 +288,7 @@ class TestUntitled:
         self.driver.find_element(By.CSS_SELECTOR, "input[type='submit']").click()
 
         # Verifica que se redirige correctamente
-        assert self.driver.current_url == "http://localhost/my-communities"
+        assert self.driver.current_url == "http://web_app_container:5000/my-communities"
 
         # Cerrar sesión
         self.driver.find_element(By.CSS_SELECTOR, ".text-dark").click()
@@ -366,7 +366,7 @@ class TestUntitled:
         self.driver.find_element(By.CSS_SELECTOR, ".text-dark").click()
         self.driver.find_element(By.LINK_TEXT, "Log out").click()
 
-    def test_joim_community(self):
+    def test_join_community(self):
         # Navegación en la aplicación web
         self.driver.get("http://web_app_container:5000/")
         self.driver.set_window_size(927, 1012)
@@ -454,4 +454,3 @@ class TestUntitled:
         # Cerrar sesión
         self.driver.find_element(By.CSS_SELECTOR, ".text-dark").click()
         self.driver.find_element(By.LINK_TEXT, "Log out").click()
-'''
