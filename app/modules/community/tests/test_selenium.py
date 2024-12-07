@@ -5,16 +5,18 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-
+from webdriver_manager.chrome import ChromeDriverManager
 
 class TestUntitled:
 
     def setup_method(self, method):
-        # Configuración de ChromeDriver y Chrome
+        # Use the manually installed chromedriver
         options = Options()
-        service = Service("/usr/bin/chromedriver")
+        options.add_argument("--headless")  # Run headless if necessary
+        options.add_argument("--no-sandbox")
+        options.add_argument("--disable-dev-shm-usage")
+        service = Service("/usr/bin/chromedriver")  # Point to the manually installed chromedriver
         self.driver = webdriver.Chrome(service=service, options=options)
-        self.driver.get("http://localhost/")
 
     def teardown_method(self, method):
         # Cerrar el navegador después de cada prueba
@@ -22,7 +24,7 @@ class TestUntitled:
 
     def test_empty_communities_message(self):
         # Navegación en la aplicación web
-        self.driver.get("http://localhost/")
+        self.driver.get("http://web_app_container:5000/")
         self.driver.set_window_size(927, 1012)
 
         # Interactuar con el login
@@ -48,7 +50,7 @@ class TestUntitled:
 
     def test_user_communities_list(self):
         # Navegación en la aplicación web
-        self.driver.get("http://localhost/")
+        self.driver.get("http://web_app_container:5000/")
         self.driver.set_window_size(927, 1012)
 
         # Interactuar con el login
@@ -73,7 +75,7 @@ class TestUntitled:
 
     def test_create_new_community_button(self):
         # Navegación en la aplicación web
-        self.driver.get("http://localhost/")
+        self.driver.get("http://web_app_container:5000/")
         self.driver.set_window_size(927, 1012)
 
         # Interactuar con el login
@@ -100,7 +102,7 @@ class TestUntitled:
 
     def test_edit_community_button(self):
         # Navegación en la aplicación web
-        self.driver.get("http://localhost/")
+        self.driver.get("http://web_app_container:5000/")
         self.driver.set_window_size(927, 1012)
 
         # Interactuar con el login
@@ -131,7 +133,7 @@ class TestUntitled:
 
     def test_delete_community_button(self):
         # Navegación en la aplicación web
-        self.driver.get("http://localhost/")
+        self.driver.get("http://web_app_container:5000/")
         self.driver.set_window_size(927, 1012)
 
         # Interactuar con el login
@@ -163,7 +165,7 @@ class TestUntitled:
 
     def test_create_valid_community(self):
         # Navegación en la aplicación web
-        self.driver.get("http://localhost/")
+        self.driver.get("http://web_app_container:5000/")
         self.driver.set_window_size(927, 1012)
 
         # Interactuar con el login
@@ -194,7 +196,7 @@ class TestUntitled:
 
     def test_create_community_empty_fields(self):
         # Navegación en la aplicación web
-        self.driver.get("http://localhost/")
+        self.driver.get("http://web_app_container:5000/")
         self.driver.set_window_size(927, 1012)
 
         # Interactuar con el login
@@ -223,7 +225,7 @@ class TestUntitled:
 
     def test_create_duplicated_community(self):
         # Navegación en la aplicación web
-        self.driver.get("http://localhost/")
+        self.driver.get("http://web_app_container:5000/")
         self.driver.set_window_size(927, 1012)
 
         # Interactuar con el login
@@ -248,7 +250,7 @@ class TestUntitled:
         )
         self.driver.find_element(By.ID, "submit").click()
 
-        assert self.driver.current_url == "http://localhost/community/create"
+        assert self.driver.current_url == "http://web_app_container:5000/community/create"
 
         # Cerrar sesión
         self.driver.find_element(By.CSS_SELECTOR, ".text-dark").click()
@@ -256,7 +258,7 @@ class TestUntitled:
 
     def test_successful_edit(self):
         # Navegación en la aplicación web
-        self.driver.get("http://localhost/")
+        self.driver.get("http://web_app_container:5000/")
         self.driver.set_window_size(927, 1012)
 
         # Interactuar con el login
@@ -286,7 +288,7 @@ class TestUntitled:
         self.driver.find_element(By.CSS_SELECTOR, "input[type='submit']").click()
 
         # Verifica que se redirige correctamente
-        assert self.driver.current_url == "http://localhost/my-communities"
+        assert self.driver.current_url == "http://web_app_container:5000/my-communities"
 
         # Cerrar sesión
         self.driver.find_element(By.CSS_SELECTOR, ".text-dark").click()
@@ -294,7 +296,7 @@ class TestUntitled:
 
     def test_show_community_details(self):
         # Navegación en la aplicación web
-        self.driver.get("http://localhost/")
+        self.driver.get("http://web_app_container:5000/")
         self.driver.set_window_size(927, 1012)
 
         # Interactuar con el login
@@ -323,7 +325,7 @@ class TestUntitled:
 
     def test_list_not_joined_communities(self):
         # Navegación en la aplicación web
-        self.driver.get("http://localhost/")
+        self.driver.get("http://web_app_container:5000/")
         self.driver.set_window_size(927, 1012)
 
         # Interactuar con el login
@@ -364,9 +366,9 @@ class TestUntitled:
         self.driver.find_element(By.CSS_SELECTOR, ".text-dark").click()
         self.driver.find_element(By.LINK_TEXT, "Log out").click()
 
-    def test_joim_community(self):
+    def test_join_community(self):
         # Navegación en la aplicación web
-        self.driver.get("http://localhost/")
+        self.driver.get("http://web_app_container:5000/")
         self.driver.set_window_size(927, 1012)
 
         # Interactuar con el login
@@ -419,7 +421,7 @@ class TestUntitled:
 
     def test_empty_not_joined_communities(self):
         # Navegación en la aplicación web
-        self.driver.get("http://localhost/")
+        self.driver.get("http://web_app_container:5000/")
         self.driver.set_window_size(927, 1012)
 
         # Interactuar con el login

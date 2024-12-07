@@ -30,7 +30,8 @@ def test_upload_dataset():
     driver = initialize_driver()
 
     try:
-        host = get_host_for_selenium_testing()
+        host = "http://web_app_container:5000"
+
 
         # Open the login page
         driver.get(f"{host}/login")
