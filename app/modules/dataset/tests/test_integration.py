@@ -143,3 +143,45 @@ def test_edit_dataset(test_client):
         assert updated_metadata.description == "Updated description", "Description did not update."
 
     logout(test_client)
+
+def test_delete_dataset(test_client):
+    """
+    Test deleting a dataset and its associated metadata.
+    """
+    login_response = login(test_client, "testuser@example.com", "test1234")
+    assert login_response.status_code == 200, "Login failed."
+
+    dataset_meta = get_dataset_by_title("Test Dataset 2", test_client)
+    assert dataset_meta is not None, "Dataset metadata not found in the database."
+
+    with test_client.application.app_context():
+        dataset_service = DataSetService()
+
+        dataset = DataSet.query.filter_by(ds_meta_data_id=dataset_meta.id).first()
+        assert dataset is not None, "Dataset record not found for the metadata."
+
+        dataset.delete()
+
+        db.session.delete(dataset_meta)
+        db.session.commit()
+
+        deleted_dataset = DataSet.query.get(dataset.id)
+        assert deleted_dataset is None, "Dataset still exists in the database."
+
+        deleted_metadata = DSMetaData.query.get(dataset_meta.id)
+        assert deleted_metadata is None, "Dataset metadata still exists in the database."
+
+    logout(test_client)
+
+
+def test_handle_nonexistent_dataset(test_client):
+    """
+    Test handling access to a nonexistent dataset.
+    """
+    login_response = login(test_client, "testuser@example.com", "test1234")
+    assert login_response.status_code == 200, "Login failed."
+
+    response = test_client.get('/dataset/view/99999', follow_redirects=True)
+    assert response.status_code == 404, "Expected 404 for nonexistent dataset."
+
+    logout(test_client)
