@@ -50,9 +50,25 @@ class LoginBehavior(TaskSet):
         if response.status_code != 200:
             print(f"Login failed: {response.status_code}")
 
+class InvalidLoginBehavior(TaskSet):
+    @task
+    def invalid_login(self):
+        """Simulate an invalid login attempt."""
+        response = self.client.get("/login", name="Invalid Login")
+        csrf_token = get_csrf_token(response)
+
+        response = self.client.post("/login", data={
+            "email": "invalid@example.com",
+            "password": "wrongpassword",
+            "csrf_token": csrf_token
+        })
+        if response.status_code == 200:
+            print("Invalid login succeeded unexpectedly")
+        else:
+            print(f"Invalid login correctly failed: {response.status_code}")
 
 class AuthUser(HttpUser):
-    tasks = [SignupBehavior, LoginBehavior]
+    tasks = [SignupBehavior, LoginBehavior, InvalidLoginBehavior]
     min_wait = 5000
     max_wait = 9000
     host = get_host_for_locust_testing()
