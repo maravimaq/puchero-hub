@@ -185,3 +185,42 @@ def test_handle_nonexistent_dataset(test_client):
     assert response.status_code == 404, "Expected 404 for nonexistent dataset."
 
     logout(test_client)
+
+def test_add_file_to_dataset(test_client):
+    """
+    Test adding a file to an existing dataset.
+    """
+    login_response = login(test_client, "testuser@example.com", "test1234")
+    assert login_response.status_code == 200, "Login failed."
+
+    with test_client.application.app_context():
+        dataset_meta = get_dataset_by_title("Test Dataset 1", test_client)
+        if dataset_meta is None:
+            user = User.query.filter_by(email="testuser@example.com").first()
+            dataset_meta = DSMetaData(
+                title="Test Dataset 1",
+                description="First test dataset.",
+                publication_type=PublicationType.JOURNAL_ARTICLE
+            )
+            db.session.add(dataset_meta)
+            db.session.commit()
+
+            dataset = DataSet(user_id=user.id, ds_meta_data_id=dataset_meta.id)
+            db.session.add(dataset)
+            db.session.commit()
+
+    temp_file_path = os.path.join("uploads/temp", "test_file.uvl")
+    os.makedirs(os.path.dirname(temp_file_path), exist_ok=True)
+    with open(temp_file_path, "w") as temp_file:
+        temp_file.write("This is a test UVL file.")
+
+    data = {'file': (open(temp_file_path, 'rb'), 'test_file.uvl')}
+    response = test_client.post('/dataset/file/upload', data=data, content_type='multipart/form-data')
+
+    assert response.status_code == 200, "Failed to upload file."
+    assert b"UVL uploaded and validated successfully" in response.data, "Success message not found."
+
+    if os.path.exists(temp_file_path):
+        os.remove(temp_file_path)
+
+    logout(test_client)
