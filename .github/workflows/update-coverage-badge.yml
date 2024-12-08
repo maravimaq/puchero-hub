@@ -47,8 +47,8 @@ jobs:
         MARIADB_PASSWORD: uvlhub_password
       run: |
         coverage run -m pytest app/modules/ --ignore-glob='*selenium*'
+        rm -f coverage.svg  # Remove the existing badge if it exists
         coverage-badge -o coverage.svg
-
     - name: Commit Coverage Badge
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
