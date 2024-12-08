@@ -1,12 +1,12 @@
 name: Update Coverage Badge
 
 on:
-  push:
+  push:  # Run on every push
+    branches: 
+      - '*'  # Matches all branches
+  pull_request:  # Run on every pull request
     branches:
-      - main
-  pull_request:
-    branches:
-      - main
+      - '*'  # Matches all branches
 
 jobs:
   update-coverage:
@@ -24,19 +24,19 @@ jobs:
     - name: Install Dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install -r requirements.txt
+        pip install coverage coverage-badge pytest
 
     - name: Run Tests and Generate Coverage Report
       run: |
-        coverage run -m pytest
+        coverage run -m pytest --ignore-glob='*test_selenium.py'
         coverage-badge -o coverage.svg
 
-    - name: Commit and Push Badge
+    - name: Commit Coverage Badge
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
         git config --global user.name "GitHub Actions"
         git config --global user.email "actions@github.com"
         git add coverage.svg
-        git commit -m "Update coverage badge"
+        git commit -m "Update coverage badge [skip ci]"
         git push
