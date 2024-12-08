@@ -53,7 +53,7 @@
         <td style="text-align: left; padding: 8px; border: 1px solid #ddd;">davblamor</td>
       </tr>
       <tr>
-        <td style="text-align: left; padding: 8px; border: 1px solid #ddd;">Del Junco Obregón, Juan</td>
+        <td style="text-align: left; padding: 8px; border: 1px solid #ddd;">del Junco Obregón, Juan</td>
         <td style="text-align: left; padding: 8px; border: 1px solid #ddd;">juanjunobr</td>
       </tr>
       <tr>
@@ -99,7 +99,7 @@ El equipo está formado por los miembros mencionados anteriormente, pero aparte 
 - **Equipo de desarrollo**:
   - Ávila Maqueda, María del Mar. *Contacto*: maravimaq@alum.us.es
   - Blanco Mora, David. *Contacto*: davblamor@alum.us.es
-  - Del Junco Obregón, Juan. *Contacto*: juanjunobr@alum.us.es
+  - del Junco Obregón, Juan. *Contacto*: juajunobr@alum.us.es
   - Mejías Buitrago, Pablo. *Contacto*: pabmejbui@alum.us.es
   - Solís Alfonso, Julio. *Contacto*: julsolalf@alum.us.es
 

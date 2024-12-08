@@ -7,44 +7,37 @@ Esta guía describe los pasos necesarios para configurar y ejecutar pruebas de S
 
 ## **Pasos para Configurar Selenium en Docker**
 
-### **1. Ejecutar los contenedores**
+### 1. Antes de continuar, ejecuta el script de limpieza para asegurarte de que la configuración funcione correctamente. 
+Este paso debe repetirse cada vez que se cambie de rama:
+
+   ```bash
+   sudo scripts/clean_docker.sh sh
+```
+
+### **2. Ejecutar los contenedores**
 
 Ejecuta los contenedores necesarios utilizando el siguiente comando:
 ```bash
 docker compose -f docker/docker-compose.dev.yml up -d
 ```
 
-### **2. Acceder al contenedor**
+### **3. Acceder al contenedor**
 
 Accede al contenedor de tu aplicación web:
-```bash
+```
 sudo docker exec -it web_app_container bash
 ```
 
-### **3. Instalar los paquetes necesarios**
-
-Asegúrate de que los siguientes paquetes estén instalados en el contenedor:
-
-- `curl`: Para descargar archivos desde URLs.
-
-- `chromium`: El navegador Chrome.
-
-- `unzip`: Para extraer archivos .zip (opcional).
-
-Ejecuta los comandos:
-```bash
-apt update && apt install -y curl chromium unzip
-```
-
-### **4. Instalar Google Chrome**
+### **4. Instalar navegador**
 
 Descarga e instala manualmente Google Chrome:
 ```bash
+apt update
+apt install -y chromium
 curl -o google-chrome-stable.deb https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
 dpkg -i google-chrome-stable.deb
 apt-get -f install  # Corrige dependencias
 ```
-
 Verifica la instalación de Google Chrome:
 ```bash
 google-chrome --version
@@ -57,14 +50,8 @@ Instala manualmente una versión compatible de ChromeDriver:
 
 1. Descarga la versión específica de ChromeDriver que coincida con la versión de Chrome instalada:
     ```bash
-    curl -o chromedriver-linux64.zip https://edgedl.me.gvt1.com/edgedl/chrome/chrome-for-testing/131.0.6778.108/linux64/chromedriver-linux64.zip
-    ```
-
-2. Extrae y mueve el binario a `/usr/bin`:
-    ```bash
-    unzip chromedriver-linux64.zip
-    mv chromedriver /usr/bin/chromedriver
-    chmod +x /usr/bin/chromedriver
+    apt-get update
+    apt-get install -y chromium-driver
     ```
 
 3. Verifica la instalación de ChromeDriver:
@@ -112,7 +99,7 @@ self.driver.get("http://web_app_container:5000/")
 
 Ejecuta las pruebas para confirmar que funcionan correctamente:
 ```bash
-rosemary selenium community
+rosemary selenium
 ```
 
 ---
@@ -122,10 +109,6 @@ rosemary selenium community
 - **Google Chrome**: 131.0.6778.108
 
 - **ChromeDriver**: 131.0.6778.108
-
-- **curl**: Para descargar archivos.
-
-- **unzip**: Para extraer archivos .zip.
 
 ---
 
