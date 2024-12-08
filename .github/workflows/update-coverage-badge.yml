@@ -38,23 +38,22 @@ jobs:
         pip install -r requirements.txt
 
     - name: Run Tests and Generate Coverage Badge
-      env:
-        FLASK_ENV: testing
-        MARIADB_HOSTNAME: 127.0.0.1
-        MARIADB_PORT: 3306
-        MARIADB_TEST_DATABASE: uvlhubdb_test
-        MARIADB_USER: uvlhub_user
-        MARIADB_PASSWORD: uvlhub_password
       run: |
+        rm -f coverage.svg
         coverage run -m pytest app/modules/ --ignore-glob='*selenium*'
-        rm -f coverage.svg  # Remove the existing badge if it exists
         coverage-badge -o coverage.svg
-    - name: Commit Coverage Badge
+
+    - name: Checkout the Branch
+      run: |
+        git fetch origin ${{ github.ref_name }}:$GITHUB_REF_NAME
+        git checkout ${{ github.ref_name }}
+
+    - name: Commit and Push Badge
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
         git config --global user.name "GitHub Actions"
         git config --global user.email "actions@github.com"
         git add coverage.svg
-        git commit -m "Update coverage badge"
-        git push
+        git commit -m "Update coverage badge" || echo "No changes to commit"
+        git push origin ${{ github.ref_name }}
