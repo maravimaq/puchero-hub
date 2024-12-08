@@ -21,7 +21,7 @@ jobs:
           MYSQL_PASSWORD: uvlhub_password
         ports:
           - 3306:3306
-        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+        options: --health-cmd="mysqladmin ping -h localhost -u root -proot_password" --health-interval=10s --health-timeout=5s --health-retries=3
 
     steps:
     - name: Checkout Code
@@ -38,9 +38,16 @@ jobs:
         pip install -r requirements.txt
 
     - name: Run Tests and Generate Coverage Badge
+      env:
+        FLASK_ENV: testing
+        MARIADB_HOSTNAME: 127.0.0.1
+        MARIADB_PORT: 3306
+        MARIADB_DATABASE: uvlhubdb_test
+        MARIADB_USER: uvlhub_user
+        MARIADB_PASSWORD: uvlhub_password
       run: |
-        rm -f coverage.svg
         coverage run -m pytest app/modules/ --ignore-glob='*selenium*'
+        rm -f coverage.svg
         coverage-badge -o coverage.svg
 
     - name: Checkout the Branch
