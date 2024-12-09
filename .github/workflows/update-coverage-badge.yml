@@ -76,7 +76,7 @@ jobs:
         git stash list | grep "Temporary stash for coverage badge changes" && git stash apply
         if git ls-files -u | grep coverage.svg; then
           echo "Conflict detected in coverage.svg. Overwriting with generated file."
-          mv coverage.svg coverage.svg.resolved
+          cp coverage.svg coverage.svg.resolved
           mv coverage.svg.resolved coverage.svg
           git add coverage.svg
         fi
