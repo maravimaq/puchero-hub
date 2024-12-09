@@ -72,3 +72,46 @@ def test_explore_post_no_results(client, populate_data):
     assert response.status_code == 200
     json_data = response.get_json()
     assert len(json_data) == 0
+
+
+def test_explore_post_filter_by_author(client, populate_data):
+    criteria = {
+        "author": "Author One"
+    }
+    response = client.post('/explore', json=criteria)
+    assert response.status_code == 200
+    json_data = response.get_json()
+    assert len(json_data) == 1
+    assert json_data[0]['title'] == "Dataset 1"
+
+def test_explore_post_filter_by_multiple_criteria(client, populate_data):
+    criteria = {
+        "author": "Author One",
+        "publication_type": "journal_article"
+    }
+    response = client.post('/explore', json=criteria)
+    assert response.status_code == 200
+    json_data = response.get_json()
+    assert len(json_data) == 1
+    assert json_data[0]['title'] == "Dataset 1"
+
+
+def test_explore_post_filter_by_partial_title(client, populate_data):
+    criteria = {
+        "title": "Dataset"
+    }
+    response = client.post('/explore', json=criteria)
+    assert response.status_code == 200
+    json_data = response.get_json()
+    assert len(json_data) == 2
+    assert any(dataset['title'] == "Dataset 1" for dataset in json_data)
+    assert any(dataset['title'] == "Dataset 2" for dataset in json_data)
+
+def test_explore_post_empty_filter(client, populate_data):
+    # An empty filter should return all datasets
+    response = client.post('/explore', json={})
+    assert response.status_code == 200
+    json_data = response.get_json()
+    assert len(json_data) == 2
+    assert any(dataset['title'] == "Dataset 1" for dataset in json_data)
+    assert any(dataset['title'] == "Dataset 2" for dataset in json_data)
