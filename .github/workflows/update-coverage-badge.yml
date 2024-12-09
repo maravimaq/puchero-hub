@@ -61,7 +61,9 @@ jobs:
       run: |
         git config --global user.name "GitHub Actions"
         git config --global user.email "actions@github.com"
-        
+
+        git stash push -m "Temporary stash for coverage badge changes"
+
         if [ "${{ github.event_name }}" == "pull_request" ]; then
           echo "Pull request detected. Checking out the source branch: ${{ github.head_ref }}"
           git fetch origin ${{ github.head_ref }}:${{ github.head_ref }}
@@ -70,6 +72,8 @@ jobs:
           echo "Push event detected. Using branch: ${{ github.ref_name }}"
           git checkout ${{ github.ref_name }}
         fi
+
+        git stash list | grep "Temporary stash for coverage badge changes" && git stash pop
 
         git add coverage.svg
         git commit -m "Update coverage badge" || echo "No changes to commit"
