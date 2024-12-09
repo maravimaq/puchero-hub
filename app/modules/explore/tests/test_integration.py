@@ -115,3 +115,50 @@ def test_explore_post_empty_filter(client, populate_data):
     assert len(json_data) == 2
     assert any(dataset['title'] == "Dataset 1" for dataset in json_data)
     assert any(dataset['title'] == "Dataset 2" for dataset in json_data)
+
+
+def test_explore_post_filter_by_nonexistent_author(client, populate_data):
+    criteria = {
+        "author": "Nonexistent Author"
+    }
+    response = client.post('/explore', json=criteria)
+    assert response.status_code == 200
+    json_data = response.get_json()
+    assert len(json_data) == 0  # No datasets should match
+
+
+def test_explore_post_filter_by_tags(client, populate_data):
+    criteria = {
+        "tags": ["test"]
+    }
+    response = client.post('/explore', json=criteria)
+    assert response.status_code == 200
+    json_data = response.get_json()
+    assert len(json_data) == 2  # Assuming both datasets have the "test" tag
+    assert any(dataset['title'] == "Dataset 1" for dataset in json_data)
+    assert any(dataset['title'] == "Dataset 2" for dataset in json_data)
+
+
+def test_explore_post_filter_by_date_range(client, populate_data):
+    criteria = {
+        "date_from": "2024-01-01",
+        "date_to": "2024-12-31"
+    }
+    response = client.post('/explore', json=criteria)
+    assert response.status_code == 200
+    json_data = response.get_json()
+    assert len(json_data) == 2  # Both datasets fall within this range
+    assert any(dataset['title'] == "Dataset 1" for dataset in json_data)
+    assert any(dataset['title'] == "Dataset 2" for dataset in json_data)
+
+
+def test_explore_post_filter_by_multiple_authors(client, populate_data):
+    criteria = {
+        "authors": ["Author One", "Author Two"]
+    }
+    response = client.post('/explore', json=criteria)
+    assert response.status_code == 200
+    json_data = response.get_json()
+    assert len(json_data) == 2  # Both datasets should be returned
+    assert any(dataset['title'] == "Dataset 1" for dataset in json_data)
+    assert any(dataset['title'] == "Dataset 2" for dataset in json_data)
