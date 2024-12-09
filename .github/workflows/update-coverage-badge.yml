@@ -52,7 +52,7 @@ jobs:
         MARIADB_PASSWORD: uvlhub_password
       run: |
         coverage run -m pytest app/modules/ --ignore-glob='*selenium*'
-        rm -f coverage.svg  # Remove the existing badge if it exists
+        rm -f coverage.svg
         coverage-badge -o coverage.svg
 
     - name: Handle Detached HEAD, Resolve Conflicts, and Commit Badge
@@ -76,7 +76,7 @@ jobs:
         git stash list | grep "Temporary stash for coverage badge changes" && git stash apply
         if git ls-files -u | grep coverage.svg; then
           echo "Conflict detected in coverage.svg. Overwriting with generated file."
-          cp coverage.svg coverage.svg.resolved
+          mv coverage.svg coverage.svg.resolved
           mv coverage.svg.resolved coverage.svg
           git add coverage.svg
         fi
