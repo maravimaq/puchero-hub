@@ -159,6 +159,24 @@ def test_explore_post_filter_by_multiple_authors(client, populate_data):
     response = client.post('/explore', json=criteria)
     assert response.status_code == 200
     json_data = response.get_json()
-    assert len(json_data) == 2  # Both datasets should be returned
+    assert len(json_data) == 2
     assert any(dataset['title'] == "Dataset 1" for dataset in json_data)
     assert any(dataset['title'] == "Dataset 2" for dataset in json_data)
+
+
+def test_explore_get_all_datasets(client, populate_data):
+    """
+    Test the GET method of the /explore endpoint to retrieve and render all datasets.
+    """
+    response = client.get('/explore')
+    assert response.status_code == 200
+
+    # Verify the page title
+    assert b"<h1 class=\"h2 mb-3\"><b>Explore</b></h1>" in response.data
+    
+    # Verify that dataset titles are rendered
+    assert b"Dataset 1" in response.data
+    assert b"Dataset 2" in response.data
+
+    # Ensure "not found" div is not visible
+    assert b"id=\"results_not_found\" style=\"display: none;\"" in response.data
