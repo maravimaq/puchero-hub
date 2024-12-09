@@ -55,7 +55,7 @@ jobs:
         rm -f coverage.svg  # Remove the existing badge if it exists
         coverage-badge -o coverage.svg
 
-    - name: Handle Detached HEAD and Commit Badge
+    - name: Handle Detached HEAD, Resolve Conflicts, and Commit Badge
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
@@ -73,9 +73,14 @@ jobs:
           git checkout ${{ github.ref_name }}
         fi
 
-        git stash list | grep "Temporary stash for coverage badge changes" && git stash pop
+        git stash list | grep "Temporary stash for coverage badge changes" && git stash apply
+        if git ls-files -u | grep coverage.svg; then
+          echo "Conflict detected in coverage.svg. Overwriting with generated file."
+          cp coverage.svg coverage.svg.resolved
+          mv coverage.svg.resolved coverage.svg
+          git add coverage.svg
+        fi
 
-        git add coverage.svg
         git commit -m "Update coverage badge" || echo "No changes to commit"
 
         git push origin HEAD:${{ github.head_ref || github.ref_name }}
