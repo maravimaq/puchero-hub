@@ -90,3 +90,22 @@ def test_view_user_datasets_html_structure(test_client):
     assert b"<tbody" in response.data
     assert b"<tr" in response.data
     logout(test_client)
+
+
+def test_view_user_datasets_contains_correct_headers(test_client):
+    """
+    Verifies that the public profile page includes correct table headers for datasets.
+    """
+    login_response = login(test_client, "testuser@example.com", "testpassword")
+    assert login_response.status_code == 200
+
+    with test_client.application.app_context():
+        user = User.query.filter_by(email="testuser@example.com").first()
+        user_id = user.id
+
+    response = test_client.get(f"/public_profile/{user_id}")
+    assert response.status_code == 200
+    assert b"<th>Title</th>" in response.data
+    assert b"<th>Publication type</th>" in response.data
+
+    logout(test_client)
