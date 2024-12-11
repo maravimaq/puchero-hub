@@ -113,8 +113,6 @@ El equipo está formado por los miembros mencionados anteriormente, pero aparte 
 ## 4. Repositorio en GitHub.
 Nuestro proyecto se ha realizado subiendo dicho proyecto a un repositorio común en la plataforma GitHub. Este repositorio es el siguiente: [Puchero-hub](https://github.com/maravimaq/puchero-hub.git).
 
----
-
 ### i. Estructura del repositorio.
 La estructura principal del proyecto consta de las siguientes carpetas y archivos. Dentro de las carpetas hay más información detallada, pero en este caso hemos decidido mostrar principalmente la estructura del proyecto en general, sin entrar mucho en detalles, nada más para explicar en que consiste cada archivos y carpeta:
 
@@ -188,8 +186,6 @@ Nuestro equipo sigue una política de commits que se llama **Conventional Commit
 
 La política **Conventional Commits** es un estándar ampliamente utilizado para redactar mensajes de commits de manera clara y estructurada. Su objetivo principal es mantener un historial consistente y fácil de entender, facilitando el trabajo en equipo, la revisión de cambios y el uso de herramientas automatizadas como generación de changelogs y versionado semántico.
 
----
-
 #### **Estructura del Mensaje de Commit**
 
 Cada mensaje de commit debe seguir la siguiente estructura:
@@ -201,8 +197,6 @@ Cada mensaje de commit debe seguir la siguiente estructura:
 - **`tipo`**: Describe el propósito del cambio. Por ejemplo: `feat`, `fix`, `docs`, etc.
 - **`alcance` (opcional)**: Especifica el módulo, componente o área afectada del proyecto. Por ejemplo: `(login)`, `(API)`.
 - **`descripción breve`**: Explica de manera concisa qué se ha hecho.
-
----
 
 #### Tipos de Commits
 
@@ -239,8 +233,6 @@ docs(readme): actualizar requisitos de instalación
 ```plaintext
 test(auth): añadir pruebas para la autenticación de usuarios
 ```
-
----
 
 #### Ventajas de Usar Conventional Commits
 
