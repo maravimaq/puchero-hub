@@ -15,7 +15,7 @@
 
 ##### <p style="text-align: center;">Curso 2024-2025</p>
 
-## Índice
+## Índice.
 1. [Miembros de puchero-hub](#id1)
 2. [¿Qué es puchero-hub?](#id2)
 3. [Roles del equipo](#id3)
@@ -34,7 +34,7 @@
 <div id='id1'></div>
 
 
-## 1. Miembros de puchero-hub
+## 1. Miembros de puchero-hub.
 <div style="text-align: center;">
   <table style="margin: auto; border-collapse: collapse; width: 60%;">
     <thead>
@@ -93,7 +93,7 @@ El proyecto tiene como requisitos principales el cumpliemento de una serie de mi
 <div id='id3'></div>
 
 
-## 3. Roles del equipo
+## 3. Roles del equipo.
 El equipo está formado por los miembros mencionados anteriormente, pero aparte de estos miembros, el desarrollo del proyecto tiene una estructura de organización a tener en cuenta. Dicha estructura está repartida en dos roles y/o escalones, *Director del proyecto* y *Equipo de desarrollo*:
 
 - **Equipo de desarrollo**:
@@ -105,3 +105,157 @@ El equipo está formado por los miembros mencionados anteriormente, pero aparte 
 
 - **Director del proyecto**:
   - Romero Organvídez, David. *Contacto*: drorganvidez@us.es
+
+
+<div id='id4'></div>
+
+
+## 4. Repositorio en GitHub.
+Nuestro proyecto se ha realizado subiendo dicho proyecto a un repositorio común en la plataforma GitHub. Este repositorio es el siguiente: [Puchero-hub](https://github.com/maravimaq/puchero-hub.git).
+
+### i. Estructura del repositorio.
+La estructura principal del proyecto consta de las siguientes carpetas y archivos. Dentro de las carpetas hay más información detallada, pero en este caso hemos decidido mostrar principalmente la estructura del proyecto en general, sin entrar mucho en detalles, nada más para explicar en que consiste cada archivos y carpeta:
+
+<div id='id41'></div>
+
+- **.env.docker.example**  
+  ➡ Ejemplo de configuración de entorno para entornos Docker.
+- **.env.docker.production.example**  
+  ➡ Ejemplo de configuración de entorno para producción en Docker.
+- **.env.local.example**  
+  ➡ Ejemplo de configuración de entorno para desarrollo local.
+- **.env.vagrant.example**  
+  ➡ Ejemplo de configuración de entorno para configuraciones con Vagrant.
+- **.flake8**  
+  ➡ Configuración para la herramienta de estilo de código Python Flake8.
+- **.gitattributes**  
+  ➡ Configuración para el tratamiento de archivos en Git.
+- **.gitignore**  
+  ➡ Lista de archivos y carpetas que Git debe ignorar.
+- **.moduleignore**  
+  ➡ Archivos y carpetas que deben excluirse al empaquetar el módulo.
+- **README.md**  
+  ➡ Documentación principal del proyecto con información sobre instalación y uso.
+- **coverage.svg**  
+  ➡ Indicador visual del porcentaje de cobertura de pruebas.
+- **requirements.txt**  
+  ➡ Lista de dependencias necesarias para el proyecto.
+- **setup.py**  
+  ➡ Configuración del paquete para su instalación o distribución.
+- **github/workflows/**  
+  ➡ Configuraciones de automatización para CI/CD mediante GitHub Actions.
+- **app/**  
+  ➡ Contiene el código principal de la aplicación, incluyendo vistas, modelos, rutas y servicios.  
+  - **modules/**  
+    ➡ Módulos organizados por funcionalidades específicas, como autenticación, comunidad, etc.  
+  - **static/**  
+    ➡ Archivos estáticos como CSS, JavaScript e imágenes.  
+    - **css/** ➡ Estilos CSS de la aplicación.  
+    - **js/** ➡ Scripts JavaScript para funcionalidades interactivas.  
+    - **images/** ➡ Imágenes como logos y otros recursos visuales.  
+  - **templates/**  
+    ➡ Plantillas HTML para las vistas.  
+    - **base.html** ➡ Plantilla base compartida.  
+    - **layout.html** ➡ Estructura general de las páginas.  
+- **core/**  
+  ➡ Configuraciones esenciales y componentes principales del proyecto, como extensiones y configuraciones base.
+- **docker/**  
+  ➡ Archivos relacionados con configuraciones y scripts para Docker, facilitando la creación de contenedores.
+- **docs/**  
+  ➡ Documentación adicional del proyecto, como especificaciones técnicas y manuales de referencia.
+- **migrations/**  
+  ➡ Archivos generados por herramientas de migración para la gestión del esquema de la base de datos.
+- **rosemary/**  
+  ➡ Módulos específicos para funcionalidades adicionales o integraciones personalizadas.
+- **scripts/**  
+  ➡ Scripts de utilidad para tareas de mantenimiento, despliegue o configuración.
+- **vagrant/**  
+  ➡ Archivos de configuración para entornos de desarrollo usando Vagrant.
+
+
+<div id='id5'></div>
+
+
+## 5. Políticas
+En esta sección vamos a hablar de las distintas políticas a seguir por el equipo. Estas políticas son políticas decididas por el conjunto del equipo, y deben ser acatadas por todos los miembros de este.
+
+<div id='id51'></div>
+
+### i. Política de Commits.
+Nuestro equipo sigue una política de commits que se llama **Conventional Commits**. # Política de Commits: Conventional Commits
+
+La política **Conventional Commits** es un estándar ampliamente utilizado para redactar mensajes de commits de manera clara y estructurada. Su objetivo principal es mantener un historial consistente y fácil de entender, facilitando el trabajo en equipo, la revisión de cambios y el uso de herramientas automatizadas como generación de changelogs y versionado semántico.
+
+#### **Estructura del Mensaje de Commit**
+
+Cada mensaje de commit debe seguir la siguiente estructura:
+
+```plaintext
+<tipo>(<alcance opcional>): <descripción breve>
+```
+
+- **`tipo`**: Describe el propósito del cambio. Por ejemplo: `feat`, `fix`, `docs`, etc.
+- **`alcance` (opcional)**: Especifica el módulo, componente o área afectada del proyecto. Por ejemplo: `(login)`, `(API)`.
+- **`descripción breve`**: Explica de manera concisa qué se ha hecho.
+
+#### Tipos de Commits
+
+A continuación, se describen los principales tipos de commits que seguimos en este proyecto:
+
+##### `feat`: Funcionalidades nuevas
+- **Uso**: Commits que añaden nuevas funcionalidades o crean nuevos archivos.
+- **Ejemplo**:  
+
+```plaintext
+feat(login): añadir autenticación de usuarios
+```
+
+##### `fix`: Correcciones de errores
+- **Uso**: Commits que corrigen fallos o errores en el código.
+- **Ejemplo**: 
+
+```plaintext
+fix(api): corregir error de validación en el endpoint de usuarios
+```
+
+##### `docs`: Documentación
+- **Uso**: Commits relacionados con cambios en la documentación, como manuales o README.
+- **Ejemplo**:  
+
+```plaintext
+docs(readme): actualizar requisitos de instalación
+```
+
+##### `test`: Pruebas
+- **Uso**: Commits que contienen cambios o adiciones en las pruebas, como unitarias o de integración.
+- **Ejemplo**:  
+
+```plaintext
+test(auth): añadir pruebas para la autenticación de usuarios
+```
+
+#### Ventajas de Usar Conventional Commits
+
+- **Consistencia**: Los mensajes son uniformes, lo que facilita la lectura del historial de commits.
+- **Automatización**: Se pueden generar changelogs automáticos y realizar versionado semántico.
+- **Colaboración**: Facilita la comunicación dentro del equipo sobre los cambios realizados.
+
+Esta política asegura que cada commit refleje de manera precisa el trabajo realizado y permite un mejor mantenimiento del proyecto a lo largo del tiempo.
+
+<div id='id52'></div>
+
+
+### ii. Política de Ramas.
+
+
+<div id='id53'></div>
+
+
+### iii.Política de Issues.
+
+
+
+<div id='id54'></div>
+
+
+### iv. Política de Versionado.
