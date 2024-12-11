@@ -244,8 +244,49 @@ Esta política asegura que cada commit refleje de manera precisa el trabajo real
 
 <div id='id52'></div>
 
-
 ### ii. Política de Ramas.
+En nuestro proyecto seguimos el flujo de trabajo **Feature Branch Workflow**, el cual permite un desarrollo organizado y colaborativo. A continuación, se detalla el proceso que seguimos para gestionar las ramas:
+
+#### **1. Creación de ramas independientes**
+- Para cada nueva funcionalidad o corrección, se crea una rama independiente basada en la rama principal (`main`).
+- Las ramas se nombran de manera descriptiva para identificar claramente su propósito, siguiendo estas convenciones:
+  - **`feature/<descripción>`**: Para nuevas funcionalidades.
+  - **`fix/<descripción>`**: Para correcciones de errores.
+  - **`hotfix/<descripción>`**: Para correcciones críticas en producción.
+  - **`docs/<descripcion>`**: Para documentos.
+
+**Ejemplos de nombres de ramas:**
+- `feature/autenticacion_usuario`
+- `feature/soporte_multilenguaje`
+- `fix/correccion_login`
+- `hotfix/error_critico_pago`
+- `docs/policy_documents`
+
+#### **2. Desarrollo en las ramas independientes**
+- Todo el desarrollo relacionado con la funcionalidad o corrección específica se realiza dentro de la rama creada.
+- Esto asegura que la rama principal (`main`) permanezca siempre estable y lista para su uso.
+
+#### **3. Creación de una Pull Request**
+- Una vez completado el desarrollo en la rama independiente, se crea una **Pull Request (PR)** hacia la rama principal (`main`).
+- En la PR, se describen los cambios realizados y se incluye cualquier información relevante.
+
+#### **4. Revisión por parte del equipo**
+- Nosotros hemos implementado que no haga falta revisión por parte del equipo, ya que eso consideramos que provoca retrasos a la hora de realizar el proyecto.
+- Como único requisito de revision tenemos que no se suba nada que de error, o fallo. Todo lo que se suba al repositorio debe ser funcional.
+
+#### **5. Fusión con la rama principal**
+- La Pull Request será **mergeada** con la rama `main`.
+
+#### **6. Eliminación de la rama**
+- Después de la fusión, la rama de funcionalidad puede ser **eliminada** para mantener el repositorio limpio y organizado.
+- No tenemos la obligación impuesta de eliminar o no la rama. Hay libertad en este aspecto.
+
+#### **Ventajas de esta política**
+- **Colaboración efectiva**: La revisión por parte de otros desarrolladores mejora la calidad del código.
+- **Estructura clara**: Las ramas independientes organizan el trabajo y protegen la estabilidad de `main`.
+- **Control de calidad**: Solo los cambios revisados y aprobados llegan a `main`.
+
+Con esta política, aseguramos un flujo de trabajo eficiente, colaborativo y de alta calidad en el desarrollo de nuestro proyecto.
 
 
 <div id='id53'></div>
