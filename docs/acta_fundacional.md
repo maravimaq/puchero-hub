@@ -15,7 +15,7 @@
 
 ##### <p style="text-align: center;">Curso 2024-2025</p>
 
-## Índice
+## Índice.
 1. [Miembros de puchero-hub](#id1)
 2. [¿Qué es puchero-hub?](#id2)
 3. [Roles del equipo](#id3)
@@ -34,7 +34,7 @@
 <div id='id1'></div>
 
 
-## 1. Miembros de puchero-hub
+## 1. Miembros de puchero-hub.
 <div style="text-align: center;">
   <table style="margin: auto; border-collapse: collapse; width: 60%;">
     <thead>
@@ -93,7 +93,7 @@ El proyecto tiene como requisitos principales el cumpliemento de una serie de mi
 <div id='id3'></div>
 
 
-## 3. Roles del equipo
+## 3. Roles del equipo.
 El equipo está formado por los miembros mencionados anteriormente, pero aparte de estos miembros, el desarrollo del proyecto tiene una estructura de organización a tener en cuenta. Dicha estructura está repartida en dos roles y/o escalones, *Director del proyecto* y *Equipo de desarrollo*:
 
 - **Equipo de desarrollo**:
@@ -105,3 +105,67 @@ El equipo está formado por los miembros mencionados anteriormente, pero aparte 
 
 - **Director del proyecto**:
   - Romero Organvídez, David. *Contacto*: drorganvidez@us.es
+
+
+<div id='id4'></div>
+
+
+## 4. Repositorio en GitHub.
+Nuestro proyecto se ha realizado subiendo dicho proyecto a un repositorio común en la plataforma GitHub. Este repositorio es el siguiente: [Puchero-hub](https://github.com/maravimaq/puchero-hub.git).
+
+### i. Estructura del repositorio.
+La estructura principal del proyecto consta de las siguientes carpetas y archivos. Dentro de las carpetas hay más información detallada, pero en este caso hemos decidido mostrar principalmente la estructura del proyecto en general, sin entrar mucho en detalles, nada más para explicar en que consiste cada archivos y carpeta:
+
+- **.env.docker.example**  
+  ➡ Ejemplo de configuración de entorno para entornos Docker.
+- **.env.docker.production.example**  
+  ➡ Ejemplo de configuración de entorno para producción en Docker.
+- **.env.local.example**  
+  ➡ Ejemplo de configuración de entorno para desarrollo local.
+- **.env.vagrant.example**  
+  ➡ Ejemplo de configuración de entorno para configuraciones con Vagrant.
+- **.flake8**  
+  ➡ Configuración para la herramienta de estilo de código Python Flake8.
+- **.gitattributes**  
+  ➡ Configuración para el tratamiento de archivos en Git.
+- **.gitignore**  
+  ➡ Lista de archivos y carpetas que Git debe ignorar.
+- **.moduleignore**  
+  ➡ Archivos y carpetas que deben excluirse al empaquetar el módulo.
+- **README.md**  
+  ➡ Documentación principal del proyecto con información sobre instalación y uso.
+- **coverage.svg**  
+  ➡ Indicador visual del porcentaje de cobertura de pruebas.
+- **requirements.txt**  
+  ➡ Lista de dependencias necesarias para el proyecto.
+- **setup.py**  
+  ➡ Configuración del paquete para su instalación o distribución.
+- **github/workflows/**  
+  ➡ Configuraciones de automatización para CI/CD mediante GitHub Actions.
+- **app/**  
+  ➡ Contiene el código principal de la aplicación, incluyendo vistas, modelos, rutas y servicios.  
+  - **modules/**  
+    ➡ Módulos organizados por funcionalidades específicas, como autenticación, comunidad, etc.  
+  - **static/**  
+    ➡ Archivos estáticos como CSS, JavaScript e imágenes.  
+    - **css/** ➡ Estilos CSS de la aplicación.  
+    - **js/** ➡ Scripts JavaScript para funcionalidades interactivas.  
+    - **images/** ➡ Imágenes como logos y otros recursos visuales.  
+  - **templates/**  
+    ➡ Plantillas HTML para las vistas.  
+    - **base.html** ➡ Plantilla base compartida.  
+    - **layout.html** ➡ Estructura general de las páginas.  
+- **core/**  
+  ➡ Configuraciones esenciales y componentes principales del proyecto, como extensiones y configuraciones base.
+- **docker/**  
+  ➡ Archivos relacionados con configuraciones y scripts para Docker, facilitando la creación de contenedores.
+- **docs/**  
+  ➡ Documentación adicional del proyecto, como especificaciones técnicas y manuales de referencia.
+- **migrations/**  
+  ➡ Archivos generados por herramientas de migración para la gestión del esquema de la base de datos.
+- **rosemary/**  
+  ➡ Módulos específicos para funcionalidades adicionales o integraciones personalizadas.
+- **scripts/**  
+  ➡ Scripts de utilidad para tareas de mantenimiento, despliegue o configuración.
+- **vagrant/**  
+  ➡ Archivos de configuración para entornos de desarrollo usando Vagrant.
