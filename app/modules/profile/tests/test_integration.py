@@ -194,14 +194,15 @@ def test_service_update_profile_required_fields(test_client):
         from app.modules.profile.forms import UserProfileForm
 
         invalid_form_data = {
-            "name": "",  # Required field
-            "surname": "",  # Required field
-            "orcid": "0000-0000-0000-000X",  # Invalid format (ignored due to required field errors)
-            "affiliation": "Valid Affiliation",  # Valid value
+            "name": "",
+            "surname": "",
+            "orcid": "0000-0000-0000-000X",
+            "affiliation": "Valid Affiliation",
         }
         form = UserProfileForm(data=invalid_form_data)
         form.validate()
 
-        assert "name" in form.errors, "Expected 'name' error in form errors."
-        assert "surname" in form.errors, "Expected 'surname' error in form errors."
-        assert "orcid" not in form.errors, "Unexpected 'orcid' error when required fields are invalid."
+        assert "name" in form.errors, f"Expected 'name' error, got {form.errors}"
+        assert "surname" in form.errors, f"Expected 'surname' error, got {form.errors}"
+        assert "orcid" in form.errors, f"Expected 'orcid' error, got {form.errors}"
+        assert "Invalid ORCID format" in form.errors["orcid"], f"Expected 'Invalid ORCID format' in 'orcid' errors, got {form.errors['orcid']}"
