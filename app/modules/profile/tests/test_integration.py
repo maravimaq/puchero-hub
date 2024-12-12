@@ -1,3 +1,4 @@
+from app.modules.auth.services import AuthenticationService
 import pytest
 from app import db
 from app.modules.auth.models import User
@@ -59,7 +60,6 @@ def test_profile_summary_pagination(test_client):
     assert response.status_code == 200, "Failed to access profile summary with pagination."
 
     if b"No datasets uploaded" not in response.data:
-        # Debugging message for datasets found
         datasets = db.session.query(DataSet).filter_by(user_id=1).offset(5).all()
         assert not datasets, f"Unexpected datasets found on page 2: {datasets}"
 
@@ -100,7 +100,7 @@ def test_view_profile_edit_redirects_unauthenticated(test_client):
     """
     Tests that unauthenticated users are redirected when attempting to access the edit profile page.
     """
-    logout(test_client)  # Ensure no user is logged in.
+    logout(test_client)
 
     response = test_client.get("/profile/edit", follow_redirects=False)
     assert response.status_code == 302, "Unauthenticated users should be redirected."
@@ -112,7 +112,6 @@ def test_model_user_profile_save(test_client):
     Tests the save method of the UserProfile model.
     """
     with test_client.application.app_context():
-        # Create a new UserProfile instance and save it
         user = User(email="save_test_user@example.com", password="password123")
         db.session.add(user)
         db.session.commit()
@@ -120,8 +119,34 @@ def test_model_user_profile_save(test_client):
         profile = UserProfile(user_id=user.id, name="SaveTest", surname="User")
         profile.save()
 
-        # Verify the instance was saved
         saved_profile = UserProfile.query.filter_by(user_id=user.id).first()
         assert saved_profile is not None, "UserProfile was not saved correctly."
         assert saved_profile.name == "SaveTest", "UserProfile name is incorrect."
         assert saved_profile.surname == "User", "UserProfile surname is incorrect."
+
+
+def test_edit_profile_invalid_csrf_token(test_client):
+    """
+    Tests that an invalid CSRF token is handled correctly when editing a profile.
+    """
+    login_response = login(test_client, "testuser@example.com", "test1234")
+    assert login_response.status_code == 200, "Login failed."
+
+    # Access the edit profile page to retrieve a valid CSRF token
+    response = test_client.get("/profile/edit")
+    assert response.status_code == 200, "Failed to load edit profile page."
+
+    # Inject an invalid CSRF token
+    csrf_token = "invalid_token"
+
+    form_data = {
+        "name": "CSRFTest",
+        "surname": "Invalid",
+        "orcid": "0000-0003-1825-0097",
+        "affiliation": "Test Affiliation",
+        "csrf_token": csrf_token,  # Invalid token
+    }
+    response = test_client.post("/profile/edit", data=form_data, follow_redirects=False)
+    assert response.status_code in [302, 400], "Expected a 302 redirect or 400 error for invalid CSRF token."
+
+    logout(test_client)
