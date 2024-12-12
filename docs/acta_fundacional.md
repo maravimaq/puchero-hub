@@ -463,3 +463,80 @@ Estas medidas están diseñadas para:
 - Mantener la calidad y el ritmo de trabajo del proyecto.
 
 Al seguir estas directrices, buscamos garantizar un entorno de trabajo productivo y respetuoso para todos los miembros del equipo.
+
+
+<div id='id9'></div>
+
+
+# 9. Gestión de Incidencias
+
+En nuestro proyecto, las incidencias se gestionan mediante la creación de **issues** en el repositorio de GitHub, siguiendo un proceso claro y estructurado. Esto permite una resolución eficiente y facilita el seguimiento de problemas en el sistema.
+
+## **Proceso de Gestión de Incidencias**
+### **1. Creación de la Issue**
+- Cuando se detecta una incidencia, se crea una nueva **issue** en GitHub.
+- La issue debe incluir:
+  - **Título descriptivo**: Un resumen breve del problema.
+  - **Etiqueta**: Se debe asignar la etiqueta `bug` para identificarla como una incidencia.
+  - **Descripción detallada**:
+    - **En inglés**, siguiendo el estándar del proyecto.
+    - Debe incluir los pasos para reproducir el problema y una descripción clara de los síntomas.
+
+### **2. Estructura de la Descripción**
+La descripción de la issue debe incluir los siguientes puntos:
+
+1. **Descripción del problema**:
+   - Explica qué ocurre y dónde se manifiesta el problema.
+   - Incluye capturas de pantalla o logs si son relevantes.
+
+2. **Pasos para resolver la incidencia**:
+   - Lista detallada y numerada con los pasos a seguir para investigar y resolver el problema.
+   - Especifica los cambios necesarios y cómo verificarlos.
+
+**Ejemplo de Issue**:  
+**Título**: Fix Communities Locust Tests  
+**Descripción**:  
+```plaintext
+When you try to run Locust tests for the community module with the rosemary locust community, the Host field appears empty.
+```
+
+**Steps to resolve:**
+1. Analyze the scope of the issue:
+    - Verify why the Host field appears empty in the Locust interface.
+    - Confirm if the issue is related to the host attribute in the test class or the structure of the test file.
+    - Test similar configurations to ensure the issue is isolated to community tests.
+2. Create a new branch named fix/communities_locust_tests.
+3. Debug the test file:
+    - Check if the `host` attribute is defined in the `CommunityUser` class.
+    - Verify the naming convention of the test file to ensure Locust recognizes it automatically.
+4. Implement fixes:
+    - Add `host = get_host_for_locust_testing()` to the `CommunityUser` class.
+    - Rename the test file to comply with Locust's naming convention.
+5. Test the fix locally:
+    - Run Locust locally to confirm the Host field is populated correctly.
+    - Verify that the tests run successfully.
+6. Validate the fix with Docker:
+    - Execute Locust tests in the Docker environment to ensure deployment works as expected.
+7. Commit and push changes:
+    - Commit with a descriptive message: "Fix Locust tests for community: added host and renamed file."
+8. Create a Pull Request:
+    - Open a PR to `main` and include a summary of the problem and the solution.
+9. Verify after merge:
+    - Pull the latest changes from `main` and confirm the issue is resolved.
+10. Document and close the issue:
+    - Update the issue tracker with a summary of the fix and close the issue.
+
+### 3. **Resolución y Seguimiento**:
+
+  - Cada issue es asignada a uno o más miembros del equipo responsables de su resolución.
+  - Una vez solucionada la incidencia, el responsable debe:
+    - Documentar los pasos realizados en la issue.
+    - Verificar que la solución funciona correctamente.
+    - Cerrar la issue tras confirmar que el problema ha sido resuelto.
+
+### 4. **Buenas Prácticas**:
+- Lenguaje: Toda la documentación técnica de las issues (como los pasos para resolverlas) debe estar en inglés, alineándose con el estándar del proyecto.
+- Claridad: Los pasos deben ser detallados y comprensibles para facilitar la resolución por cualquier miembro del equipo.
+- Estandarización: Asegurarse de que todas las issues sigan un formato similar para mantener un sistema de seguimiento coherente y profesional.
+
+Con esta política, aseguramos una gestión eficiente de incidencias que facilita su resolución y mejora la calidad del proyecto.
