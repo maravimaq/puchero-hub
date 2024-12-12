@@ -226,3 +226,23 @@ def test_service_update_profile_orcid_format(test_client):
 
         assert not is_valid, "Expected the form to be invalid due to ORCID format."
         assert "orcid" in form.errors, f"Expected 'orcid' error in form errors. Errors: {form.errors}"
+
+
+def test_service_update_profile_affiliation_length(test_client):
+    """
+    Tests the update_profile service method for affiliation length validation errors.
+    """
+    with test_client.application.app_context():
+        from app.modules.profile.forms import UserProfileForm
+
+        invalid_form_data = {
+            "name": "Valid Name",
+            "surname": "Valid Surname",
+            "orcid": "0000-0000-0000-0000",
+            "affiliation": "A",
+        }
+        form = UserProfileForm(data=invalid_form_data)
+        is_valid = form.validate()
+
+        assert not is_valid, "Expected the form to be invalid due to short affiliation."
+        assert "affiliation" in form.errors, f"Expected 'affiliation' error in form errors. Errors: {form.errors}"
