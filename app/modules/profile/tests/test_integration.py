@@ -133,11 +133,9 @@ def test_edit_profile_invalid_csrf_token(test_client):
     login_response = login(test_client, "testuser@example.com", "test1234")
     assert login_response.status_code == 200, "Login failed."
 
-    # Access the edit profile page to retrieve a valid CSRF token
     response = test_client.get("/profile/edit")
     assert response.status_code == 200, "Failed to load edit profile page."
 
-    # Inject an invalid CSRF token
     csrf_token = "invalid_token"
 
     form_data = {
@@ -145,7 +143,7 @@ def test_edit_profile_invalid_csrf_token(test_client):
         "surname": "Invalid",
         "orcid": "0000-0003-1825-0097",
         "affiliation": "Test Affiliation",
-        "csrf_token": csrf_token,  # Invalid token
+        "csrf_token": csrf_token,
     }
     response = test_client.post("/profile/edit", data=form_data, follow_redirects=False)
     assert response.status_code in [302, 400], "Expected a 302 redirect or 400 error for invalid CSRF token."
@@ -183,7 +181,27 @@ def test_service_update_profile_invalid_id(test_client):
         form = UserProfileForm(data=form_data)
         result, errors = service.update_profile(-1, form)
 
-        # Verifica el resultado y los errores
         assert result is None, "Expected no result for invalid profile ID."
         assert errors is not None, "Expected errors for invalid profile ID."
         assert "UserProfile with id -1 does not exist." in errors.get("error", ""), "Expected specific error message for invalid profile ID."
+
+
+def test_service_update_profile_required_fields(test_client):
+    """
+    Tests the update_profile service method for required field validation errors.
+    """
+    with test_client.application.app_context():
+        from app.modules.profile.forms import UserProfileForm
+
+        invalid_form_data = {
+            "name": "",  # Required field
+            "surname": "",  # Required field
+            "orcid": "0000-0000-0000-000X",  # Invalid format (ignored due to required field errors)
+            "affiliation": "Valid Affiliation",  # Valid value
+        }
+        form = UserProfileForm(data=invalid_form_data)
+        form.validate()
+
+        assert "name" in form.errors, "Expected 'name' error in form errors."
+        assert "surname" in form.errors, "Expected 'surname' error in form errors."
+        assert "orcid" not in form.errors, "Unexpected 'orcid' error when required fields are invalid."
