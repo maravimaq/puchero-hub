@@ -59,6 +59,8 @@ def my_profile():
 @profile_bp.route('/public_profile/<int:user_id>', methods=['GET'])
 @login_required
 def view_user_datasets(user_id):
+    if current_user.id == user_id:
+        return "You cannot access your own public profile.", 403
     user = User.query.get_or_404(user_id)
     datasets = DataSet.query.filter_by(user_id=user.id).all()
     return render_template('public_profile.html', user=user, datasets=datasets)
