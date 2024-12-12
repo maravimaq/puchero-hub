@@ -15,7 +15,7 @@
 
 ##### <p style="text-align: center;">Curso 2024-2025</p>
 
-## Índice.
+# Índice
 1. [Miembros de puchero-hub](#id1)
 2. [¿Qué es puchero-hub?](#id2)
 3. [Roles del equipo](#id3)
@@ -35,7 +35,7 @@
 <div id='id1'></div>
 
 
-## 1. Miembros de puchero-hub.
+# 1. Miembros de puchero-hub.
 <div style="text-align: center;">
   <table style="margin: auto; border-collapse: collapse; width: 60%;">
     <thead>
@@ -73,7 +73,7 @@
 <div id='id2'></div>
 
 
-## 2. ¿Qué es Puchero-hub?
+# 2. ¿Qué es Puchero-hub?
 **Puchero-hub** es un un proyecto creado con el fin de implementar nuevas funcionalidades a la aplicación web uvlhub.io. **Uvlhub** es un repositorio, desarrollado por Diverso-Lab, que consiste una serie de modelos de características siguendo el formato UVL y está integrado con Flamapy y Zenodo.
 
 El proyecto tiene como requisitos principales el cumpliemento de una serie de milestones o entregables, en los que se deberá entregar, el proyecto, siendo este funcional y con diversas adiciones extras. Estas milestones están representadas en la página web de la asignatura *Evolución y Gestión de la Configuración*, [Wiki - EGC](https://1984.lsi.us.es/wiki-egc/index.php/P%C3%A1gina_Principal) , en la sección con nombre: *Proyecto - 24/25*.
@@ -94,7 +94,7 @@ El proyecto tiene como requisitos principales el cumpliemento de una serie de mi
 <div id='id3'></div>
 
 
-## 3. Roles del equipo.
+# 3. Roles del equipo.
 El equipo está formado por los miembros mencionados anteriormente, pero aparte de estos miembros, el desarrollo del proyecto tiene una estructura de organización a tener en cuenta. Dicha estructura está repartida en dos roles y/o escalones, *Director del proyecto* y *Equipo de desarrollo*:
 
 - **Equipo de desarrollo**:
@@ -111,10 +111,10 @@ El equipo está formado por los miembros mencionados anteriormente, pero aparte 
 <div id='id4'></div>
 
 
-## 4. Repositorio en GitHub.
+# 4. Repositorio en GitHub.
 Nuestro proyecto se ha realizado subiendo dicho proyecto a un repositorio común en la plataforma GitHub. Este repositorio es el siguiente: [Puchero-hub](https://github.com/maravimaq/puchero-hub.git).
 
-### i. Estructura del repositorio.
+## i. Estructura del repositorio.
 La estructura principal del proyecto consta de las siguientes carpetas y archivos. Dentro de las carpetas hay más información detallada, pero en este caso hemos decidido mostrar principalmente la estructura del proyecto en general, sin entrar mucho en detalles, nada más para explicar en que consiste cada archivos y carpeta:
 
 <div id='id41'></div>
@@ -177,17 +177,17 @@ La estructura principal del proyecto consta de las siguientes carpetas y archivo
 <div id='id5'></div>
 
 
-## 5. Políticas
+# 5. Políticas
 En esta sección vamos a hablar de las distintas políticas a seguir por el equipo. Estas políticas son políticas decididas por el conjunto del equipo, y deben ser acatadas por todos los miembros de este.
 
 <div id='id51'></div>
 
-### i. Política de Commits.
+## i. Política de Commits.
 Nuestro equipo sigue una política de commits que se llama **Conventional Commits**. # Política de Commits: Conventional Commits
 
 La política **Conventional Commits** es un estándar ampliamente utilizado para redactar mensajes de commits de manera clara y estructurada. Su objetivo principal es mantener un historial consistente y fácil de entender, facilitando el trabajo en equipo, la revisión de cambios y el uso de herramientas automatizadas como generación de changelogs y versionado semántico.
 
-#### **Estructura del Mensaje de Commit**
+### **Estructura del Mensaje de Commit**
 
 Cada mensaje de commit debe seguir la siguiente estructura:
 
@@ -199,11 +199,11 @@ Cada mensaje de commit debe seguir la siguiente estructura:
 - **`alcance` (opcional)**: Especifica el módulo, componente o área afectada del proyecto. Por ejemplo: `(login)`, `(API)`.
 - **`descripción breve`**: Explica de manera concisa qué se ha hecho.
 
-#### Tipos de Commits
+### Tipos de Commits
 
 A continuación, se describen los principales tipos de commits que seguimos en este proyecto:
 
-##### `feat`: Funcionalidades nuevas
+#### `feat`: Funcionalidades nuevas
 - **Uso**: Commits que añaden nuevas funcionalidades o crean nuevos archivos.
 - **Ejemplo**:  
 
@@ -211,7 +211,7 @@ A continuación, se describen los principales tipos de commits que seguimos en e
 feat(login): añadir autenticación de usuarios
 ```
 
-##### `fix`: Correcciones de errores
+#### `fix`: Correcciones de errores
 - **Uso**: Commits que corrigen fallos o errores en el código.
 - **Ejemplo**: 
 
@@ -219,7 +219,7 @@ feat(login): añadir autenticación de usuarios
 fix(api): corregir error de validación en el endpoint de usuarios
 ```
 
-##### `docs`: Documentación
+#### `docs`: Documentación
 - **Uso**: Commits relacionados con cambios en la documentación, como manuales o README.
 - **Ejemplo**:  
 
@@ -227,7 +227,7 @@ fix(api): corregir error de validación en el endpoint de usuarios
 docs(readme): actualizar requisitos de instalación
 ```
 
-##### `test`: Pruebas
+#### `test`: Pruebas
 - **Uso**: Commits que contienen cambios o adiciones en las pruebas, como unitarias o de integración.
 - **Ejemplo**:  
 
@@ -235,7 +235,7 @@ docs(readme): actualizar requisitos de instalación
 test(auth): añadir pruebas para la autenticación de usuarios
 ```
 
-#### Ventajas de Usar Conventional Commits
+### Ventajas de Usar Conventional Commits
 
 - **Consistencia**: Los mensajes son uniformes, lo que facilita la lectura del historial de commits.
 - **Automatización**: Se pueden generar changelogs automáticos y realizar versionado semántico.
@@ -245,10 +245,10 @@ Esta política asegura que cada commit refleje de manera precisa el trabajo real
 
 <div id='id52'></div>
 
-### ii. Política de Ramas.
+## ii. Política de Ramas.
 En nuestro proyecto seguimos el flujo de trabajo **Feature Branch Workflow**, el cual permite un desarrollo organizado y colaborativo. A continuación, se detalla el proceso que seguimos para gestionar las ramas:
 
-#### **1. Creación de ramas independientes**
+### **1. Creación de ramas independientes**
 - Para cada nueva funcionalidad o corrección, se crea una rama independiente basada en la rama principal (`main`).
 - Las ramas se nombran de manera descriptiva para identificar claramente su propósito, siguiendo estas convenciones:
   - **`feature/<descripción>`**: Para nuevas funcionalidades.
@@ -263,26 +263,26 @@ En nuestro proyecto seguimos el flujo de trabajo **Feature Branch Workflow**, el
 - `hotfix/error_critico_pago`
 - `docs/policy_documents`
 
-#### **2. Desarrollo en las ramas independientes**
+### **2. Desarrollo en las ramas independientes**
 - Todo el desarrollo relacionado con la funcionalidad o corrección específica se realiza dentro de la rama creada.
 - Esto asegura que la rama principal (`main`) permanezca siempre estable y lista para su uso.
 
-#### **3. Creación de una Pull Request**
+### **3. Creación de una Pull Request**
 - Una vez completado el desarrollo en la rama independiente, se crea una **Pull Request (PR)** hacia la rama principal (`main`).
 - En la PR, se describen los cambios realizados y se incluye cualquier información relevante.
 
-#### **4. Revisión por parte del equipo**
+### **4. Revisión por parte del equipo**
 - Nosotros hemos implementado que no haga falta revisión por parte del equipo, ya que eso consideramos que provoca retrasos a la hora de realizar el proyecto.
 - Como único requisito de revision tenemos que no se suba nada que de error, o fallo. Todo lo que se suba al repositorio debe ser funcional.
 
-#### **5. Fusión con la rama principal**
+### **5. Fusión con la rama principal**
 - La Pull Request será **mergeada** con la rama `main`.
 
-#### **6. Eliminación de la rama**
+### **6. Eliminación de la rama**
 - Después de la fusión, la rama de funcionalidad puede ser **eliminada** para mantener el repositorio limpio y organizado.
 - No tenemos la obligación impuesta de eliminar o no la rama. Hay libertad en este aspecto.
 
-#### **Ventajas de esta política**
+### **Ventajas de esta política**
 - **Colaboración efectiva**: La revisión por parte de otros desarrolladores mejora la calidad del código.
 - **Estructura clara**: Las ramas independientes organizan el trabajo y protegen la estabilidad de `main`.
 - **Control de calidad**: Solo los cambios revisados y aprobados llegan a `main`.
@@ -293,7 +293,7 @@ Con esta política, aseguramos un flujo de trabajo eficiente, colaborativo y de 
 <div id='id53'></div>
 
 
-### iii.Política de Issues.
+## iii.Política de Issues.
 Nuestro equipo ha decidido no seguir una política de Issues específica en cuanto al nombramiento de estas. Básicamente, los nombres de estas van a seguir un formato de explicación descriptiva de la Issue, y en inglés.
 
 A cada Issue se le asignará una etiqueta según sobre el tipo de issue que sea. Para ello vamos a usar las etiquetas dadas por defecto en github, junto a la adición de una nueva, que recibe el nombre `test`. Esta última no se encuentra en github, y la vamos a usar para las issues dedicadas a las pruebas.
@@ -306,10 +306,10 @@ Por último, se ha tomado la decisión de que las Issues se agruparán en Épica
 <div id='id54'></div>
 
 
-### iv. Política de Versionado.
+## iv. Política de Versionado.
 Nuestra política de versionado sigue el esquema **X.Y.Z**, el cual permite identificar de manera clara y estructurada los cambios realizados en el proyecto. Este sistema de versionado facilita el seguimiento de actualizaciones y asegura que todos los miembros del equipo comprendan el impacto de cada cambio en el proyecto.
 
-#### **1. Componente X (Versión Mayor)**
+### **1. Componente X (Versión Mayor)**
 - Representa cambios **grandes o disruptivos** que pueden hacer que versiones anteriores queden desfasadas o incompatibles.
 - Se utiliza para:
   - Modificaciones significativas en la estructura del proyecto.
@@ -319,7 +319,7 @@ Nuestra política de versionado sigue el esquema **X.Y.Z**, el cual permite iden
 **Ejemplo:**
 - De `1.5.2` a `2.0.0`: Se introduce una reestructuración completa del sistema.
 
-#### **2. Componente Y (Versión Menor)**
+### **2. Componente Y (Versión Menor)**
 - Representa **adiciones de nuevas funcionalidades** que no alteran la estructura general del proyecto ni rompen compatibilidad con versiones anteriores.
 - Se utiliza para:
   - Incorporar nuevas características.
@@ -328,7 +328,7 @@ Nuestra política de versionado sigue el esquema **X.Y.Z**, el cual permite iden
 **Ejemplo:**
 - De `1.5.2` a `1.6.0`: Se añade soporte para multilenguaje.
 
-#### **3. Componente Z (Correcciones o Cambios Menores)**
+### **3. Componente Z (Correcciones o Cambios Menores)**
 - Representa **pequeños ajustes, correcciones o mejoras** que no tienen un impacto significativo en el proyecto.
 - Se utiliza para:
   - Correcciones de errores o bugs.
@@ -338,7 +338,7 @@ Nuestra política de versionado sigue el esquema **X.Y.Z**, el cual permite iden
 **Ejemplo:**
 - De `1.5.2` a `1.5.3`: Se corrige un error en la validación del formulario de login.
 
-#### **Ventajas de esta Política**
+### **Ventajas de esta Política**
 1. **Claridad**: Permite entender el alcance de los cambios realizados con solo observar el número de versión.
 2. **Compatibilidad**: Facilita la planificación para asegurar compatibilidad entre versiones.
 3. **Colaboración**: Ayuda al equipo a priorizar cambios según su impacto en el proyecto.
@@ -349,10 +349,10 @@ Con esta política de versionado, aseguramos un control preciso y estructurado d
 <div id='id6'></div>
 
 
-### 6. Integración continua.
+# 6. Integración continua.
 En nuestro proyecto implementamos **Integración Continua (CI)** utilizando **GitHub Actions**. Esto nos permite mantener un flujo de trabajo eficiente, automatizado y con altos estándares de calidad.
 
-#### **Codacy**
+## **Codacy**
 Utilizamos **Codacy** como herramienta de análisis estático de código, que nos ayuda a garantizar la calidad y consistencia del código mediante:
 - **Revisión automática**: Detecta malas prácticas, problemas comunes y complejidad en el código.
 - **Cobertura de código**: Evalúa qué porcentaje del código está cubierto por pruebas.
@@ -360,7 +360,7 @@ Utilizamos **Codacy** como herramienta de análisis estático de código, que no
 
 Codacy se configura directamente con el repositorio, evaluando cada cambio que se realiza en el proyecto.
 
-#### **Update Coverage Badge**
+## **Update Coverage Badge**
 Hemos implementado un workflow llamado **Update Coverage Badge**, diseñado para mantener actualizado el badge de cobertura del código. Este workflow realiza las siguientes tareas:
 
 1. **Ejecuta pruebas**: Corre las pruebas unitarias y de integración para verificar el estado del proyecto.
@@ -371,7 +371,7 @@ Se ejecuta cada vez que:
 - Se realiza un `push` a la rama `main`.
 - Se abre o actualiza una pull request hacia `main`.
 
-#### **Beneficios de la Integración Continua**
+## **Beneficios de la Integración Continua**
 1. **Calidad del código**: Garantiza estándares altos gracias al análisis automático de Codacy.
 2. **Automatización**: Reduce tareas manuales con workflows que ejecutan pruebas y actualizan métricas.
 3. **Colaboración efectiva**: Los análisis y comentarios automáticos facilitan la revisión del código.
@@ -383,4 +383,42 @@ Con esta configuración, aseguramos un desarrollo ágil y de calidad, optimizand
 <div id='id7'></div>
 
 
-### 7. Despliegue continuo.
+# 7. Despliegue continuo.
+En nuestro proyecto, hemos implementado un sistema de **Despliegue Continuo (CD)** utilizando **GitHub Actions** y la plataforma **Render**. Este enfoque asegura que cada cambio aprobado en la rama principal (`main`) sea desplegado automáticamente en el entorno de producción, manteniendo un flujo de trabajo ágil y eficiente.
+
+## **Despliegue en Render**
+El despliegue automático se activa cada vez que se realiza un `push` a la rama `main`. El workflow de GitHub Actions realiza las siguientes tareas:
+
+1. **Ejecución de Pruebas de Integración**: Antes de proceder al despliegue, todas las pruebas deben pasar correctamente. Esto asegura que solo código funcional se despliegue en producción.
+2. **Automatización del Despliegue**: Una vez superadas las pruebas, el workflow despliega automáticamente la aplicación en la plataforma **Render**, actualizando la instancia en producción.
+
+Este proceso garantiza un despliegue confiable y rápido, eliminando la necesidad de realizar operaciones manuales.
+
+## **Zenhub Workflow**
+Adicionalmente, utilizamos un workflow personalizado llamado **Zenhub Workflow** para gestionar automáticamente las tareas relacionadas con los issues y pull requests en **Zenhub**, nuestra herramienta de gestión de proyectos.
+
+## **¿Qué hace el Zenhub Workflow?**
+1. **Detección de eventos**: El workflow se activa cuando se abren, editan o cierran issues, así como cuando se abren o cierran pull requests.
+2. **Actualización automática de pipelines**:
+   - Los issues y pull requests se mueven automáticamente entre los pipelines de **Zenhub**, según el evento que ocurra:
+     - **New Issues**: Cuando se abre un nuevo issue.
+     - **In Progress**: Cuando se abre un pull request.
+     - **Review/QA**: Cuando se cierra un pull request.
+     - **Done**: Cuando se cierra un issue.
+3. **Interacción con la API de Zenhub**:
+   - Utiliza la API de Zenhub para mover issues o pull requests al pipeline correspondiente, asegurando una gestión fluida y automatizada del flujo de trabajo.
+
+## **Beneficios del Despliegue Continuo**
+1. **Automatización Total**:
+   - Todo el proceso, desde la validación hasta el despliegue y la gestión de tareas, está completamente automatizado.
+   
+2. **Calidad Garantizada**:
+   - La ejecución de pruebas asegura que solo código funcional llega a producción.
+   
+3. **Gestión Eficiente**:
+   - El workflow de Zenhub sincroniza automáticamente el estado de las tareas, reduciendo la carga manual del equipo.
+   
+4. **Despliegue Rápido**:
+   - Los cambios llegan a producción en minutos, permitiendo iteraciones ágiles y una respuesta rápida a las necesidades del proyecto.
+
+Con estos workflows, hemos optimizado tanto el despliegue de nuestra aplicación como la gestión del flujo de trabajo del equipo, asegurando un desarrollo ágil y eficiente.
