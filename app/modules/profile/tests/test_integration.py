@@ -262,3 +262,21 @@ def test_access_nonexistent_route(test_client):
     """
     response = test_client.get("/profile/nonexistent")
     assert response.status_code == 404, "Expected 404 for non-existent route."
+
+
+def test_service_update_profile_with_missing_fields(test_client):
+    """
+    Tests the update_profile service method with missing fields.
+    """
+    with test_client.application.app_context():
+        from app.modules.profile.forms import UserProfileForm
+
+        service = UserProfileService()
+        incomplete_data = {
+            "name": "Test Name",  # Missing surname and other fields
+        }
+        form = UserProfileForm(data=incomplete_data)
+        result, errors = service.update_profile(1, form)
+
+        assert result is None, "Expected no result when fields are missing."
+        assert errors is not None, "Expected errors for missing fields."
