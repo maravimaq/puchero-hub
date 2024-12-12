@@ -150,3 +150,16 @@ def test_edit_profile_invalid_csrf_token(test_client):
     assert response.status_code in [302, 400], "Expected a 302 redirect or 400 error for invalid CSRF token."
 
     logout(test_client)
+
+
+def test_profile_routes_404(test_client):
+    """
+    Tests accessing non-existent routes in the profile blueprint.
+    """
+    login_response = login(test_client, "testuser@example.com", "test1234")
+    assert login_response.status_code == 200, "Login failed."
+
+    response = test_client.get("/profile/nonexistent_route", follow_redirects=False)
+    assert response.status_code == 404, "Non-existent route should return a 404."
+
+    logout(test_client)
