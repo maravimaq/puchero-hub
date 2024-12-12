@@ -105,3 +105,23 @@ def test_view_profile_edit_redirects_unauthenticated(test_client):
     response = test_client.get("/profile/edit", follow_redirects=False)
     assert response.status_code == 302, "Unauthenticated users should be redirected."
     assert "/login" in response.headers["Location"], "Redirect should be to the login page."
+
+
+def test_model_user_profile_save(test_client):
+    """
+    Tests the save method of the UserProfile model.
+    """
+    with test_client.application.app_context():
+        # Create a new UserProfile instance and save it
+        user = User(email="save_test_user@example.com", password="password123")
+        db.session.add(user)
+        db.session.commit()
+
+        profile = UserProfile(user_id=user.id, name="SaveTest", surname="User")
+        profile.save()
+
+        # Verify the instance was saved
+        saved_profile = UserProfile.query.filter_by(user_id=user.id).first()
+        assert saved_profile is not None, "UserProfile was not saved correctly."
+        assert saved_profile.name == "SaveTest", "UserProfile name is incorrect."
+        assert saved_profile.surname == "User", "UserProfile surname is incorrect."
