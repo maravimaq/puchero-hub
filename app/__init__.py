@@ -1,8 +1,8 @@
 import os
 
 from flask import Flask
-
 from flask_sqlalchemy import SQLAlchemy
+from flask_wtf.csrf import CSRFProtect
 from dotenv import load_dotenv
 from flask_migrate import Migrate
 
@@ -18,6 +18,7 @@ load_dotenv()
 # Create the instances
 db = SQLAlchemy()
 migrate = Migrate()
+csrf = CSRFProtect()
 
 
 def create_app(config_name='development'):
@@ -30,6 +31,15 @@ def create_app(config_name='development'):
     # Initialize SQLAlchemy and Migrate with the app
     db.init_app(app)
     migrate.init_app(app, db)
+
+    # Initialize CSRF protection
+    csrf.init_app(app)
+    
+    @csrf.error_handler
+    def csrf_error(reason):
+        app.logger.error(f"CSRF error: {reason}")
+        return "Invalid CSRF token. Access denied.", 400
+
 
     # Register modules
     module_manager = ModuleManager(app)
