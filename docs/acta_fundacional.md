@@ -293,7 +293,13 @@ Con esta política, aseguramos un flujo de trabajo eficiente, colaborativo y de 
 
 
 ### iii.Política de Issues.
+Nuestro equipo ha decidido no seguir una política de Issues específica en cuanto al nombramiento de estas. Básicamente, los nombres de estas van a seguir un formato de explicación descriptiva de la Issue, y en inglés.
 
+A cada Issue se le asignará una etiqueta según sobre el tipo de issue que sea. Para ello vamos a usar las etiquetas dadas por defecto en github, junto a la adición de una nueva, que recibe el nombre `test`. Esta última no se encuentra en github, y la vamos a usar para las issues dedicadas a las pruebas.
+
+Además, para el uso y empleo detallado de las issues, hemos usado la extensión y plataforma Zenhub, la cuál mediante un tablero nos permite conectar las issues a las pull requests, y que en este tablero, se desplacen automáticamente al estar conectadas, y tras realizar una pull request sobre esa issue.
+
+Por último, se ha tomado la decisión de que las Issues se agruparán en Épicas para así mantener una organización más específica y detallada.
 
 
 <div id='id54'></div>
