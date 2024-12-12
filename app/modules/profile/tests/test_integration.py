@@ -78,3 +78,30 @@ def test_profile_summary_invalid_pagination(test_client):
     assert b"User profile" in response.data, "Profile summary did not load with invalid pagination."
 
     logout(test_client)
+
+
+def test_public_profile_access_denied_for_self(test_client):
+    """
+    Tests that users cannot access their own public profile via /public_profile/<user_id>.
+    """
+    login_response = login(test_client, "testuser@example.com", "test1234")
+    assert login_response.status_code == 200, "Login failed."
+
+    with test_client.application.app_context():
+        user = User.query.filter_by(email="testuser@example.com").first()
+
+    response = test_client.get(f"/public_profile/{user.id}")
+    assert response.status_code == 403, "Users should not be able to access their own public profile."
+
+    logout(test_client)
+
+
+def test_view_profile_edit_redirects_unauthenticated(test_client):
+    """
+    Tests that unauthenticated users are redirected when attempting to access the edit profile page.
+    """
+    logout(test_client)  # Ensure no user is logged in.
+
+    response = test_client.get("/profile/edit", follow_redirects=False)
+    assert response.status_code == 302, "Unauthenticated users should be redirected."
+    assert "/login" in response.headers["Location"], "Redirect should be to the login page."
