@@ -254,3 +254,11 @@ def test_invalid_method_on_existing_route(test_client):
     """
     response = test_client.put("/profile/summary")
     assert response.status_code == 405, "Expected 405 for unsupported HTTP method on /profile/summary."
+
+
+def test_access_nonexistent_route(test_client):
+    """
+    Tests accessing a non-existent route in the profile blueprint.
+    """
+    response = test_client.get("/profile/nonexistent")
+    assert response.status_code == 404, "Expected 404 for non-existent route."
