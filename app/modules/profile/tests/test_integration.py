@@ -1,4 +1,5 @@
 from app.modules.auth.services import AuthenticationService
+from app.modules.profile.services import UserProfileService
 import pytest
 from app import db
 from app.modules.auth.models import User
@@ -163,3 +164,26 @@ def test_profile_routes_404(test_client):
     assert response.status_code == 404, "Non-existent route should return a 404."
 
     logout(test_client)
+
+
+def test_service_update_profile_invalid_id(test_client):
+    """
+    Tests the update_profile service method with an invalid user_profile_id.
+    """
+    with test_client.application.app_context():
+        from app.modules.profile.forms import UserProfileForm
+        
+        service = UserProfileService()
+        form_data = {
+            "name": "Test",
+            "surname": "Invalid",
+            "orcid": "0000-0003-1825-0097",
+            "affiliation": "Test Affiliation",
+        }
+        form = UserProfileForm(data=form_data)
+        result, errors = service.update_profile(-1, form)
+
+        # Verifica el resultado y los errores
+        assert result is None, "Expected no result for invalid profile ID."
+        assert errors is not None, "Expected errors for invalid profile ID."
+        assert "UserProfile with id -1 does not exist." in errors.get("error", ""), "Expected specific error message for invalid profile ID."
