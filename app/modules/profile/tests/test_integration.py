@@ -48,3 +48,33 @@ def test_update_profile_invalid_method(test_client):
     logout(test_client)
 
 
+def test_profile_summary_pagination(test_client):
+    """
+    Tests that the profile summary handles pagination correctly.
+    """
+    login_response = login(test_client, "testuser@example.com", "test1234")
+    assert login_response.status_code == 200, "Login failed."
+
+    response = test_client.get("/profile/summary?page=2")
+    assert response.status_code == 200, "Failed to access profile summary with pagination."
+
+    if b"No datasets uploaded" not in response.data:
+        # Debugging message for datasets found
+        datasets = db.session.query(DataSet).filter_by(user_id=1).offset(5).all()
+        assert not datasets, f"Unexpected datasets found on page 2: {datasets}"
+
+    logout(test_client)
+
+
+def test_profile_summary_invalid_pagination(test_client):
+    """
+    Tests that the profile summary handles invalid page numbers gracefully.
+    """
+    login_response = login(test_client, "testuser@example.com", "test1234")
+    assert login_response.status_code == 200, "Login failed."
+
+    response = test_client.get("/profile/summary?page=invalid")
+    assert response.status_code == 200, "Invalid pagination parameter should not cause a crash."
+    assert b"User profile" in response.data, "Profile summary did not load with invalid pagination."
+
+    logout(test_client)
