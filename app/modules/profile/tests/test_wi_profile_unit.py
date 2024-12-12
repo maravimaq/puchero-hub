@@ -8,11 +8,15 @@ from app.modules.dataset.models import DataSet, DSMetaData, PublicationType
 @pytest.fixture(scope="module")
 def test_client(test_client):
     """
-    Extiende el fixture test_client para añadir datos específicos de prueba.
+    Extends the test_client fixture to add specific test data.
     """
     with test_client.application.app_context():
         user = User(email='testuser@example.com', password='testpassword')
         db.session.add(user)
+        db.session.commit()
+
+        other_user = User(email='otheruser@example.com', password='otherpassword')
+        db.session.add(other_user)
         db.session.commit()
 
         metadata1 = DSMetaData(
@@ -23,7 +27,7 @@ def test_client(test_client):
         db.session.add(metadata1)
         db.session.commit()
 
-        dataset1 = DataSet(user_id=user.id, ds_meta_data_id=metadata1.id)
+        dataset1 = DataSet(user_id=other_user.id, ds_meta_data_id=metadata1.id)
         db.session.add(dataset1)
         db.session.commit()
 
@@ -38,13 +42,13 @@ def test_view_user_datasets_success(test_client):
     assert login_response.status_code == 200
 
     with test_client.application.app_context():
-        user = User.query.filter_by(email='testuser@example.com').first()
-        user_id = user.id
+        other_user = User.query.filter_by(email='otheruser@example.com').first()
+        other_user_id = other_user.id
 
-    response = test_client.get(f"/public_profile/{user_id}")
-    assert response.status_code == 200
-    assert b"Dataset 1 Metadata" in response.data
-    assert b"Journal Article" in response.data
+    response = test_client.get(f"/public_profile/{other_user_id}")
+    assert response.status_code == 200, "Failed to access the public profile of another user."
+    assert b"Dataset 1 Metadata" in response.data, "Dataset details are not displayed."
+    assert b"Journal Article" in response.data, "Dataset publication type is missing."
     logout(test_client)
 
 
@@ -81,14 +85,14 @@ def test_view_user_datasets_html_structure(test_client):
     assert login_response.status_code == 200
 
     with test_client.application.app_context():
-        user = User.query.filter_by(email="testuser@example.com").first()
+        other_user = User.query.filter_by(email="otheruser@example.com").first()
 
-    response = test_client.get(f"/public_profile/{user.id}")
-    assert response.status_code == 200
-    assert b"<table" in response.data
-    assert b"<thead" in response.data
-    assert b"<tbody" in response.data
-    assert b"<tr" in response.data
+    response = test_client.get(f"/public_profile/{other_user.id}")
+    assert response.status_code == 200, "Failed to access the public profile page."
+    assert b"<table" in response.data, "Table structure is missing."
+    assert b"<thead" in response.data, "Table headers are missing."
+    assert b"<tbody" in response.data, "Table body is missing."
+    assert b"<tr" in response.data, "Table rows are missing."
     logout(test_client)
 
 
@@ -100,12 +104,12 @@ def test_view_user_datasets_contains_correct_headers(test_client):
     assert login_response.status_code == 200
 
     with test_client.application.app_context():
-        user = User.query.filter_by(email="testuser@example.com").first()
-        user_id = user.id
+        other_user = User.query.filter_by(email="otheruser@example.com").first()
+        other_user_id = other_user.id
 
-    response = test_client.get(f"/public_profile/{user_id}")
-    assert response.status_code == 200
-    assert b"<th>Title</th>" in response.data
-    assert b"<th>Publication type</th>" in response.data
+    response = test_client.get(f"/public_profile/{other_user_id}")
+    assert response.status_code == 200, "Failed to access the public profile page."
+    assert b"<th>Title</th>" in response.data, "Title header is missing."
+    assert b"<th>Publication type</th>" in response.data, "Publication type header is missing."
 
     logout(test_client)
