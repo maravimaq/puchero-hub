@@ -34,12 +34,6 @@ def create_app(config_name='development'):
 
     # Initialize CSRF protection
     csrf.init_app(app)
-    
-    @csrf.error_handler
-    def csrf_error(reason):
-        app.logger.error(f"CSRF error: {reason}")
-        return "Invalid CSRF token. Access denied.", 400
-
 
     # Register modules
     module_manager = ModuleManager(app)
@@ -63,6 +57,14 @@ def create_app(config_name='development'):
     # Initialize error handler manager
     error_handler_manager = ErrorHandlerManager(app)
     error_handler_manager.register_error_handlers()
+
+    # Handle CSRF errors
+    @app.errorhandler(400)
+    def handle_csrf_error(error):
+        app.logger.error(f"CSRF error: {error}")
+        if "CSRF token" in str(error):
+            return "Invalid CSRF token. Access denied.", 400
+        return "Bad request.", 400
 
     # Injecting environment variables into jinja context
     @app.context_processor
