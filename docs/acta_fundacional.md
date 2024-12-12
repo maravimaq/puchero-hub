@@ -27,8 +27,9 @@
 - [iii.Política de Issues ](#id53)
 - [iv. Política de Versionado ](#id54)
 6. [Integración Continua](#id6)
-7. [Gestión de Conflictos](#id7)
-8. [Gestión de Incidencias](#id8)
+7. [Despliegue Continuo](#id7)
+8. [Gestión de Conflictos](#id8)
+9. [Gestión de Incidencias](#id9)
 
 
 <div id='id1'></div>
@@ -343,3 +344,43 @@ Nuestra política de versionado sigue el esquema **X.Y.Z**, el cual permite iden
 3. **Colaboración**: Ayuda al equipo a priorizar cambios según su impacto en el proyecto.
 
 Con esta política de versionado, aseguramos un control preciso y estructurado de las actualizaciones del proyecto, mejorando la comunicación dentro del equipo y con los usuarios.
+
+
+<div id='id6'></div>
+
+
+### 6. Integración continua.
+En nuestro proyecto implementamos **Integración Continua (CI)** utilizando **GitHub Actions**. Esto nos permite mantener un flujo de trabajo eficiente, automatizado y con altos estándares de calidad.
+
+#### **Codacy**
+Utilizamos **Codacy** como herramienta de análisis estático de código, que nos ayuda a garantizar la calidad y consistencia del código mediante:
+- **Revisión automática**: Detecta malas prácticas, problemas comunes y complejidad en el código.
+- **Cobertura de código**: Evalúa qué porcentaje del código está cubierto por pruebas.
+- **Integración con GitHub**: Proporciona comentarios automáticos en pull requests, facilitando la colaboración del equipo.
+
+Codacy se configura directamente con el repositorio, evaluando cada cambio que se realiza en el proyecto.
+
+#### **Update Coverage Badge**
+Hemos implementado un workflow llamado **Update Coverage Badge**, diseñado para mantener actualizado el badge de cobertura del código. Este workflow realiza las siguientes tareas:
+
+1. **Ejecuta pruebas**: Corre las pruebas unitarias y de integración para verificar el estado del proyecto.
+2. **Genera un badge de cobertura**: Muestra visualmente el porcentaje de código cubierto por pruebas.
+3. **Actualiza el badge automáticamente**: Sube el badge actualizado al repositorio, resolviendo conflictos si los hay.
+
+Se ejecuta cada vez que:
+- Se realiza un `push` a la rama `main`.
+- Se abre o actualiza una pull request hacia `main`.
+
+#### **Beneficios de la Integración Continua**
+1. **Calidad del código**: Garantiza estándares altos gracias al análisis automático de Codacy.
+2. **Automatización**: Reduce tareas manuales con workflows que ejecutan pruebas y actualizan métricas.
+3. **Colaboración efectiva**: Los análisis y comentarios automáticos facilitan la revisión del código.
+4. **Visibilidad**: El badge de cobertura y las métricas de Codacy proporcionan información clara y actualizada.
+
+Con esta configuración, aseguramos un desarrollo ágil y de calidad, optimizando el flujo de trabajo del equipo.
+
+
+<div id='id7'></div>
+
+
+### 7. Despliegue continuo.
