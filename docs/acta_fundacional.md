@@ -306,3 +306,40 @@ Por último, se ha tomado la decisión de que las Issues se agruparán en Épica
 
 
 ### iv. Política de Versionado.
+Nuestra política de versionado sigue el esquema **X.Y.Z**, el cual permite identificar de manera clara y estructurada los cambios realizados en el proyecto. Este sistema de versionado facilita el seguimiento de actualizaciones y asegura que todos los miembros del equipo comprendan el impacto de cada cambio en el proyecto.
+
+#### **1. Componente X (Versión Mayor)**
+- Representa cambios **grandes o disruptivos** que pueden hacer que versiones anteriores queden desfasadas o incompatibles.
+- Se utiliza para:
+  - Modificaciones significativas en la estructura del proyecto.
+  - Cambios que impacten la base del sistema o introduzcan una nueva arquitectura.
+  - Lanzamientos que no sean compatibles hacia atrás con versiones anteriores.
+
+**Ejemplo:**
+- De `1.5.2` a `2.0.0`: Se introduce una reestructuración completa del sistema.
+
+#### **2. Componente Y (Versión Menor)**
+- Representa **adiciones de nuevas funcionalidades** que no alteran la estructura general del proyecto ni rompen compatibilidad con versiones anteriores.
+- Se utiliza para:
+  - Incorporar nuevas características.
+  - Mejoras significativas en el sistema que no impactan la base existente.
+
+**Ejemplo:**
+- De `1.5.2` a `1.6.0`: Se añade soporte para multilenguaje.
+
+#### **3. Componente Z (Correcciones o Cambios Menores)**
+- Representa **pequeños ajustes, correcciones o mejoras** que no tienen un impacto significativo en el proyecto.
+- Se utiliza para:
+  - Correcciones de errores o bugs.
+  - Mejoras menores en el rendimiento.
+  - Cambios triviales en la documentación o pruebas.
+
+**Ejemplo:**
+- De `1.5.2` a `1.5.3`: Se corrige un error en la validación del formulario de login.
+
+#### **Ventajas de esta Política**
+1. **Claridad**: Permite entender el alcance de los cambios realizados con solo observar el número de versión.
+2. **Compatibilidad**: Facilita la planificación para asegurar compatibilidad entre versiones.
+3. **Colaboración**: Ayuda al equipo a priorizar cambios según su impacto en el proyecto.
+
+Con esta política de versionado, aseguramos un control preciso y estructurado de las actualizaciones del proyecto, mejorando la comunicación dentro del equipo y con los usuarios.
