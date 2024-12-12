@@ -206,3 +206,23 @@ def test_service_update_profile_required_fields(test_client):
         assert "surname" in form.errors, f"Expected 'surname' error, got {form.errors}"
         assert "orcid" in form.errors, f"Expected 'orcid' error, got {form.errors}"
         assert "Invalid ORCID format" in form.errors["orcid"], f"Expected 'Invalid ORCID format' in 'orcid' errors, got {form.errors['orcid']}"
+
+
+def test_service_update_profile_orcid_format(test_client):
+    """
+    Tests the update_profile service method for ORCID format validation errors.
+    """
+    with test_client.application.app_context():
+        from app.modules.profile.forms import UserProfileForm
+
+        invalid_form_data = {
+            "name": "Valid Name",
+            "surname": "Valid Surname",
+            "orcid": "0000-0000-0000-000X",
+            "affiliation": "Valid Affiliation",
+        }
+        form = UserProfileForm(data=invalid_form_data)
+        is_valid = form.validate()
+
+        assert not is_valid, "Expected the form to be invalid due to ORCID format."
+        assert "orcid" in form.errors, f"Expected 'orcid' error in form errors. Errors: {form.errors}"
