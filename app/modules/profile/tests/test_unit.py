@@ -37,6 +37,7 @@ def test_edit_profile_page_get(test_client):
 
     logout(test_client)
 
+
 def test_view_other_user_profile(test_client):
     """
     Tests accessing another user's profile page.
@@ -60,6 +61,7 @@ def test_view_other_user_profile(test_client):
 
     logout(test_client)
 
+
 def test_view_nonexistent_profile(test_client):
     """
     Tests that accessing a nonexistent user's profile returns a 404 error.
@@ -72,6 +74,7 @@ def test_view_nonexistent_profile(test_client):
     assert response.status_code == 404, "Expected a 404 error for a nonexistent profile."
 
     logout(test_client)
+
 
 def test_view_profile_unauthenticated(test_client):
     """
@@ -88,6 +91,7 @@ def test_view_profile_unauthenticated(test_client):
     response = test_client.get(f"/public_profile/{user_id}", follow_redirects=False)
     assert response.status_code == 302, "Unauthenticated access should redirect."
     assert "/login" in response.headers["Location"], "Unauthenticated access should redirect to the login page."
+
 
 def test_view_profile_invalid_page(test_client):
     """
@@ -112,6 +116,8 @@ def test_view_profile_invalid_page(test_client):
     assert response.status_code == 200, "Invalid page parameter should not crash the app."
     assert b"User profile" in response.data, "The profile page is not rendering as expected with invalid pagination."
     logout(test_client)
+
+
 '''
 def test_update_profile_success(test_client):
     """
@@ -145,6 +151,8 @@ def test_update_profile_success(test_client):
 
     logout(test_client)
 '''
+
+
 def test_view_profile_sensitive_data_not_exposed(test_client):
     """
     Tests that sensitive data (e.g., passwords) is not exposed in the profile response.
