@@ -246,3 +246,11 @@ def test_service_update_profile_affiliation_length(test_client):
 
         assert not is_valid, "Expected the form to be invalid due to short affiliation."
         assert "affiliation" in form.errors, f"Expected 'affiliation' error in form errors. Errors: {form.errors}"
+
+
+def test_invalid_method_on_existing_route(test_client):
+    """
+    Tests unsupported HTTP methods on an existing route.
+    """
+    response = test_client.put("/profile/summary")
+    assert response.status_code == 405, "Expected 405 for unsupported HTTP method on /profile/summary."
