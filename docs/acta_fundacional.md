@@ -35,7 +35,7 @@
 <div id='id1'></div>
 
 
-# 1. Miembros de puchero-hub.
+# 1. Miembros de puchero-hub
 <div style="text-align: center;">
   <table style="margin: auto; border-collapse: collapse; width: 60%;">
     <thead>
@@ -94,7 +94,7 @@ El proyecto tiene como requisitos principales el cumpliemento de una serie de mi
 <div id='id3'></div>
 
 
-# 3. Roles del equipo.
+# 3. Roles del equipo
 El equipo está formado por los miembros mencionados anteriormente, pero aparte de estos miembros, el desarrollo del proyecto tiene una estructura de organización a tener en cuenta. Dicha estructura está repartida en dos roles y/o escalones, *Director del proyecto* y *Equipo de desarrollo*:
 
 - **Equipo de desarrollo**:
@@ -111,10 +111,10 @@ El equipo está formado por los miembros mencionados anteriormente, pero aparte 
 <div id='id4'></div>
 
 
-# 4. Repositorio en GitHub.
+# 4. Repositorio en GitHub
 Nuestro proyecto se ha realizado subiendo dicho proyecto a un repositorio común en la plataforma GitHub. Este repositorio es el siguiente: [Puchero-hub](https://github.com/maravimaq/puchero-hub.git).
 
-## i. Estructura del repositorio.
+## i. Estructura del repositorio
 La estructura principal del proyecto consta de las siguientes carpetas y archivos. Dentro de las carpetas hay más información detallada, pero en este caso hemos decidido mostrar principalmente la estructura del proyecto en general, sin entrar mucho en detalles, nada más para explicar en que consiste cada archivos y carpeta:
 
 <div id='id41'></div>
@@ -182,7 +182,7 @@ En esta sección vamos a hablar de las distintas políticas a seguir por el equi
 
 <div id='id51'></div>
 
-## i. Política de Commits.
+## i. Política de Commits
 Nuestro equipo sigue una política de commits que se llama **Conventional Commits**. # Política de Commits: Conventional Commits
 
 La política **Conventional Commits** es un estándar ampliamente utilizado para redactar mensajes de commits de manera clara y estructurada. Su objetivo principal es mantener un historial consistente y fácil de entender, facilitando el trabajo en equipo, la revisión de cambios y el uso de herramientas automatizadas como generación de changelogs y versionado semántico.
@@ -245,7 +245,7 @@ Esta política asegura que cada commit refleje de manera precisa el trabajo real
 
 <div id='id52'></div>
 
-## ii. Política de Ramas.
+## ii. Política de Ramas
 En nuestro proyecto seguimos el flujo de trabajo **Feature Branch Workflow**, el cual permite un desarrollo organizado y colaborativo. A continuación, se detalla el proceso que seguimos para gestionar las ramas:
 
 ### **1. Creación de ramas independientes**
@@ -293,7 +293,7 @@ Con esta política, aseguramos un flujo de trabajo eficiente, colaborativo y de 
 <div id='id53'></div>
 
 
-## iii.Política de Issues.
+## iii.Política de Issues
 Nuestro equipo ha decidido no seguir una política de Issues específica en cuanto al nombramiento de estas. Básicamente, los nombres de estas van a seguir un formato de explicación descriptiva de la Issue, y en inglés.
 
 A cada Issue se le asignará una etiqueta según sobre el tipo de issue que sea. Para ello vamos a usar las etiquetas dadas por defecto en github, junto a la adición de una nueva, que recibe el nombre `test`. Esta última no se encuentra en github, y la vamos a usar para las issues dedicadas a las pruebas.
@@ -306,7 +306,7 @@ Por último, se ha tomado la decisión de que las Issues se agruparán en Épica
 <div id='id54'></div>
 
 
-## iv. Política de Versionado.
+## iv. Política de Versionado
 Nuestra política de versionado sigue el esquema **X.Y.Z**, el cual permite identificar de manera clara y estructurada los cambios realizados en el proyecto. Este sistema de versionado facilita el seguimiento de actualizaciones y asegura que todos los miembros del equipo comprendan el impacto de cada cambio en el proyecto.
 
 ### **1. Componente X (Versión Mayor)**
@@ -349,7 +349,7 @@ Con esta política de versionado, aseguramos un control preciso y estructurado d
 <div id='id6'></div>
 
 
-# 6. Integración continua.
+# 6. Integración continua
 En nuestro proyecto implementamos **Integración Continua (CI)** utilizando **GitHub Actions**. Esto nos permite mantener un flujo de trabajo eficiente, automatizado y con altos estándares de calidad.
 
 ## **Codacy**
@@ -383,7 +383,7 @@ Con esta configuración, aseguramos un desarrollo ágil y de calidad, optimizand
 <div id='id7'></div>
 
 
-# 7. Despliegue continuo.
+# 7. Despliegue continuo
 En nuestro proyecto, hemos implementado un sistema de **Despliegue Continuo (CD)** utilizando **GitHub Actions** y la plataforma **Render**. Este enfoque asegura que cada cambio aprobado en la rama principal (`main`) sea desplegado automáticamente en el entorno de producción, manteniendo un flujo de trabajo ágil y eficiente.
 
 ## **Despliegue en Render**
@@ -422,3 +422,44 @@ Adicionalmente, utilizamos un workflow personalizado llamado **Zenhub Workflow**
    - Los cambios llegan a producción en minutos, permitiendo iteraciones ágiles y una respuesta rápida a las necesidades del proyecto.
 
 Con estos workflows, hemos optimizado tanto el despliegue de nuestra aplicación como la gestión del flujo de trabajo del equipo, asegurando un desarrollo ágil y eficiente.
+
+
+<div id='id8'></div>
+
+
+# 8. Gestión de Conflictos
+En nuestro equipo, reconocemos que los conflictos pueden surgir durante el desarrollo del proyecto. Para mantener un entorno de trabajo colaborativo y eficiente, hemos establecido procedimientos claros para gestionar y resolver estos conflictos de manera justa y constructiva.
+
+## **Conflicto: Inactividad de algún miembro del equipo**
+### **Solución:**
+1. Los miembros del equipo se pondrán en contacto con la persona implicada para dialogar sobre la situación e invitarla a retomar su participación.
+2. Si, tras un tiempo razonable, la persona sigue sin mostrar actividad o intención de contribuir al proyecto:
+   - Se informará al profesor para que gestione la posible baja del miembro en cuestión.
+
+## **Conflicto: Retraso significativo en la entrega de una tarea**
+### **Solución:**
+1. Si un miembro tiene dificultades para completar una tarea, deberá:
+   - Notificarlo al equipo lo antes posible.
+   - Explicar las causas del bloqueo.
+   - Solicitar ayuda de uno o más compañeros si es necesario.
+2. Si no se informa del problema con antelación y esto resulta en un retraso que afecta negativamente al proyecto:
+   - Se aplicará una reducción en los puntos de implicación asignados a dicho miembro.
+
+## **Conflicto: Diferencias de opinión sobre temas del trabajo**
+### **Solución:**
+1. Las diferencias de opinión se resolverán internamente mediante diálogo y búsqueda de consenso entre los miembros del equipo.
+2. En casos extremos, si no se logra un acuerdo, se recurrirá al coordinador del proyecto para que actúe como mediador.
+
+## **Conflicto: Un miembro no sigue las políticas de desarrollo del equipo**
+### **Solución:**
+1. Se informará al miembro sobre las políticas de desarrollo que no está cumpliendo, recordándole la importancia de seguir las normas acordadas por el equipo.
+2. Si persiste en aplicar su propia metodología y no se adapta a las políticas del equipo:
+   - Se informará al tutor, quien evaluará la situación. Esto podría resultar en una reducción de la calificación del miembro afectado.
+
+## **Propósito de estas Políticas**
+Estas medidas están diseñadas para:
+- Fomentar la comunicación y la colaboración.
+- Resolver conflictos de forma constructiva y justa.
+- Mantener la calidad y el ritmo de trabajo del proyecto.
+
+Al seguir estas directrices, buscamos garantizar un entorno de trabajo productivo y respetuoso para todos los miembros del equipo.
