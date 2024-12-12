@@ -27,8 +27,9 @@
 - [iii.Política de Issues ](#id53)
 - [iv. Política de Versionado ](#id54)
 6. [Integración Continua](#id6)
-7. [Gestión de Conflictos](#id7)
-8. [Gestión de Incidencias](#id8)
+7. [Despliegue Continuo](#id7)
+8. [Gestión de Conflictos](#id8)
+9. [Gestión de Incidencias](#id9)
 
 
 <div id='id1'></div>
@@ -244,18 +245,142 @@ Esta política asegura que cada commit refleje de manera precisa el trabajo real
 
 <div id='id52'></div>
 
-
 ### ii. Política de Ramas.
+En nuestro proyecto seguimos el flujo de trabajo **Feature Branch Workflow**, el cual permite un desarrollo organizado y colaborativo. A continuación, se detalla el proceso que seguimos para gestionar las ramas:
+
+#### **1. Creación de ramas independientes**
+- Para cada nueva funcionalidad o corrección, se crea una rama independiente basada en la rama principal (`main`).
+- Las ramas se nombran de manera descriptiva para identificar claramente su propósito, siguiendo estas convenciones:
+  - **`feature/<descripción>`**: Para nuevas funcionalidades.
+  - **`fix/<descripción>`**: Para correcciones de errores.
+  - **`hotfix/<descripción>`**: Para correcciones críticas en producción.
+  - **`docs/<descripcion>`**: Para documentos.
+
+**Ejemplos de nombres de ramas:**
+- `feature/autenticacion_usuario`
+- `feature/soporte_multilenguaje`
+- `fix/correccion_login`
+- `hotfix/error_critico_pago`
+- `docs/policy_documents`
+
+#### **2. Desarrollo en las ramas independientes**
+- Todo el desarrollo relacionado con la funcionalidad o corrección específica se realiza dentro de la rama creada.
+- Esto asegura que la rama principal (`main`) permanezca siempre estable y lista para su uso.
+
+#### **3. Creación de una Pull Request**
+- Una vez completado el desarrollo en la rama independiente, se crea una **Pull Request (PR)** hacia la rama principal (`main`).
+- En la PR, se describen los cambios realizados y se incluye cualquier información relevante.
+
+#### **4. Revisión por parte del equipo**
+- Nosotros hemos implementado que no haga falta revisión por parte del equipo, ya que eso consideramos que provoca retrasos a la hora de realizar el proyecto.
+- Como único requisito de revision tenemos que no se suba nada que de error, o fallo. Todo lo que se suba al repositorio debe ser funcional.
+
+#### **5. Fusión con la rama principal**
+- La Pull Request será **mergeada** con la rama `main`.
+
+#### **6. Eliminación de la rama**
+- Después de la fusión, la rama de funcionalidad puede ser **eliminada** para mantener el repositorio limpio y organizado.
+- No tenemos la obligación impuesta de eliminar o no la rama. Hay libertad en este aspecto.
+
+#### **Ventajas de esta política**
+- **Colaboración efectiva**: La revisión por parte de otros desarrolladores mejora la calidad del código.
+- **Estructura clara**: Las ramas independientes organizan el trabajo y protegen la estabilidad de `main`.
+- **Control de calidad**: Solo los cambios revisados y aprobados llegan a `main`.
+
+Con esta política, aseguramos un flujo de trabajo eficiente, colaborativo y de alta calidad en el desarrollo de nuestro proyecto.
 
 
 <div id='id53'></div>
 
 
 ### iii.Política de Issues.
+Nuestro equipo ha decidido no seguir una política de Issues específica en cuanto al nombramiento de estas. Básicamente, los nombres de estas van a seguir un formato de explicación descriptiva de la Issue, y en inglés.
 
+A cada Issue se le asignará una etiqueta según sobre el tipo de issue que sea. Para ello vamos a usar las etiquetas dadas por defecto en github, junto a la adición de una nueva, que recibe el nombre `test`. Esta última no se encuentra en github, y la vamos a usar para las issues dedicadas a las pruebas.
+
+Además, para el uso y empleo detallado de las issues, hemos usado la extensión y plataforma Zenhub, la cuál mediante un tablero nos permite conectar las issues a las pull requests, y que en este tablero, se desplacen automáticamente al estar conectadas, y tras realizar una pull request sobre esa issue.
+
+Por último, se ha tomado la decisión de que las Issues se agruparán en Épicas para así mantener una organización más específica y detallada.
 
 
 <div id='id54'></div>
 
 
 ### iv. Política de Versionado.
+Nuestra política de versionado sigue el esquema **X.Y.Z**, el cual permite identificar de manera clara y estructurada los cambios realizados en el proyecto. Este sistema de versionado facilita el seguimiento de actualizaciones y asegura que todos los miembros del equipo comprendan el impacto de cada cambio en el proyecto.
+
+#### **1. Componente X (Versión Mayor)**
+- Representa cambios **grandes o disruptivos** que pueden hacer que versiones anteriores queden desfasadas o incompatibles.
+- Se utiliza para:
+  - Modificaciones significativas en la estructura del proyecto.
+  - Cambios que impacten la base del sistema o introduzcan una nueva arquitectura.
+  - Lanzamientos que no sean compatibles hacia atrás con versiones anteriores.
+
+**Ejemplo:**
+- De `1.5.2` a `2.0.0`: Se introduce una reestructuración completa del sistema.
+
+#### **2. Componente Y (Versión Menor)**
+- Representa **adiciones de nuevas funcionalidades** que no alteran la estructura general del proyecto ni rompen compatibilidad con versiones anteriores.
+- Se utiliza para:
+  - Incorporar nuevas características.
+  - Mejoras significativas en el sistema que no impactan la base existente.
+
+**Ejemplo:**
+- De `1.5.2` a `1.6.0`: Se añade soporte para multilenguaje.
+
+#### **3. Componente Z (Correcciones o Cambios Menores)**
+- Representa **pequeños ajustes, correcciones o mejoras** que no tienen un impacto significativo en el proyecto.
+- Se utiliza para:
+  - Correcciones de errores o bugs.
+  - Mejoras menores en el rendimiento.
+  - Cambios triviales en la documentación o pruebas.
+
+**Ejemplo:**
+- De `1.5.2` a `1.5.3`: Se corrige un error en la validación del formulario de login.
+
+#### **Ventajas de esta Política**
+1. **Claridad**: Permite entender el alcance de los cambios realizados con solo observar el número de versión.
+2. **Compatibilidad**: Facilita la planificación para asegurar compatibilidad entre versiones.
+3. **Colaboración**: Ayuda al equipo a priorizar cambios según su impacto en el proyecto.
+
+Con esta política de versionado, aseguramos un control preciso y estructurado de las actualizaciones del proyecto, mejorando la comunicación dentro del equipo y con los usuarios.
+
+
+<div id='id6'></div>
+
+
+### 6. Integración continua.
+En nuestro proyecto implementamos **Integración Continua (CI)** utilizando **GitHub Actions**. Esto nos permite mantener un flujo de trabajo eficiente, automatizado y con altos estándares de calidad.
+
+#### **Codacy**
+Utilizamos **Codacy** como herramienta de análisis estático de código, que nos ayuda a garantizar la calidad y consistencia del código mediante:
+- **Revisión automática**: Detecta malas prácticas, problemas comunes y complejidad en el código.
+- **Cobertura de código**: Evalúa qué porcentaje del código está cubierto por pruebas.
+- **Integración con GitHub**: Proporciona comentarios automáticos en pull requests, facilitando la colaboración del equipo.
+
+Codacy se configura directamente con el repositorio, evaluando cada cambio que se realiza en el proyecto.
+
+#### **Update Coverage Badge**
+Hemos implementado un workflow llamado **Update Coverage Badge**, diseñado para mantener actualizado el badge de cobertura del código. Este workflow realiza las siguientes tareas:
+
+1. **Ejecuta pruebas**: Corre las pruebas unitarias y de integración para verificar el estado del proyecto.
+2. **Genera un badge de cobertura**: Muestra visualmente el porcentaje de código cubierto por pruebas.
+3. **Actualiza el badge automáticamente**: Sube el badge actualizado al repositorio, resolviendo conflictos si los hay.
+
+Se ejecuta cada vez que:
+- Se realiza un `push` a la rama `main`.
+- Se abre o actualiza una pull request hacia `main`.
+
+#### **Beneficios de la Integración Continua**
+1. **Calidad del código**: Garantiza estándares altos gracias al análisis automático de Codacy.
+2. **Automatización**: Reduce tareas manuales con workflows que ejecutan pruebas y actualizan métricas.
+3. **Colaboración efectiva**: Los análisis y comentarios automáticos facilitan la revisión del código.
+4. **Visibilidad**: El badge de cobertura y las métricas de Codacy proporcionan información clara y actualizada.
+
+Con esta configuración, aseguramos un desarrollo ágil y de calidad, optimizando el flujo de trabajo del equipo.
+
+
+<div id='id7'></div>
+
+
+### 7. Despliegue continuo.
