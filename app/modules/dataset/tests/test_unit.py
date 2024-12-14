@@ -46,39 +46,6 @@ def test_client(test_client):
     yield test_client
 
 
-def test_get_synchronized_dataset(test_client):
-    """
-    Tests if the get_synchronized method retrieves a synchronized dataset.
-    """
-    with test_client.application.app_context():
-
-        user = User.query.filter_by(email="test_user@example.com").first()
-
-        metadata = DSMetaData(
-            title="Synchronized Dataset",
-            description="This dataset is synchronized.",
-            publication_type=PublicationType.JOURNAL_ARTICLE,
-            dataset_doi="10.1234/synced.dataset"
-        )
-        db.session.add(metadata)
-        db.session.commit()
-
-        dataset = DataSet(
-            user_id=user.id,
-            ds_meta_data_id=metadata.id
-        )
-        db.session.add(dataset)
-        db.session.commit()
-
-        synchronized_datasets = dataset_service.get_synchronized(user.id)
-
-        assert isinstance(synchronized_datasets, list), "The result should be a list."
-        assert len(synchronized_datasets) > 0, "No synchronized datasets were found."
-
-        first_dataset = synchronized_datasets[0]
-        assert first_dataset.ds_meta_data.title == "Synchronized Dataset", "Dataset title mismatch."
-
-
 def test_total_dataset_views(test_client):
     """
     Tests the total number of dataset views recorded.

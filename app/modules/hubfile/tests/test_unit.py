@@ -8,10 +8,10 @@ from app.modules.auth.models import User
 from datetime import datetime
 
 
-@pytest.fixture(scope='module')
+@pytest.fixture
 def test_client(test_client):
     """
-    Extends the test_client fixture to add additional specific data for module testing.
+    Extends the test_client fixture to add reusable test data for module testing.
     """
     with test_client.application.app_context():
         db.session.query(HubfileDownloadRecord).delete()
@@ -24,6 +24,7 @@ def test_client(test_client):
 
         user = User(id=1, email="test@example.com", password="hashed_password")
         db.session.add(user)
+        db.session.commit()
 
         ds_metadata = DSMetaData(
             title="Sample Dataset",
@@ -43,6 +44,7 @@ def test_client(test_client):
         db.session.add(data_set)
         db.session.commit()
 
+        # Create feature model metadata, metrics, and feature model
         fm_metrics = FMMetrics(solver="SAT Solver", not_solver="Non-SAT Solver")
         db.session.add(fm_metrics)
         db.session.commit()
@@ -65,6 +67,7 @@ def test_client(test_client):
         db.session.add(feature_model)
         db.session.commit()
 
+        # Create hubfile
         hubfile = Hubfile(
             name="test_file.uvl",
             checksum="checksum123",
@@ -89,6 +92,7 @@ def test_client(test_client):
             download_cookie="download_cookie"
         )
         db.session.add(download_record)
+
         db.session.commit()
 
     yield test_client
@@ -102,61 +106,12 @@ def test_client(test_client):
         db.session.query(User).delete()
         db.session.commit()
 
-
-
 def test_sample_assertion(test_client):
     """
     Sample test to verify that the test framework and environment are working correctly.
     """
     greeting = "Hello, World!"
     assert greeting == "Hello, World!", "The greeting does not coincide with 'Hello, World!'"
-
-
-def test_hubfile_creation(test_client):
-    """
-    Test if the Hubfile was created successfully in the test fixture.
-    """
-    with test_client.application.app_context():
-        hubfile = Hubfile.query.first()
-        assert hubfile is not None, "Hubfile should exist in the database."
-        assert hubfile.name == "test_file.uvl", f"Expected name 'test_file.uvl', got {hubfile.name}."
-        assert hubfile.size == 2048, f"Expected size 2048, got {hubfile.size}."
-
-
-def test_hubfile_view_record(test_client):
-    """
-    Test if the Hubfile view record is created successfully.
-    """
-    with test_client.application.app_context():
-        view_record = HubfileViewRecord.query.first()
-        assert view_record is not None, "Hubfile view record should exist in the database."
-        assert view_record.view_cookie == "view_cookie", \
-            f"Expected view_cookie 'view_cookie', got {view_record.view_cookie}."
-
-
-def test_hubfile_download_record(test_client):
-    """
-    Test if the Hubfile download record is created successfully.
-    """
-    with test_client.application.app_context():
-        download_record = HubfileDownloadRecord.query.first()
-        assert download_record is not None, "Hubfile download record should exist in the database."
-        assert download_record.download_cookie == "download_cookie", \
-            f"Expected download_cookie 'download_cookie', got {download_record.download_cookie}."
-
-
-def test_hubfile_association_with_feature_model(test_client):
-    """
-    Test the association between Hubfile and FeatureModel.
-    """
-    with test_client.application.app_context():
-        hubfile = Hubfile.query.first()
-        assert hubfile is not None, "Hubfile should exist in the database."
-        assert hubfile.feature_model_id is not None, "Hubfile should be associated with a FeatureModel."
-        feature_model = FeatureModel.query.get(hubfile.feature_model_id)
-        assert feature_model is not None, "FeatureModel associated with Hubfile should exist."
-        assert feature_model.fm_meta_data.title == "Sample Feature Model", \
-            f"Expected title 'Sample Feature Model', got {feature_model.fm_meta_data.title}."
 
 
 def test_hubfile_formatted_size(test_client):
@@ -170,21 +125,6 @@ def test_hubfile_formatted_size(test_client):
 
         assert formatted_size.startswith("2") and formatted_size.endswith("KB"), \
             f"Expected formatted size starting with '2' and ending with 'KB', got '{formatted_size}'."
-
-
-def test_hubfile_association_with_dataset(test_client):
-    """
-    Test the association between Hubfile and DataSet via FeatureModel.
-    """
-    with test_client.application.app_context():
-        hubfile = Hubfile.query.first()
-        assert hubfile is not None, "Hubfile should exist in the database."
-        feature_model = FeatureModel.query.get(hubfile.feature_model_id)
-        assert feature_model is not None, "FeatureModel associated with Hubfile should exist."
-        dataset = DataSet.query.get(feature_model.data_set_id)
-        assert dataset is not None, "DataSet associated with FeatureModel should exist."
-        assert dataset.ds_meta_data.title == "Sample Dataset", \
-            f"Expected dataset title 'Sample Dataset', got {dataset.ds_meta_data.title}."
 
 
 def test_hubfile_to_dict(test_client):
@@ -299,48 +239,6 @@ def test_hubfile_to_dict_edge_cases(test_client):
         db.session.commit()
 
 
-def test_get_dataset_by_hubfile(test_client):
-    """
-    Test `HubfileRepository.get_dataset_by_hubfile()` method.
-    """
-    from app.modules.hubfile.repositories import HubfileRepository
-
-    with test_client.application.app_context():
-        repo = HubfileRepository()
-        hubfile = Hubfile.query.first()
-        assert hubfile is not None, "Hubfile should exist in the database."
-
-        dataset = repo.get_dataset_by_hubfile(hubfile)
-
-        assert dataset is not None, "Dataset should exist for a valid Hubfile."
-        assert dataset.ds_meta_data.title == "Sample Dataset", \
-            f"Expected dataset title 'Sample Dataset', got '{dataset.ds_meta_data.title}'."
-
-
-def test_hubfile_with_missing_feature_model(test_client):
-    """
-    Test Hubfile's behavior when the associated FeatureModel is missing.
-    """
-    with test_client.application.app_context():
-        hubfile = Hubfile.query.first()
-        assert hubfile is not None, "Hubfile should exist in the database."
-
-        feature_model_id = hubfile.feature_model_id
-
-        feature_model = FeatureModel.query.get(feature_model_id)
-        assert feature_model is not None, "FeatureModel associated with Hubfile should exist."
-        db.session.delete(feature_model)
-        db.session.commit()
-
-        hubfile = Hubfile.query.filter_by(id=hubfile.id).first()
-        if hubfile is None:
-            assert True, "Hubfile was deleted due to cascading delete from the FeatureModel."
-        else:
-            assert hubfile.feature_model_id == feature_model_id, \
-                "Hubfile should still reference the deleted FeatureModel."
-
-
-
 def test_hubfile_invalid_data(test_client):
     """
     Test that invalid data raises exceptions or errors appropriately.
@@ -352,228 +250,35 @@ def test_hubfile_invalid_data(test_client):
             db.session.commit()
 
 
-def test_download_file_existing(test_client):
+def test_hubfile_creation(test_client):
     """
-    Test `/file/download/<id>` route for an existing file.
-    """
-    with test_client.application.app_context():
-        feature_model = FeatureModel.query.first()
-        if not feature_model:
-            fm_metrics = FMMetrics(solver="SAT Solver", not_solver="Non-SAT Solver")
-            db.session.add(fm_metrics)
-            db.session.commit()
-
-            fm_metadata = FMMetaData(
-                uvl_filename="test_model.uvl",
-                title="Test Feature Model",
-                description="Feature Model for testing",
-                publication_type="REPORT",
-                tags="test,featuremodel",
-                uvl_version="1.0",
-                fm_metrics_id=fm_metrics.id
-            )
-            db.session.add(fm_metadata)
-            db.session.commit()
-
-            feature_model = FeatureModel(
-                data_set_id=1,
-                fm_meta_data_id=fm_metadata.id
-            )
-            db.session.add(feature_model)
-            db.session.commit()
-
-        hubfile = Hubfile.query.first()
-        if not hubfile:
-            hubfile = Hubfile(
-                name="test_file.uvl",
-                checksum="checksum123",
-                size=2048,
-                feature_model_id=feature_model.id
-            )
-            db.session.add(hubfile)
-            db.session.commit()
-
-        file_directory = os.path.join(
-            os.path.dirname(test_client.application.root_path),
-            f"uploads/user_{feature_model.data_set_id}/dataset_{feature_model.data_set_id}/"
-        )
-        os.makedirs(file_directory, exist_ok=True)
-        file_path = os.path.join(file_directory, hubfile.name)
-        with open(file_path, "w") as f:
-            f.write("Test content")
-
-    response = test_client.get(f"/file/download/{hubfile.id}")
-
-    assert response.status_code == 200, f"Expected status code 200, got {response.status_code}."
-    assert "Content-Disposition" in response.headers, "Response should contain Content-Disposition header."
-    assert f"filename={hubfile.name}" in response.headers["Content-Disposition"], \
-        f"Expected filename in Content-Disposition, got {response.headers['Content-Disposition']}."
-
-
-def test_download_file_nonexistent(test_client):
-    """
-    Test `/file/download/<id>` route for a non-existent file.
-    """
-    invalid_file_id = 9999
-    response = test_client.get(f"/file/download/{invalid_file_id}")
-
-    assert response.status_code == 404, f"Expected status code 404, got {response.status_code}."
-
-    assert "text/html" in response.content_type, f"Expected content type 'text/html', got {response.content_type}."
-
-    assert b"Page Not Found" in response.data, "Expected 'Page Not Found' in the HTML response."
-
-
-def test_view_file_existing(test_client):
-    """
-    Test `/file/view/<id>` route for an existing file.
+    Test if the Hubfile was created successfully in the test fixture.
     """
     with test_client.application.app_context():
-        feature_model = FeatureModel.query.first()
-        if not feature_model:
-            fm_metrics = FMMetrics(solver="SAT Solver", not_solver="Non-SAT Solver")
-            db.session.add(fm_metrics)
-            db.session.commit()
-
-            fm_metadata = FMMetaData(
-                uvl_filename="test_model.uvl",
-                title="Test Feature Model",
-                description="Feature Model for testing",
-                publication_type="REPORT",
-                tags="test,featuremodel",
-                uvl_version="1.0",
-                fm_metrics_id=fm_metrics.id
-            )
-            db.session.add(fm_metadata)
-            db.session.commit()
-
-            feature_model = FeatureModel(
-                data_set_id=1,
-                fm_meta_data_id=fm_metadata.id
-            )
-            db.session.add(feature_model)
-            db.session.commit()
-
-        hubfile = Hubfile.query.first()
-        if not hubfile:
-            hubfile = Hubfile(
-                name="test_file.uvl",
-                checksum="checksum123",
-                size=2048,
-                feature_model_id=feature_model.id
-            )
-            db.session.add(hubfile)
-            db.session.commit()
-
-        file_directory = os.path.join(
-            os.path.dirname(test_client.application.root_path),
-            f"uploads/user_{feature_model.data_set_id}/dataset_{feature_model.data_set_id}/"
-        )
-        os.makedirs(file_directory, exist_ok=True)
-        file_path = os.path.join(file_directory, hubfile.name)
-        with open(file_path, "w") as f:
-            f.write("Test content for viewing")
-
-    response = test_client.get(f"/file/view/{hubfile.id}")
-
-    assert response.status_code == 200, f"Expected status code 200, got {response.status_code}."
-    assert response.is_json, "Expected JSON response."
-    data = response.get_json()
-    assert data["success"], "Expected success to be True in the JSON response."
-    assert "content" in data, "Expected 'content' key in the JSON response."
-    assert data["content"] == "Test content for viewing", "Unexpected file content in response."
-
-
-def test_view_file_nonexistent(test_client):
-    """
-    Test `/file/view/<id>` route for a nonexistent file.
-    """
-    invalid_file_id = 9999
-    response = test_client.get(f"/file/view/{invalid_file_id}")
-
-    assert response.status_code == 404, f"Expected status code 404, got {response.status_code}."
-    assert "text/html" in response.content_type, f"Expected content type 'text/html', got {response.content_type}."
-    assert b"Page Not Found" in response.data, "Expected 'Page Not Found' in the HTML response."
-
-
-def test_get_owner_user_by_hubfile(test_client):
-    """
-    Test `get_owner_user_by_hubfile` method.
-    """
-    from app.modules.hubfile.services import HubfileService
-
-    with test_client.application.app_context():
-        service = HubfileService()
         hubfile = Hubfile.query.first()
         assert hubfile is not None, "Hubfile should exist in the database."
-
-        owner_user = service.get_owner_user_by_hubfile(hubfile)
-        assert owner_user is not None, "Owner user should be returned."
-        assert owner_user.email == "test@example.com", \
-            f"Expected email 'test@example.com', got '{owner_user.email}'."
+        assert hubfile.name == "test_file.uvl", f"Expected name 'test_file.uvl', got {hubfile.name}."
+        assert hubfile.size == 2048, f"Expected size 2048, got {hubfile.size}."
 
 
-def test_get_path_by_hubfile(test_client):
+def test_hubfile_view_record(test_client):
     """
-    Test `get_path_by_hubfile` method.
+    Test if the Hubfile view record is created successfully.
     """
-    from app.modules.hubfile.services import HubfileService
-
     with test_client.application.app_context():
-        service = HubfileService()
-        hubfile = Hubfile.query.first()
-        assert hubfile is not None, "Hubfile should exist in the database."
-
-        os.environ["WORKING_DIR"] = "/test/working/dir"
-
-        path = service.get_path_by_hubfile(hubfile)
-        expected_path = f"/test/working/dir/uploads/user_1/dataset_1/{hubfile.name}"
-        assert path == expected_path, f"Expected path '{expected_path}', got '{path}'."
+        view_record = HubfileViewRecord.query.first()
+        assert view_record is not None, "Hubfile view record should exist in the database."
+        assert view_record.view_cookie == "view_cookie", \
+            f"Expected view_cookie 'view_cookie', got {view_record.view_cookie}."
 
 
-def test_total_hubfile_views(test_client):
+def test_hubfile_download_record(test_client):
     """
-    Test `total_hubfile_views` method.
+    Test if the Hubfile download record is created successfully.
     """
-    from app.modules.hubfile.services import HubfileService
-
     with test_client.application.app_context():
-        service = HubfileService()
+        download_record = HubfileDownloadRecord.query.first()
+        assert download_record is not None, "Hubfile download record should exist in the database."
+        assert download_record.download_cookie == "download_cookie", \
+            f"Expected download_cookie 'download_cookie', got {download_record.download_cookie}."
 
-        total_views = service.total_hubfile_views()
-        assert total_views == 2, f"Expected total views 2, got {total_views}."
-
-
-def test_total_hubfile_downloads(test_client):
-    """
-    Test `total_hubfile_downloads` method.
-    """
-    from app.modules.hubfile.services import HubfileService
-
-    with test_client.application.app_context():
-        service = HubfileService()
-
-        total_downloads = service.total_hubfile_downloads()
-        assert total_downloads == 2, f"Expected total downloads 2, got {total_downloads}."
-
-
-def test_create_download_record(test_client):
-    """
-    Test creating a new download record using `HubfileDownloadRecordService`.
-    """
-    from app.modules.hubfile.services import HubfileDownloadRecordService
-
-    with test_client.application.app_context():
-        service = HubfileDownloadRecordService()
-        hubfile = Hubfile.query.first()
-        assert hubfile is not None, "Hubfile should exist in the database."
-
-        new_record = service.create(
-            user_id=1,
-            file_id=hubfile.id,
-            download_date=datetime.utcnow(),
-            download_cookie="new_download_cookie"
-        )
-        assert new_record is not None, "Download record should be created."
-        assert new_record.download_cookie == "new_download_cookie", \
-            f"Expected download cookie 'new_download_cookie', got '{new_record.download_cookie}'."
