@@ -70,3 +70,25 @@ class TestProfile:
         """Caso negativo: Intentar acceder a la edición del perfil sin iniciar sesión."""
         self.driver.get("http://web_app_container:5000/profile/edit")
         assert "login" in self.driver.current_url, "Unauthorized user was able to access Edit Profile page."
+
+    def test_access_nonexistent_profile(self):
+        """Caso negativo: Acceder a una página de perfil inexistente."""
+        self.driver.get("http://web_app_container:5000/")
+        self.driver.set_window_size(927, 1012)
+
+        # Inicia sesión
+        self.driver.find_element(By.LINK_TEXT, "Login").click()
+        self.driver.find_element(By.ID, "email").send_keys("user3@example.com")
+        self.driver.find_element(By.ID, "password").send_keys("1234")
+        self.driver.find_element(By.ID, "submit").click()
+        assert self.driver.current_url == "http://web_app_container:5000/", "Login failed or incorrect page loaded."
+
+        # Accede a un perfil inexistente
+        self.driver.get("http://web_app_container:5000/profile/999999")
+        assert "not found" in self.driver.page_source.lower() or "404" in self.driver.page_source.lower(), "No error message displayed for nonexistent profile."
+
+        # Vuelve al inicio
+        self.driver.get("http://web_app_container:5000/")
+        self.driver.find_element(By.CSS_SELECTOR, ".text-dark").click()
+        self.driver.find_element(By.LINK_TEXT, "Log out").click()
+        assert "login" in self.driver.current_url or "signup" in self.driver.page_source.lower(), "Logout failed."
