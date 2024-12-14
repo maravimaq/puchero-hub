@@ -282,3 +282,53 @@ def test_hubfile_download_record(test_client):
         assert download_record.download_cookie == "download_cookie", \
             f"Expected download_cookie 'download_cookie', got {download_record.download_cookie}."
 
+
+def test_hubfile_get_dataset(test_client):
+    """
+    Test the get_dataset() method of Hubfile without mocks.
+    """
+    with test_client.application.app_context():
+        hubfile = Hubfile.query.first()
+        assert hubfile is not None, "Hubfile should exist in the database."
+
+        feature_model = FeatureModel.query.get(hubfile.feature_model_id)
+        assert feature_model is not None, "FeatureModel associated with Hubfile should exist."
+
+        dataset = DataSet.query.get(feature_model.data_set_id)
+        assert dataset is not None, "DataSet associated with FeatureModel should exist."
+
+        hubfile_dataset = hubfile.get_dataset()
+
+        assert hubfile_dataset is not None, "The dataset returned by get_dataset() should not be None."
+        assert hubfile_dataset.id == dataset.id, f"Expected dataset id {dataset.id}, got {hubfile_dataset.id}."
+
+
+def test_hubfile_repr_methods(test_client):
+    """
+    Test the __repr__ methods of Hubfile, HubfileViewRecord, and HubfileDownloadRecord.
+    """
+    with test_client.application.app_context():
+        hubfile = Hubfile.query.first()
+        assert hubfile is not None, "Hubfile should exist in the database."
+
+        hubfile_repr = repr(hubfile)
+        assert hubfile_repr == f"File<{hubfile.id}>", f"Unexpected Hubfile __repr__: {hubfile_repr}"
+
+        view_record = HubfileViewRecord.query.first()
+        assert view_record is not None, "HubfileViewRecord should exist in the database."
+
+        view_record_repr = repr(view_record)
+        assert view_record_repr == f"<FileViewRecord {view_record.id}>", \
+            f"Unexpected HubfileViewRecord __repr__: {view_record_repr}"
+
+        download_record = HubfileDownloadRecord.query.first()
+        assert download_record is not None, "HubfileDownloadRecord should exist in the database."
+
+        download_record_repr = repr(download_record)
+        expected_repr = (
+            f"<FileDownload id={download_record.id} "
+            f"file_id={download_record.file_id} "
+            f"date={download_record.download_date} "
+            f"cookie={download_record.download_cookie}>"
+        )
+        assert download_record_repr == expected_repr, f"Unexpected HubfileDownloadRecord __repr__: {download_record_repr}"
