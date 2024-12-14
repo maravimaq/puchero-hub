@@ -66,3 +66,7 @@ class TestProfile:
         self.driver.find_element(By.LINK_TEXT, "Log out").click()
         assert "login" in self.driver.current_url or "signup" in self.driver.page_source.lower(), "Logout failed."
 
+    def test_access_edit_profile_without_login(self):
+        """Caso negativo: Intentar acceder a la edición del perfil sin iniciar sesión."""
+        self.driver.get("http://web_app_container:5000/profile/edit")
+        assert "login" in self.driver.current_url, "Unauthorized user was able to access Edit Profile page."
