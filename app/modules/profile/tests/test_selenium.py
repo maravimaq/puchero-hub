@@ -92,3 +92,24 @@ class TestProfile:
         self.driver.find_element(By.CSS_SELECTOR, ".text-dark").click()
         self.driver.find_element(By.LINK_TEXT, "Log out").click()
         assert "login" in self.driver.current_url or "signup" in self.driver.page_source.lower(), "Logout failed."
+
+    def test_access_my_profile_after_logout(self):
+        """Caso negativo: Intentar acceder a "My Profile" tras cerrar sesión."""
+        self.driver.get("http://web_app_container:5000/")
+        self.driver.set_window_size(927, 1012)
+
+        # Inicia sesión
+        self.driver.find_element(By.LINK_TEXT, "Login").click()
+        self.driver.find_element(By.ID, "email").send_keys("user3@example.com")
+        self.driver.find_element(By.ID, "password").send_keys("1234")
+        self.driver.find_element(By.ID, "submit").click()
+        assert self.driver.current_url == "http://web_app_container:5000/", "Login failed or incorrect page loaded."
+
+        # Cierra sesión
+        self.driver.find_element(By.CSS_SELECTOR, ".text-dark").click()
+        self.driver.find_element(By.LINK_TEXT, "Log out").click()
+        assert "login" in self.driver.current_url or "signup" in self.driver.page_source.lower(), "Logout failed."
+
+        # Intenta acceder a "My Profile"
+        self.driver.get("http://web_app_container:5000/profile")
+        assert "page not found" in self.driver.page_source.lower(), "Expected 404 page when accessing profile after logout."
