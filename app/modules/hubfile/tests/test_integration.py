@@ -251,8 +251,6 @@ def test_total_hubfile_views(test_client):
     """
     Test `total_hubfile_views` method.
     """
-    from app.modules.hubfile.services import HubfileService
-
     with test_client.application.app_context():
         service = HubfileService()
 
