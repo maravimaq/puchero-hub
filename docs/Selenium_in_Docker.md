@@ -113,6 +113,11 @@ rosemary selenium
 ---
 
 ## **Consejos para Solucionar Problemas**
+### **Error: Error response from daemon: driver failed programming external connectivity on endpoint mariadb_container (ea2122c53ccda9rb3e963ea07436a8c1c85912250a29180a39faa61699c60bd): failed to bind port 0.0.0.0:3306/tcp: Error starting userland proxy: listen tcp4 0.0.0.0:3306: bind: address already in use**
+
+```bash
+    sudo systemctl stop mariadb
+```
 
 ### **Error: ERR_CONNECTION_REFUSED**
 
