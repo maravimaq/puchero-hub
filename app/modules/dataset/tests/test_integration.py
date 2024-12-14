@@ -224,3 +224,46 @@ def test_add_file_to_dataset(test_client):
         os.remove(temp_file_path)
 
     logout(test_client)
+
+
+def test_get_synchronized_dataset(test_client):
+    """
+    Test retrieving synchronized datasets for a user.
+    """
+    login_response = login(test_client, "testuser@example.com", "test1234")
+    assert login_response.status_code == 200, "Login failed."
+
+    with test_client.application.app_context():
+        user = User.query.filter_by(email="testuser@example.com").first()
+        assert user is not None, "Test user not found."
+
+        # Add synchronized dataset metadata
+        metadata = DSMetaData(
+            title="Synchronized Dataset",
+            description="This dataset is synchronized.",
+            publication_type=PublicationType.JOURNAL_ARTICLE,
+            dataset_doi="10.1234/synced.dataset"
+        )
+        db.session.add(metadata)
+        db.session.commit()
+
+        # Link metadata to a dataset
+        dataset = DataSet(
+            user_id=user.id,
+            ds_meta_data_id=metadata.id
+        )
+        db.session.add(dataset)
+        db.session.commit()
+
+        # Retrieve synchronized datasets
+        dataset_service = DataSetService()
+        synchronized_datasets = dataset_service.get_synchronized(user.id)
+
+        # Assertions
+        assert isinstance(synchronized_datasets, list), "Expected a list of datasets."
+        assert len(synchronized_datasets) > 0, "No synchronized datasets were found."
+
+        first_dataset = synchronized_datasets[0]
+        assert first_dataset.ds_meta_data.title == "Synchronized Dataset", "Dataset title mismatch."
+
+    logout(test_client)
