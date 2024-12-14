@@ -1,6 +1,6 @@
 from selenium.common.exceptions import NoSuchElementException
 import time
-import os
+
 from core.environment.host import get_host_for_selenium_testing
 from core.selenium.common import initialize_driver, close_driver
 
