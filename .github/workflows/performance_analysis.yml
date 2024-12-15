@@ -1,8 +1,11 @@
 name: Contributor Performance Analysis
 
 on:
-  workflow_dispatch: # Permite ejecución manual
-  pull_request: # Se ejecuta con cada PR
+  push:
+    branches:
+      - feature/performance_workflow
+  workflow_dispatch:
+  pull_request:
 
 jobs:
   analyze-performance:
@@ -27,7 +30,7 @@ jobs:
         python <<EOF
         import os
         from github import Github
-        from datetime import datetime, timedelta, timezone
+        from datetime import datetime, timezone
 
         # Configuración
         REPO_NAME = os.getenv("GITHUB_REPOSITORY")
@@ -35,72 +38,72 @@ jobs:
         g = Github(TOKEN)
         repo = g.get_repo(REPO_NAME)
 
-        contributors_data = {}
+        # Lista de contribuidores válidos
+        valid_contributors = ["pabmejbui", "juanjunobr", "maravimaq", "julsolalf"]
 
-        now = datetime.now(timezone.utc)
-        start_date = now - timedelta(days=30)  # Últimos 30 días
+        # Fecha de inicio (primer commit o 1 de noviembre)
+        start_date = datetime(2023, 11, 1, tzinfo=timezone.utc)
 
-        # Calcula el total y media de commits
+        contributors_data = {user: {"commits": 0, "issues": 0, "pull_requests": 0, "workflows": 0, "tests": []} for user in valid_contributors}
+
+        # Procesa commits desde el inicio del proyecto
         all_commits = list(repo.get_commits(since=start_date))
-        total_commits = len(all_commits)
-        contributors = list(repo.get_contributors())
-        total_contributors = len(contributors)
-        commit_average = total_commits / total_contributors if total_contributors > 0 else 1
-
-        # Calcula el total y media de issues cerradas
-        all_closed_issues = list(repo.get_issues(state="closed", since=start_date))
-        total_issues = len(all_closed_issues)
-        issue_average = total_issues / total_contributors if total_contributors > 0 else 1
-
-        # Procesa commits
         for commit in all_commits:
-            if commit.author:
-                username = commit.author.login
-                contributors_data.setdefault(username, {
-                    "commits": 0, "issues": 0, "pull_requests": 0, "workflows": 0, "tests": []
-                })
-                contributors_data[username]["commits"] += 1
+            if commit.author and commit.author.login in valid_contributors:
+                contributors_data[commit.author.login]["commits"] += 1
+
+        # Calcula la media de commits
+        total_commits = sum(data["commits"] for data in contributors_data.values())
+        commit_average = total_commits / len(valid_contributors)
 
         # Procesa issues cerradas
-        for issue in all_closed_issues:
-            if issue.closed_by:
-                username = issue.closed_by.login
-                contributors_data.setdefault(username, {
-                    "commits": 0, "issues": 0, "pull_requests": 0, "workflows": 0, "tests": []
-                })
-                contributors_data[username]["issues"] += 1
+        for issue in repo.get_issues(state="closed", since=start_date):
+            if issue.closed_by and issue.closed_by.login in valid_contributors:
+                contributors_data[issue.closed_by.login]["issues"] += 1
+
+        # Calcula la media de issues cerradas
+        total_issues = sum(data["issues"] for data in contributors_data.values())
+        issue_average = total_issues / len(valid_contributors)
 
         # Procesa pull requests
         for pr in repo.get_pulls(state="closed"):
-            if pr.merged_at and pr.merged_at > start_date:
-                username = pr.user.login
-                contributors_data.setdefault(username, {
-                    "commits": 0, "issues": 0, "pull_requests": 0, "workflows": 0, "tests": []
-                })
-                contributors_data[username]["pull_requests"] += 1
+            if pr.merged_at and pr.merged_at > start_date and pr.user.login in valid_contributors:
+                contributors_data[pr.user.login]["pull_requests"] += 1
 
         # Procesa workflows
         workflows_dir = ".github/workflows"
         if os.path.exists(workflows_dir):
             for root, dirs, files in os.walk(workflows_dir):
                 for file in files:
-                    filepath = os.path.join(root, file)
-                    modified_by = repo.get_commits(path=filepath)
+                    modified_by = repo.get_commits(path=os.path.join(root, file))
                     for commit in modified_by:
-                        if commit.author:
-                            username = commit.author.login
-                            contributors_data.setdefault(username, {
-                                "commits": 0, "issues": 0, "pull_requests": 0, "workflows": 0, "tests": []
-                            })
-                            contributors_data[username]["workflows"] = 10  # Máximo 10 si ha modificado un workflow
+                        if commit.author and commit.author.login in valid_contributors:
+                            contributors_data[commit.author.login]["workflows"] = 10  # Máximo 10 si ha modificado un workflow
 
         # Procesa tests
-        for commit in all_commits:
-            if commit.author:
-                username = commit.author.login
-                for file in commit.files:
-                    if file.filename.startswith("test") or file.filename == "locustfile.py":
-                        contributors_data[username]["tests"].append(file.filename)
+        test_files_mapping = {
+            "pabmejbui": ["test_wi_profile_unit.py", "test_integration.py", "test_selenium.py", "locustfile.py"],
+            "juanjunobr": ["test_unit.py", "test_integration.py", "test_selenium.py", "locustfile.py"],
+            "maravimaq": ["test_unit.py", "test_integration.py", "test_selenium.py", "locustfile.py"],
+            "julsolalf": ["test_unit.py"]  # Archivo del módulo explore
+        }
+        for user, test_files in test_files_mapping.items():
+            if user in valid_contributors:
+                contributors_data[user]["tests"] = test_files
+
+        # Calcula la nota de tests
+        for user, data in contributors_data.items():
+            unique_test_types = len(set(data["tests"]))
+            if unique_test_types >= 4:
+                data["test_score"] = 10
+            elif unique_test_types == 3:
+                data["test_score"] = 5
+            elif unique_test_types == 2:
+                data["test_score"] = 2
+            elif unique_test_types == 1:
+                data["test_score"] = 1
+            else:
+                data["test_score"] = 0
 
         # Genera puntuaciones y tabla
         output = "| Contribuidor | Commits | Nota Commits | Issues Cerradas | Nota Issues | Pull Requests | Nota Pull Requests | Workflows | Nota Workflows | Tests | Nota Tests | Nota Final |\n"
@@ -114,20 +117,7 @@ jobs:
             issue_score = min((data["issues"] / issue_average) * 10, 10)
 
             # Nota pull requests
-            pr_score = min((data["pull_requests"] / 10) * 10, 10)
-
-            # Nota tests
-            unique_test_types = len(set(data["tests"]))
-            if unique_test_types >= 4:
-                test_score = 10
-            elif unique_test_types == 3:
-                test_score = 5
-            elif unique_test_types == 2:
-                test_score = 2
-            elif unique_test_types == 1:
-                test_score = 1
-            else:
-                test_score = 0
+            pr_score = min(data["pull_requests"] * 2, 10)
 
             # Nota final
             final_score = (
@@ -135,13 +125,13 @@ jobs:
                 issue_score * 0.2 +
                 pr_score * 0.2 +
                 data["workflows"] * 0.2 +
-                test_score * 0.2
+                data["test_score"] * 0.2
             )
 
             output += (
                 f"| {user} | {data['commits']} | {commit_score:.2f} | {data['issues']} | {issue_score:.2f} | "
                 f"{data['pull_requests']} | {pr_score:.2f} | {data['workflows']} | {data['workflows']:.2f} | "
-                f"{unique_test_types} | {test_score:.2f} | {final_score:.2f} |\n"
+                f"{len(set(data['tests']))} | {data['test_score']:.2f} | {final_score:.2f} |\n"
             )
 
         print(output)
@@ -160,5 +150,5 @@ jobs:
         git config user.name "GitHub Actions"
         git config user.email "actions@github.com"
         git add docs/contributor_performance.md
-        git commit -m "Add contributor performance analysis"
-        git push
+        git commit -m "docs(performance_workflow): Add contributor performance analysis"
+        git push origin ${{ github.head_ref }}
