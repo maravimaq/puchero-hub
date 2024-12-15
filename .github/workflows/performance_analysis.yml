@@ -11,6 +11,8 @@ jobs:
     steps:
     - name: Checkout Code
       uses: actions/checkout@v4
+      with:
+        ref: ${{ github.ref }}
 
     - name: Set up Python
       uses: actions/setup-python@v5
@@ -146,6 +148,7 @@ jobs:
       run: |
         git config user.name "GitHub Actions"
         git config user.email "actions@github.com"
+        git checkout -B feature/performance_workflow
         git add docs/contributor_performance.md
         git commit -m "docs(performance_workflow): Add contributor performance analysis"
-        git push origin ${{ github.head_ref }}
+        git push origin feature/performance_workflow --force
