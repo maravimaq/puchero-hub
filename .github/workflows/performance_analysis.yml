@@ -1,9 +1,6 @@
 name: Contributor Performance Analysis
 
 on:
-  push:
-    branches:
-      - feature/performance_workflow
   workflow_dispatch:
   pull_request:
 
