@@ -105,7 +105,6 @@ jobs:
             else:
                 data["test_score"] = 0
 
-        # Genera puntuaciones y tabla
         output = "| Contribuidor | Commits | Nota Commits | Issues Cerradas | Nota Issues | Pull Requests | Nota Pull Requests | Workflows | Nota Workflows | Tipos de Tests | Nota Tests | Nota Final |\n"
         output += "|--------------|---------|--------------|----------------|------------|---------------|---------------------|-----------|---------------|-------|-----------|-----------|\n"
 
