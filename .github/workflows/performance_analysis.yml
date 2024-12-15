@@ -27,7 +27,7 @@ jobs:
         import os
         import requests
         from github import Github
-        from datetime import datetime, timedelta
+        from datetime import datetime, timedelta, timezone
 
         # Configuración
         REPO_NAME = os.getenv("GITHUB_REPOSITORY")
