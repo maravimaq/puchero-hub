@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   pull_request:
     branches:
-      - main
+      - main  # Se ejecuta automáticamente en PR hacia la rama main
 
 permissions:
   contents: write
@@ -140,7 +140,17 @@ jobs:
       run: |
         git config user.name "GitHub Actions"
         git config user.email "actions@github.com"
+        
+        # Maneja posibles conflictos
+        git stash push -m "Temporary stash for contributor analysis" || echo "No changes to stash"
+        
+        # Restaura la rama correcta
         git checkout ${{ github.head_ref || github.ref_name }}
+
+        # Aplica los cambios si hay un stash
+        git stash list | grep "Temporary stash for contributor analysis" && git stash pop || echo "No stash to apply"
+        
+        # Commit y push
         git add docs/contributor_performance.md
         git commit -m "docs(performance_workflow): Add contributor performance analysis" || echo "No changes to commit"
         git push origin ${{ github.head_ref || github.ref_name }}
