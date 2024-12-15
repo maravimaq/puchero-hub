@@ -25,7 +25,6 @@ jobs:
       run: |
         python <<EOF
         import os
-        import requests
         from github import Github
         from datetime import datetime, timedelta, timezone
 
@@ -39,7 +38,7 @@ jobs:
         contributors_data = {}
 
         # Calcula las fechas relevantes
-        now = datetime.now()
+        now = datetime.now(timezone.utc)  # Aware datetime en UTC
         start_date = now - timedelta(days=30)  # Analizar el último mes
 
         # Procesa commits
@@ -58,7 +57,7 @@ jobs:
 
         # Procesa pull requests
         for pr in repo.get_pulls(state="closed"):
-            if pr.merged_at and pr.merged_at > start_date:
+            if pr.merged_at and pr.merged_at > start_date.replace(tzinfo=timezone.utc):  # Asegura que ambos sean aware
                 username = pr.user.login
                 contributors_data.setdefault(username, {"commits": 0, "issues": 0, "pull_requests": 0, "workflows": 0})
                 contributors_data[username]["pull_requests"] += 1
