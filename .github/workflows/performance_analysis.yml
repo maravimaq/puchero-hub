@@ -1,4 +1,4 @@
-name: Contributor Performance Analysis
+name: Contributors Performance Analysis
 
 on:
   push:
