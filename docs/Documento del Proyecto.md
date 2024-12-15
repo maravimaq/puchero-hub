@@ -223,11 +223,11 @@ Automatizan tareas repetitivas y críticas en el desarrollo y mantenimiento.
 
   - Analiza métricas de contribución y genera reportes automáticos.
 
-  - Evalúa el desempeño en términos de commits, issues cerradas, pull requests y tests realizados.
+  - Evalúa el desempeño en términos de commits, issues creadas, pull requests y workflows realizados.
 
 - **Update Coverage Badge**:
 
-  - Ejecuta pruebas con `pytest` y actualiza el badge de cobertura de código.
+  - Ejecuta pruebas con `pytest` y actualiza el badge de cobertura de código en Readme.md.
 
 - **Zenhub Integration**:
 
@@ -241,7 +241,7 @@ Automatizan tareas repetitivas y críticas en el desarrollo y mantenimiento.
 
 - **Repositorio**:
 
-  - Método `filter` para manejar criterios como título, autor, fechas, tamaño y tipo de publicación.
+  - Método `filter` para manejar criterios como título, autor, fechas, tamaño y tipo de publicación independientemente.
 
 - **Servicio**:
 
@@ -250,6 +250,10 @@ Automatizan tareas repetitivas y críticas en el desarrollo y mantenimiento.
 - **Rutas**:
 
   - `/explore` para búsquedas dinámicas.
+
+- **Access**
+
+    - Modificación de scripts para gestionar los nuevos criterios.
 
 #### **2. Communities**
 
