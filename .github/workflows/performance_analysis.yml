@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   pull_request:
     branches:
-      - main  # Se ejecuta automáticamente en PR hacia la rama main
+      - main
 
 permissions:
   contents: write
@@ -45,25 +45,30 @@ jobs:
         start_date = datetime(2023, 11, 1, tzinfo=timezone.utc)
         contributors_data = {user: {"commits": 0, "issues": 0, "pull_requests": 0, "workflows": 0, "tests": []} for user in valid_contributors}
 
+        # Procesa commits excluyendo los de merge
         all_commits = list(repo.get_commits(since=start_date))
         for commit in all_commits:
             if commit.author and commit.author.login in valid_contributors:
-                contributors_data[commit.author.login]["commits"] += 1
+                if not commit.commit.message.startswith("Merge"):
+                    contributors_data[commit.author.login]["commits"] += 1
 
         total_commits = sum(data["commits"] for data in contributors_data.values())
         commit_average = total_commits / len(valid_contributors)
 
-        for issue in repo.get_issues(state="closed", since=start_date):
-            if issue.closed_by and issue.closed_by.login in valid_contributors:
-                contributors_data[issue.closed_by.login]["issues"] += 1
+        # Procesa issues creadas por cada contribuidor
+        for issue in repo.get_issues(state="all", since=start_date):
+            if issue.user and issue.user.login in valid_contributors:
+                contributors_data[issue.user.login]["issues"] += 1
 
         total_issues = sum(data["issues"] for data in contributors_data.values())
         issue_average = total_issues / len(valid_contributors)
 
+        # Procesa pull requests
         for pr in repo.get_pulls(state="closed"):
             if pr.merged_at and pr.merged_at > start_date and pr.user.login in valid_contributors:
                 contributors_data[pr.user.login]["pull_requests"] += 1
 
+        # Procesa workflows
         workflows_dir = ".github/workflows"
         if os.path.exists(workflows_dir):
             for root, dirs, files in os.walk(workflows_dir):
@@ -73,16 +78,21 @@ jobs:
                         if commit.author and commit.author.login in valid_contributors:
                             contributors_data[commit.author.login]["workflows"] = 10
 
-        test_files_mapping = {
-            "pabmejbui": ["test_wi_profile_unit.py", "test_integration.py", "test_selenium.py", "locustfile.py"],
-            "juanjunobr": ["test_unit.py", "test_integration.py", "test_selenium.py", "locustfile.py"],
-            "maravimaq": ["test_unit.py", "test_integration.py", "test_selenium.py", "locustfile.py"],
-            "julsolalf": ["test_unit.py"]
-        }
-        for user, test_files in test_files_mapping.items():
-            if user in valid_contributors:
-                contributors_data[user]["tests"] = test_files
+        # Procesa tests dinámicamente
+        for root, _, files in os.walk("app/modules"):
+            for user, test_files in {
+                "pabmejbui": ["test_wi_profile_unit.py", "test_integration.py", "test_selenium.py", "locustfile.py"],
+                "juanjunobr": ["test_unit.py", "test_integration.py", "test_selenium.py", "locustfile.py"],
+                "maravimaq": ["test_unit.py", "test_integration.py", "test_selenium.py", "locustfile.py"],
+                "julsolalf": ["test_unit.py", "test_integration.py", "test_selenium.py", "locustfile.py"]
+            }.items():
+                if user in valid_contributors:
+                    user_tests = [
+                        filename for filename in test_files if filename in files
+                    ]
+                    contributors_data[user]["tests"] = user_tests
 
+        # Calcula la nota de tests
         for user, data in contributors_data.items():
             unique_test_types = len(set(data["tests"]))
             if unique_test_types >= 4:
@@ -96,7 +106,7 @@ jobs:
             else:
                 data["test_score"] = 0
 
-        output = "| Contribuidor | Commits | Nota Commits | Issues Cerradas | Nota Issues | Pull Requests | Nota Pull Requests | Workflows | Nota Workflows | Tipos de Tests | Nota Tests | Nota Final |\n"
+        output = "| Contribuidor | Commits | Nota Commits | Issues Creadas | Nota Issues | Pull Requests | Nota Pull Requests | Workflows | Nota Workflows | Tipos de Tests | Nota Tests | Nota Final |\n"
         output += "|--------------|---------|--------------|----------------|------------|---------------|---------------------|-----------|---------------|-------|-----------|-----------|\n"
 
         for user, data in contributors_data.items():
