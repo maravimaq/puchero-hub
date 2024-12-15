@@ -55,9 +55,9 @@ jobs:
         total_commits = sum(data["commits"] for data in contributors_data.values())
         commit_average = total_commits / len(valid_contributors)
 
-        # Procesa issues creadas por cada contribuidor
+        # Procesa issues creadas, excluyendo las pull requests
         for issue in repo.get_issues(state="all", since=start_date):
-            if issue.user and issue.user.login in valid_contributors:
+            if issue.user and issue.user.login in valid_contributors and not issue.pull_request:
                 contributors_data[issue.user.login]["issues"] += 1
 
         total_issues = sum(data["issues"] for data in contributors_data.values())
@@ -78,8 +78,8 @@ jobs:
                         if commit.author and commit.author.login in valid_contributors:
                             contributors_data[commit.author.login]["workflows"] = 10
 
-        # Procesa tests dinámicamente
-        for root, _, files in os.walk("app/modules"):
+        # Procesa tests dinámicamente verificando archivos creados
+        for root, dirs, files in os.walk("app/modules"):
             for user, test_files in {
                 "pabmejbui": ["test_wi_profile_unit.py", "test_integration.py", "test_selenium.py", "locustfile.py"],
                 "juanjunobr": ["test_unit.py", "test_integration.py", "test_selenium.py", "locustfile.py"],
@@ -88,7 +88,7 @@ jobs:
             }.items():
                 if user in valid_contributors:
                     user_tests = [
-                        filename for filename in test_files if filename in files
+                        test for test in test_files if test in files
                     ]
                     contributors_data[user]["tests"] = user_tests
 
