@@ -83,5 +83,5 @@ jobs:
         fi
 
         git add coverage.svg
-        git commit -m "Update coverage badge" || echo "No changes to commit"
+        git commit -m "docs(update_coverage_badge): coverage badge updated due to test changes" || echo "No changes to commit"
         git push origin HEAD:${{ github.head_ref || github.ref_name }}
