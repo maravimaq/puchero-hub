@@ -7,12 +7,14 @@ from app.modules.dataset.models import PublicationType  # Import PublicationType
 class ExploreForm(FlaskForm):
     title = StringField('Title', validators=[Optional()])
     author = StringField('Author', validators=[Optional()])
+    publication_doi = StringField('Publication DOI', validators=[Optional()])
     date_from = DateField('Date From', validators=[Optional()])
     date_to = DateField('Date To', validators=[Optional()])
     size_from = IntegerField('Size From (KB)', validators=[Optional(), NumberRange(min=0)])
     size_to = IntegerField('Size To (KB)', validators=[Optional(), NumberRange(min=0)])
     format = StringField('Format', validators=[Optional()])
     files_count = IntegerField('Number of Files', validators=[Optional(), NumberRange(min=0)])
+    tags = StringField('Tags', validators=[Optional()])
     publication_type = SelectField(
         'Publication Type',
         choices=[('any', 'Any')] + [(pt.value, pt.name.replace('_', ' ').title()) for pt in PublicationType],
