@@ -11,23 +11,27 @@ from core.repositories.BaseRepository import BaseRepository
 class ExploreRepository(BaseRepository):
     def __init__(self):
         super().__init__(DataSet)
-
+        
     def filter(self, title="", author="", date_from=None, date_to=None,
-               publication_doi="", files_count="", size_from=None,
+               publication_doi="", files_count="", description="", size_from=None,
                size_to=None, publication_type="any",
                sorting="newest", tags=None, **kwargs):
-        # Normalize and remove unwanted characters
-
         filters = []
         if title:
             filters.append(DSMetaData.title.ilike(f"%{title}%"))
         if author:
             filters.append(Author.name.ilike(f"%{author}%"))
+        if publication_doi:
+            filters.append(DSMetaData.dataset_doi.ilike(f"%{publication_doi}%"))
         if date_from:
             filters.append(DataSet.created_at >= date_from)
         if date_to:
             filters.append(DataSet.created_at <= date_to)
-            
+        if description:
+            filters.append(DSMetaData.description.ilike(f"%{description}%"))
+        if tags:
+            filters.append(DSMetaData.tags.ilike(f"%{tags}%"))
+
         # Subconsulta para files_count
         if files_count != "" and files_count is not None and files_count != "0":
             subquery_files_count = (

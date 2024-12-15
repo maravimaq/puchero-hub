@@ -18,3 +18,5 @@ entrypoint.sh
 deployments.log
 test_file.txt
 google-chrome-stable.deb
+app.log
+app.log.1

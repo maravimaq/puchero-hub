@@ -12,7 +12,7 @@ class ExploreForm(FlaskForm):
     date_to = DateField('Date To', validators=[Optional()])
     size_from = IntegerField('Size From (KB)', validators=[Optional(), NumberRange(min=0)])
     size_to = IntegerField('Size To (KB)', validators=[Optional(), NumberRange(min=0)])
-    format = StringField('Format', validators=[Optional()])
+    description = StringField('Description', validators=[Optional()])
     files_count = IntegerField('Number of Files', validators=[Optional(), NumberRange(min=0)])
     tags = StringField('Tags', validators=[Optional()])
     publication_type = SelectField(
@@ -26,4 +26,3 @@ class ExploreForm(FlaskForm):
         validators=[Optional()]
     )
     submit = SubmitField('Search')
-    

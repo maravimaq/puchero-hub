@@ -51,11 +51,14 @@ function send_query() {
     const searchCriteria = {
         title: document.getElementById('title').value,
         author: document.getElementById('author').value,
+        publication_doi: document.getElementById('publication_doi').value,
         date_from: document.getElementById('date_from').value,
         date_to: document.getElementById('date_to').value,
         size_from: document.getElementById('size_from').value,
         size_to: document.getElementById('size_to').value,
         files_count: document.getElementById('files_count').value,
+        description: document.getElementById('description').value,
+        tags: document.getElementById('tags').value,
         publication_type: document.getElementById('publication_type').value,
         sorting: document.getElementById('sorting').value,
         csrf_token: document.querySelector('input[name="csrf_token"]').value
@@ -185,6 +188,17 @@ function clearFilters() {
     let authorInput = document.getElementById('author');
     authorInput.value = "";
   
+// Reset the publication DOI
+    let publicationDoiInput = document.getElementById('publication_doi');
+    publicationDoiInput.value = "";
+
+    // Reset the description
+    let descriptionInput = document.getElementById('description');
+    descriptionInput.value = "";
+
+    // Reset the tags
+    let tagsInput = document.getElementById('tags');
+    tagsInput.value = "";
     // Reset the date range
     let dateFromInput = document.getElementById('date_from');
     dateFromInput.value = "";

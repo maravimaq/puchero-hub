@@ -20,6 +20,18 @@
                     {{ form.author(class="form-control", id="author") }}
                 </div>
                 <div class="mb-3">
+                    {{ form.publication_doi.label(class="form-label") }}
+                    {{ form.publication_doi(class="form-control", id="publication_doi") }}
+                </div>
+                <div class="mb-3">
+                    {{ form.description.label(class="form-label") }}
+                    {{ form.description(class="form-control", id="description") }}
+                </div>
+                <div class="mb-3">
+                    {{ form.tags.label(class="form-label") }}
+                    {{ form.tags(class="form-control", id="tags") }}
+                </div>
+                <div class="mb-3">
                     {{ form.date_from.label(class="form-label") }}
                     {{ form.date_from(class="form-control", id="date_from") }}
                 </div>
