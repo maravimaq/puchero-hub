@@ -78,19 +78,23 @@ jobs:
                         if commit.author and commit.author.login in valid_contributors:
                             contributors_data[commit.author.login]["workflows"] = 10
 
-        # Procesa tests dinámicamente verificando archivos creados
-        for root, dirs, files in os.walk("app/modules"):
-            for user, test_files in {
-                "pabmejbui": ["test_wi_profile_unit.py", "test_integration.py", "test_selenium.py", "locustfile.py"],
-                "juanjunobr": ["test_unit.py", "test_integration.py", "test_selenium.py", "locustfile.py"],
-                "maravimaq": ["test_unit.py", "test_integration.py", "test_selenium.py", "locustfile.py"],
-                "julsolalf": ["test_unit.py", "test_integration.py", "test_selenium.py", "locustfile.py"]
-            }.items():
-                if user in valid_contributors:
-                    user_tests = [
-                        test for test in test_files if test in files
-                    ]
-                    contributors_data[user]["tests"] = user_tests
+        # Verificación estática de archivos de tests
+        test_files_mapping = {
+            "pabmejbui": ["test_wi_profile_unit.py", "test_integration.py", "test_selenium.py", "locustfile.py"],
+            "juanjunobr": ["test_unit.py", "test_integration.py", "test_selenium.py", "locustfile.py"],
+            "maravimaq": ["test_unit.py", "test_integration.py", "test_selenium.py", "locustfile.py"],
+            "julsolalf": ["test_unit.py", "test_integration.py", "test_selenium.py", "locustfile.py"]
+        }
+
+        for user, test_files in test_files_mapping.items():
+            if user in valid_contributors:
+                repo_files = [
+                    file.filename for commit in all_commits if commit.author and commit.author.login == user
+                    for file in commit.files
+                ]
+                contributors_data[user]["tests"] = [
+                    test for test in test_files if test in repo_files
+                ]
 
         # Calcula la nota de tests
         for user, data in contributors_data.items():
@@ -135,22 +139,12 @@ jobs:
         EOF
 
     - name: Commit and Push Results
+      if: ${{ github.event_name != 'pull_request' }}  # Solo hace push si no es un PR
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
         git config user.name "GitHub Actions"
         git config user.email "actions@github.com"
-        
-        # Maneja posibles conflictos
-        git stash push -m "Temporary stash for contributor analysis" || echo "No changes to stash"
-        
-        # Restaura la rama correcta
-        git checkout ${{ github.head_ref || github.ref_name }}
-
-        # Aplica los cambios si hay un stash
-        git stash list | grep "Temporary stash for contributor analysis" && git stash pop || echo "No stash to apply"
-        
-        # Commit y push
         git add docs/contributor_performance.md
         git commit -m "docs(performance_workflow): Add contributor performance analysis" || echo "No changes to commit"
         git push origin ${{ github.head_ref || github.ref_name }}
