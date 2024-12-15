@@ -21,7 +21,7 @@ El workflow se activa en los siguientes eventos:
 
 ```yaml
 permissions:
-  contents: read and write
+  contents: write
 ```
 
 ---
