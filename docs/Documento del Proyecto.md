@@ -39,11 +39,11 @@
 
 | Miembro del equipo | Horas | Commits | LoC | Test | Issues | Work Item |
 | ----- | ----- | ----- | ----- | ----- | ----- | ----- |
-| Ávila Maqueda, María del Mar  | 153 | 113 | 5662 | 70 | 30 | Download All Datasets, Create Communities |
+| Ávila Maqueda, María del Mar  | 153 | 116 | 6416 | 70 | 30 | Download All Datasets, Create Communities |
 | Blanco Mora, David  | No procede | No procede | No procede | No procede | No procede | No procede |
-| del Junco Obregón, Juan | 148 | 116 | 5209 | 88 | 22 | Fakenodo, New Test Cases |
+| del Junco Obregón, Juan | 148 | 117 | 5338 | 88 | 24 | Fakenodo, New Test Cases |
 | González Marcos, Pedro | No procede | No procede | No procede | No procede | No procede | No procede |
-| Mejías Buitrago, Pablo | 96 | 76 | 1983 | 18 | 13 | View User Profile  |
+| Mejías Buitrago, Pablo | 96 | 76 | 2083 | 18 | 13 | View User Profile  |
 | Solís Alfonso, Julio | 52 | 4 | 691 | 15 | 2 | Advanced Filtering |
 | **TOTAL** | 449 | 302 | 13435 | 191 | 65 | 6 |
 
