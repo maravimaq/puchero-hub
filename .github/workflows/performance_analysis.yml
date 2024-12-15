@@ -1,8 +1,9 @@
 name: Contributor Performance Analysis
 
 on:
-  workflow_dispatch: # Permite ejecutar el workflow manualmente
-
+  workflow_dispatch: # Permite ejecución manual
+  pull_request: 
+    
 jobs:
   analyze-performance:
     runs-on: ubuntu-latest
