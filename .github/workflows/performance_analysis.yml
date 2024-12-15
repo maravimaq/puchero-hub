@@ -159,6 +159,10 @@ jobs:
       run: |
         git config user.name "GitHub Actions"
         git config user.email "actions@github.com"
+
+        git checkout ${{ github.head_ref }}
+        
         git add docs/contributor_performance.md
-        git commit -m "Add contributor performance analysis"
-        git push
+        git commit -m "docs(performance_workflow): Add contributor performance analysis #114" || echo "No changes to commit"
+
+        git push origin ${{ github.head_ref }}
