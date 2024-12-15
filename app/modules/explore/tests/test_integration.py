@@ -39,12 +39,14 @@ def populate_data(app):
             description="A test dataset",
             publication_type=PublicationType.JOURNAL_ARTICLE.name,
             authors=[author1],
+            tags="test"
         )
         meta2 = DSMetaData(
             title="Dataset 2",
             description="Another test dataset",
             publication_type=PublicationType.BOOK.name,
             authors=[author2],
+            tags="test"
         )
         db.session.add_all([meta1, meta2])
         db.session.commit()
@@ -135,7 +137,7 @@ def test_explore_post_filter_by_nonexistent_author(client, populate_data):
 
 def test_explore_post_filter_by_tags(client, populate_data):
     criteria = {
-        "tags": ["test"]
+        "tags": "test"
     }
     response = client.post('/explore', json=criteria)
     assert response.status_code == 200
