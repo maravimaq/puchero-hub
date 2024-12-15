@@ -1,10 +1,10 @@
 name: Contributors Performance Analysis
 
 on:
-  workflow_dispatch:
   pull_request:
     branches:
-      - main  # Se ejecuta automáticamente en PR hacia la rama main
+      - main
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -17,7 +17,7 @@ jobs:
     - name: Checkout Code
       uses: actions/checkout@v4
       with:
-        fetch-depth: 0  # Asegura tener el historial completo
+        fetch-depth: 0
 
     - name: Set up Python
       uses: actions/setup-python@v5
@@ -44,7 +44,7 @@ jobs:
         # Lista de contribuidores válidos
         valid_contributors = ["pabmejbui", "juanjunobr", "maravimaq", "julsolalf"]
 
-        # Fecha de inicio (primer commit o 1 de noviembre)
+        # Fecha de inicio del análisis
         start_date = datetime(2023, 11, 1, tzinfo=timezone.utc)
         contributors_data = {user: {"commits": 0, "issues": 0, "pull_requests": 0, "workflows": 0} for user in valid_contributors}
 
@@ -58,7 +58,7 @@ jobs:
         total_commits = sum(data["commits"] for data in contributors_data.values())
         commit_average = total_commits / len(valid_contributors)
 
-        # Procesa issues creadas (excluyendo pull requests)
+        # Procesa issues creadas
         for issue in repo.get_issues(state="all", since=start_date):
             if issue.user and issue.user.login in valid_contributors and not issue.pull_request:
                 contributors_data[issue.user.login]["issues"] += 1
@@ -121,14 +121,15 @@ jobs:
         EOF
 
     - name: Commit and Push Results
-      if: ${{ github.event_name == 'pull_request' }}
+      if: ${{ github.event_name == 'pull_request' && github.base_ref == 'main' }}
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
         git config user.name "GitHub Actions"
         git config user.email "actions@github.com"
-        git fetch origin
-        git checkout ${{ github.head_ref || github.ref_name }}
+        git fetch origin main
+        git checkout main
+        git pull origin main
         git add docs/contributor_performance.md
         git commit -m "docs(performance_workflow): Update contributor performance analysis" || echo "No changes to commit"
-        git push origin ${{ github.head_ref || github.ref_name }}
+        git push origin main
