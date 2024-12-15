@@ -1,0 +1,109 @@
+name: Contributor Performance Analysis
+
+on:
+  workflow_dispatch: # Permite ejecutar el workflow manualmente
+
+jobs:
+  analyze-performance:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.10'
+
+    - name: Install Dependencies
+      run: pip install requests PyGithub
+
+    - name: Analyze Contributor Performance
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        python <<EOF
+        import os
+        import requests
+        from github import Github
+        from datetime import datetime, timedelta
+
+        # Configuración
+        REPO_NAME = os.getenv("GITHUB_REPOSITORY")
+        TOKEN = os.getenv("GITHUB_TOKEN")
+        g = Github(TOKEN)
+        repo = g.get_repo(REPO_NAME)
+
+        # Inicializa los datos
+        contributors_data = {}
+
+        # Calcula las fechas relevantes
+        now = datetime.now()
+        start_date = now - timedelta(days=30)  # Analizar el último mes
+
+        # Procesa commits
+        for commit in repo.get_commits(since=start_date):
+            if commit.author:
+                username = commit.author.login
+                contributors_data.setdefault(username, {"commits": 0, "issues": 0, "pull_requests": 0, "workflows": 0})
+                contributors_data[username]["commits"] += 1
+
+        # Procesa issues cerradas
+        for issue in repo.get_issues(state="closed", since=start_date):
+            if issue.closed_by:
+                username = issue.closed_by.login
+                contributors_data.setdefault(username, {"commits": 0, "issues": 0, "pull_requests": 0, "workflows": 0})
+                contributors_data[username]["issues"] += 1
+
+        # Procesa pull requests
+        for pr in repo.get_pulls(state="closed"):
+            if pr.merged_at and pr.merged_at > start_date:
+                username = pr.user.login
+                contributors_data.setdefault(username, {"commits": 0, "issues": 0, "pull_requests": 0, "workflows": 0})
+                contributors_data[username]["pull_requests"] += 1
+
+        # Procesa workflows (si el repositorio tiene workflows)
+        workflows_dir = ".github/workflows"
+        if os.path.exists(workflows_dir):
+            for root, dirs, files in os.walk(workflows_dir):
+                for file in files:
+                    filepath = os.path.join(root, file)
+                    modified_by = repo.get_commits(path=filepath)
+                    for commit in modified_by:
+                        if commit.author:
+                            username = commit.author.login
+                            contributors_data.setdefault(username, {"commits": 0, "issues": 0, "pull_requests": 0, "workflows": 0})
+                            contributors_data[username]["workflows"] += 1
+
+        # Genera puntuaciones y tabla
+        output = "| Contribuidor | Commits | Issues Cerradas | Pull Requests | Workflows | Puntuación Total |\n"
+        output += "|--------------|---------|----------------|---------------|-----------|----------------|\n"
+
+        for user, data in contributors_data.items():
+            score = (
+                data["commits"] * 2 +
+                data["issues"] * 3 +
+                data["pull_requests"] * 4 +
+                data["workflows"] * 5
+            )
+            output += f"| {user} | {data['commits']} | {data['issues']} | {data['pull_requests']} | {data['workflows']} | {score} |\n"
+
+        print(output)
+
+        # Guarda el resultado en docs/
+        os.makedirs("docs", exist_ok=True)
+        with open("docs/contributor_performance.md", "w") as f:
+            f.write("# Contributor Performance Analysis\n\n")
+            f.write(output)
+        EOF
+
+    - name: Commit and Push Results
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        git config user.name "GitHub Actions"
+        git config user.email "actions@github.com"
+        git add docs/contributor_performance.md
+        git commit -m "Add contributor performance analysis"
+        git push
