@@ -58,21 +58,24 @@ Este apartado detalla los pasos necesarios para ejecutar el job `analyze-perform
 Clona el código del repositorio completo para garantizar el acceso a todos los archivos, incluidas las configuraciones y los historiales de commits.
 
 ```yaml
-- name: Checkout Code
-  uses: actions/checkout@v4
+steps:
+  - name: Checkout Code
+    uses: actions/checkout@v4
+    with:
+      fetch-depth: 0
 ```
 
 ---
 
 **Paso 2: Configurar Python**
 
-Establece un entorno Python utilizando la versión `3.10`, necesario para ejecutar el script de análisis.
+Establece un entorno Python utilizando la versión `3.12`, necesario para ejecutar el script de análisis.
 
 ```yaml
 - name: Set up Python
   uses: actions/setup-python@v5
   with:
-    python-version: "3.10"
+    python-version: "3.12"
 ```
 
 ---
