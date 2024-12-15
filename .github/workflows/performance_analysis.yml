@@ -2,7 +2,7 @@ name: Contributor Performance Analysis
 
 on:
   workflow_dispatch: # Permite ejecución manual
-  pull_request:     # Se ejecuta automáticamente en cada PR
+  pull_request: # Se ejecuta con cada PR
 
 jobs:
   analyze-performance:
@@ -36,18 +36,21 @@ jobs:
         repo = g.get_repo(REPO_NAME)
 
         contributors_data = {}
+
         now = datetime.now(timezone.utc)
         start_date = now - timedelta(days=30)  # Últimos 30 días
 
-        # Total de commits
+        # Calcula el total y media de commits
         all_commits = list(repo.get_commits(since=start_date))
         total_commits = len(all_commits)
-        commit_average = total_commits / len(repo.get_contributors())
+        contributors = list(repo.get_contributors())
+        total_contributors = len(contributors)
+        commit_average = total_commits / total_contributors if total_contributors > 0 else 1
 
-        # Total de issues
+        # Calcula el total y media de issues cerradas
         all_closed_issues = list(repo.get_issues(state="closed", since=start_date))
         total_issues = len(all_closed_issues)
-        issue_average = total_issues / len(repo.get_contributors())
+        issue_average = total_issues / total_contributors if total_contributors > 0 else 1
 
         # Procesa commits
         for commit in all_commits:
@@ -111,7 +114,7 @@ jobs:
             issue_score = min((data["issues"] / issue_average) * 10, 10)
 
             # Nota pull requests
-            pr_score = min((data["pull_requests"] / (total_issues / 10)) * 10, 10)
+            pr_score = min((data["pull_requests"] / 10) * 10, 10)
 
             # Nota tests
             unique_test_types = len(set(data["tests"]))
@@ -157,5 +160,5 @@ jobs:
         git config user.name "GitHub Actions"
         git config user.email "actions@github.com"
         git add docs/contributor_performance.md
-        git commit -m "Update contributor performance analysis"
+        git commit -m "Add contributor performance analysis"
         git push
