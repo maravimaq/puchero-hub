@@ -1,8 +1,11 @@
 name: Contributor Performance Analysis
 
 on:
-  workflow_dispatch: # Permite ejecución manual
-  pull_request: # Se ejecuta con cada PR
+  push:
+    branches:
+      - feature/performance_workflow
+  workflow_dispatch:
+  pull_request:
 
 jobs:
   analyze-performance:
@@ -161,7 +164,7 @@ jobs:
         git config user.email "actions@github.com"
 
         git checkout ${{ github.head_ref }}
-        
+
         git add docs/contributor_performance.md
         git commit -m "docs(performance_workflow): Add contributor performance analysis #114" || echo "No changes to commit"
 
