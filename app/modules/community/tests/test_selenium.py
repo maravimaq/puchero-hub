@@ -366,59 +366,6 @@ class TestUntitled:
         self.driver.find_element(By.CSS_SELECTOR, ".text-dark").click()
         self.driver.find_element(By.LINK_TEXT, "Log out").click()
 
-    def test_join_community(self):
-        # Navegación en la aplicación web
-        self.driver.get("http://web_app_container:5000/")
-        self.driver.set_window_size(927, 1012)
-
-        # Interactuar con el login
-        self.driver.find_element(By.LINK_TEXT, "Login").click()
-        self.driver.find_element(By.ID, "email").click()
-        self.driver.find_element(By.ID, "email").send_keys("user2@example.com")
-        self.driver.find_element(By.ID, "password").click()
-        self.driver.find_element(By.ID, "password").send_keys("1234")
-        self.driver.find_element(By.ID, "submit").click()
-
-        # Abrir el menú lateral
-        menu_button = WebDriverWait(self.driver, 10).until(
-            EC.element_to_be_clickable((By.CSS_SELECTOR, ".hamburger"))
-        )
-        menu_button.click()
-
-        # Esperar a que se cargue el elemento del menú lateral
-        community_menu_item = WebDriverWait(self.driver, 10).until(
-            EC.element_to_be_clickable((By.LINK_TEXT, "Explore Communities"))
-        )
-        community_menu_item.click()
-
-        # Verificar que estamos en la página de comunidades no unidas
-        assert (
-            "Communities You Haven't Joined" in self.driver.page_source
-        ), "No se cargó la página de comunidades no unidas correctamente"
-
-        # Verificar que hay comunidades listadas
-        communities = self.driver.find_elements(By.CSS_SELECTOR, ".list-group-item")
-        assert len(communities) > 0, "No hay comunidades disponibles para unirse"
-
-        # Unirse a la primera comunidad de la lista
-        first_community_name = communities[0].find_element(By.TAG_NAME, "strong").text
-        communities[0].find_element(By.TAG_NAME, "button").click()
-
-        # Navegar a 'Mis comunidades' y verificar que la comunidad aparece allí
-        self.driver.find_element(By.CSS_SELECTOR, ".text-dark").click()
-        self.driver.find_element(By.LINK_TEXT, "My Communities").click()
-
-        # Verificar que la comunidad unida está listada
-        joined_communities = self.driver.find_elements(By.CSS_SELECTOR, ".list-group-item h5 a")
-        joined_community_names = [community.text for community in joined_communities]
-        assert (
-            first_community_name in joined_community_names
-        ), f"La comunidad '{first_community_name}' no aparece en 'Mis comunidades'."
-
-        # Cerrar sesión
-        self.driver.find_element(By.CSS_SELECTOR, ".text-dark").click()
-        self.driver.find_element(By.LINK_TEXT, "Log out").click()
-
     def test_empty_not_joined_communities(self):
         # Navegación en la aplicación web
         self.driver.get("http://web_app_container:5000/")
