@@ -1,5 +1,4 @@
 from flask import render_template, request, jsonify
-
 from app.modules.explore import explore_bp
 from app.modules.explore.forms import ExploreForm
 from app.modules.explore.services import ExploreService
@@ -11,7 +10,7 @@ def index():
     if request.method == 'GET':
         query = request.args.get('query', '')
         datasets = ExploreService().filter()  # Load all datasets initially
-        return render_template('explore/index.html',
+        return render_template('explore/index.html', 
                                form=form, query=query, datasets=[dataset.to_dict() for dataset in datasets])
 
     if request.method == 'POST':

@@ -9,10 +9,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     form.addEventListener('submit', function(event) {
         event.preventDefault();
-       send_query();
+        send_query();
     });
 
-  const searchButton = document.getElementById('search_button');
+    const searchButton = document.getElementById('search_button');
     searchButton.addEventListener('click', function(event) {
         event.preventDefault();
         send_query();
@@ -26,6 +26,20 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
 
 function send_query() {
     console.log("send query...");
@@ -34,27 +48,35 @@ function send_query() {
     document.getElementById("results_not_found").style.display = "none";
     console.log("hide not found icon");
 
-        const searchCriteria = {
+    const searchCriteria = {
         title: document.getElementById('title').value,
         author: document.getElementById('author').value,
         date_from: document.getElementById('date_from').value,
         date_to: document.getElementById('date_to').value,
         size_from: document.getElementById('size_from').value,
         size_to: document.getElementById('size_to').value,
-      //  format: document.getElementById('format').value,
         files_count: document.getElementById('files_count').value,
         publication_type: document.getElementById('publication_type').value,
-        sorting: document.getElementById('sorting').value
+        sorting: document.getElementById('sorting').value,
+        csrf_token: document.querySelector('input[name="csrf_token"]').value
     };
+
+    const csrfToken = getCookie('csrf_token');
 
     fetch('/explore', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
+            'X-CSRFToken': searchCriteria.csrf_token
         },
         body: JSON.stringify(searchCriteria),
     })
-    .then(response => response.json())
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.json();
+    })
     .then(data => {
         const results = document.getElementById('results');
         results.innerHTML = '';
@@ -122,6 +144,9 @@ function send_query() {
             `;
             results.appendChild(card);
         });
+    })
+    .catch(error => {
+        console.error('Error:', error);
     });
 }
 
@@ -153,9 +178,8 @@ document.getElementById('clear-filters').addEventListener('click', clearFilters)
 
 function clearFilters() {
     // Reset the search query
-    let queryInput = document.querySelector('title');
+    let queryInput = document.getElementById('title');
     queryInput.value = "";
-    // queryInput.dispatchEvent(new Event('input', {bubbles: true}));
 
     // Reset the author
     let authorInput = document.getElementById('author');
@@ -176,21 +200,20 @@ function clearFilters() {
     // Reset the files count
     let filesCountInput = document.getElementById('files_count');
     filesCountInput.value = "";
+  
     // Reset the publication type to its default value
-    if (document.getElementById('publication_type')) {
-        let publicationTypeSelect = document.getElementById('publication_type');
+    let publicationTypeSelect = document.getElementById('publication_type');
+    if (publicationTypeSelect) {
         publicationTypeSelect.value = "any"; // replace "any" with whatever your default value is
-        // publicationTypeSelect.dispatchEvent(new Event('input', {bubbles: true}));
     }
+  
     // Reset the sorting option
     let sortingOptions = document.querySelectorAll('[name="sorting"]');
     sortingOptions.forEach(option => {
         option.checked = option.value == "newest"; // replace "default" with whatever your default value is
-        // option.dispatchEvent(new Event('input', {bubbles: true}));
     });
 
     // Perform a new search with the reset filters
-    queryInput.dispatchEvent(new Event('input', {bubbles: true}));
     send_query();
 }
 

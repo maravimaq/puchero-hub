@@ -3,6 +3,7 @@ from app import db, create_app
 from app.modules.dataset.models import DataSet, DSMetaData, PublicationType, Author
 from app.modules.auth.models import User
 
+
 @pytest.fixture
 def app():
     app = create_app('testing')  # Ensure 'testing' config is set up
@@ -12,9 +13,11 @@ def app():
         db.session.remove()
         db.drop_all()
 
+
 @pytest.fixture
 def client(app):
     return app.test_client()
+
 
 @pytest.fixture
 def populate_data(app):
@@ -52,6 +55,7 @@ def populate_data(app):
         db.session.add_all([dataset1, dataset2])
         db.session.commit()
 
+
 def test_explore_post_filter_by_title(client, populate_data):
     criteria = {
         "title": "Dataset 1",
@@ -84,6 +88,7 @@ def test_explore_post_filter_by_author(client, populate_data):
     assert len(json_data) == 1
     assert json_data[0]['title'] == "Dataset 1"
 
+
 def test_explore_post_filter_by_multiple_criteria(client, populate_data):
     criteria = {
         "author": "Author One",
@@ -106,6 +111,7 @@ def test_explore_post_filter_by_partial_title(client, populate_data):
     assert len(json_data) == 2
     assert any(dataset['title'] == "Dataset 1" for dataset in json_data)
     assert any(dataset['title'] == "Dataset 2" for dataset in json_data)
+
 
 def test_explore_post_empty_filter(client, populate_data):
     # An empty filter should return all datasets
@@ -173,7 +179,7 @@ def test_explore_get_all_datasets(client, populate_data):
 
     # Verify the page title
     assert b"<h1 class=\"h2 mb-3\"><b>Explore</b></h1>" in response.data
-    
+
     # Verify that dataset titles are rendered
     assert b"Dataset 1" in response.data
     assert b"Dataset 2" in response.data

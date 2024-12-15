@@ -11,7 +11,7 @@ from core.managers.module_manager import ModuleManager
 from core.managers.config_manager import ConfigManager
 from core.managers.error_handler_manager import ErrorHandlerManager
 from core.managers.logging_manager import LoggingManager
-
+import secrets
 # Load environment variables
 load_dotenv()
 
@@ -20,9 +20,18 @@ db = SQLAlchemy()
 migrate = Migrate()
 csrf = CSRFProtect()
 
+# Genera una clave secreta
+
+secret_key = secrets.token_hex(32)
+
 
 def create_app(config_name='development'):
     app = Flask(__name__)
+    csrf = CSRFProtect(app)
+
+    app.config['SECRET_KEY'] = secret_key
+    app.config['WTF_CSRF_ENABLED'] = True
+    app.config['WTF_CSRF_METHODS'] = ['POST', 'PUT', 'PATCH', 'DELETE']
 
     # Load configuration according to environment
     config_manager = ConfigManager(app)
