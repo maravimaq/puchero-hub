@@ -42,7 +42,6 @@ El job utiliza un entorno basado en Ubuntu y se asegura de tener acceso al códi
 jobs:
   update-coverage:
     runs-on: ubuntu-latest
-
 ```
 
 ---
@@ -101,29 +100,20 @@ El script en Python realiza las siguientes acciones:
 
     - Commits: Se calcula el total de commits por contribuidor desde una fecha de inicio (1 de noviembre de 2023).
         - Se calcula una nota basada en la relación del número de commits del usuario con el promedio general.
-    - Issues cerradas: Se cuentan las issues cerradas por cada contribuidor.
+    - Issues creadas: Se cuentan las issues cerradas por cada contribuidor.
         - La nota se basa en la relación entre el número de issues cerradas y la media general.
     - Pull requests: Se evalúan los pull requests cerrados y mergeados por contribuidor.
         - La nota se calcula en proporción a la actividad.
     - Workflows: Se verifica si el contribuidor ha modificado algún archivo en .github/workflows.
         - Nota fija: 10 si se ha creado algún workflow, 0 si no.
-    - Tests realizados:
-        - Se analizan los commits para identificar archivos de test creados (unitarios, integración, selenium y locust).
-        - La nota depende del número de tipos de tests realizados:
-            - 10: Todos los tipos.
-            - 5: Tres tipos.
-            - 2: Dos tipos.
-            - 1: Un tipo.
-            - 0: Ningún tipo.
 
 - Generación del archivo markdown: Se genera un documento en docs/contributor_performance.md con una tabla detallada que incluye:
 
     - Contribuidor: Nombre de usuario.
     - Commits y Nota: Número de commits y la nota asignada.
-    - Issues cerradas y Nota.
+    - Issues creadas y Nota.
     - Pull requests y Nota.
     - Workflows y Nota.
-    - Tests y Nota.
     - Nota final: Promedio ponderado de las métricas.
 
 ```yaml
@@ -159,28 +149,20 @@ El archivo generado se agrega al repositorio, y se realiza un commit con un mens
 ## Detalles de las Métricas
 Las métricas y sus ponderaciones son:
 
-    1. Commits (20%):
+    1. Commits (25%):
         - Se compara el número de commits del usuario con la media general.
         - Fórmula: (commits_usuario / media_commits) * 10.
 
-    2. Issues cerradas (20%):
-        - Similar a los commits, la nota depende de la relación entre issues - cerradas y la media.
+    2. Issues creadas (25%):
+        - Similar a los commits, la nota depende de la relación entre issues creadas y la media.
         - Fórmula: (issues_usuario / media_issues) * 10.
 
-    3. Pull requests (20%):
+    3. Pull requests (25%):
         - Se otorga una nota proporcional al número de pull requests cerrados y mergeados.
         - Máximo: 10.
 
-    4. Workflows (20%):
+    4. Workflows (25%):
         - Si un usuario modifica un archivo de workflow, obtiene una nota fija de 10.
-
-    5. Tests (20%):
-        - Nota según los tipos de tests realizados:
-            - 10: Todos los tipos.
-            - 5: Tres tipos.
-            - 2: Dos tipos.
-            - 1: Un tipo.
-            - 0: Ningún tipo.
 
 ## Notas Adicionales
 
