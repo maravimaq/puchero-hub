@@ -1,0 +1,35 @@
+name: Execute Selenium Tests
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  selenium-tests:
+    name: Run Selenium Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+
+      - name: Start Docker containers
+        run: |
+          cp .env.docker.example .env
+          sh scripts/setup_selenium_docker.sh
+
+      - name: Wait for services to be ready
+        run: |
+          docker run --network host --rm alpine sh -c 'while ! nc -z localhost 3306; do sleep 1; done'
+          docker run --network host --rm alpine sh -c 'while ! nc -z localhost 4444; do sleep 1; done'
+
+      - name: Run Selenium tests
+        run: |
+          docker exec -i web_app_container rosemary selenium
