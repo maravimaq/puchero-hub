@@ -46,7 +46,7 @@ def test_client(test_client):
 
         metadata_1.authors.append(author_1)
         metadata_2.authors.append(author_2)
-        
+
         dataset_1 = DataSet(
             user_id=user_1.id,
             ds_meta_data_id=metadata_1.id,
@@ -201,5 +201,41 @@ def test_filter_by_title_author_date_range_and_tags(test_client):
                               date_from=date_from, date_to=date_to, tags="climate")
         assert len(results) == 1, ("Expected only one dataset matching title 'Climate Change', author 'John Doe',"
                                    "date range, and tags 'climate'.")
+        assert results[0].ds_meta_data.title == "Climate Change Data", \
+            "The dataset title did not match the expected result."
+
+
+def test_filter_by_publication_doi(test_client):
+    """
+    Test filtering datasets by publication DOI.
+    """
+    with test_client.application.app_context():
+        repo = ExploreRepository()
+        results = repo.filter(publication_doi="10.1234/example-1")
+        assert len(results) == 1, "Expected only one dataset matching publication DOI '10.1234/example-1'."
+        assert results[0].ds_meta_data.title == "Climate Change Data", \
+            "The dataset title did not match the expected result."
+
+
+def test_filter_by_description(test_client):
+    """
+    Test filtering datasets by description.
+    """
+    with test_client.application.app_context():
+        repo = ExploreRepository()
+        results = repo.filter(description="climate change")
+        assert len(results) == 1, "Expected only one dataset matching description 'climate change'."
+        assert results[0].ds_meta_data.title == "Climate Change Data", \
+            "The dataset title did not match the expected result."
+
+
+def test_filter_by_tags(test_client):
+    """
+    Test filtering datasets by tags.
+    """
+    with test_client.application.app_context():
+        repo = ExploreRepository()
+        results = repo.filter(tags="climate")
+        assert len(results) == 1, "Expected only one dataset matching tags 'climate'."
         assert results[0].ds_meta_data.title == "Climate Change Data", \
             "The dataset title did not match the expected result."

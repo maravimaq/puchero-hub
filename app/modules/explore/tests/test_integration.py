@@ -39,6 +39,7 @@ def populate_data(app):
             description="A test dataset",
             publication_type=PublicationType.JOURNAL_ARTICLE.name,
             authors=[author1],
+            publication_doi="10.1234/example-1",
             tags="test"
         )
         meta2 = DSMetaData(
@@ -46,6 +47,7 @@ def populate_data(app):
             description="Another test dataset",
             publication_type=PublicationType.BOOK.name,
             authors=[author2],
+            publication_doi="10.1234/example-2",
             tags="test"
         )
         db.session.add_all([meta1, meta2])
@@ -188,3 +190,14 @@ def test_explore_get_all_datasets(client, populate_data):
 
     # Ensure "not found" div is not visible
     assert b"id=\"results_not_found\" style=\"display: none;\"" in response.data
+
+
+def test_explore_post_filter_by_description(client, populate_data):
+    criteria = {
+        "description": "A test dataset"
+    }
+    response = client.post('/explore', json=criteria)
+    assert response.status_code == 200
+    json_data = response.get_json()
+    assert len(json_data) == 1
+    assert json_data[0]['title'] == "Dataset 1"
