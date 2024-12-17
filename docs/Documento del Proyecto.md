@@ -12,7 +12,7 @@
 | Blanco Mora, David  | No procede |
 | del Junco Obregón, Juan | 10 |
 | González Marcos, Pedro | No procede |
-| Mejías Buitrago, Pablo | 6 |
+| Mejías Buitrago, Pablo | 7.5 |
 | Solís Alfonso, Julio | 3 |
 
 ## Índice
@@ -41,11 +41,11 @@
 | ----- | ----- | ----- | ----- | ----- | ----- | ----- |
 | Ávila Maqueda, María del Mar  | 153 | 117 | 6416 | 70 | 30 | Download All Datasets, Create Communities |
 | Blanco Mora, David  | No procede | No procede | No procede | No procede | No procede | No procede |
-| del Junco Obregón, Juan | 148 | 117 | 5338 | 88 | 24 | Fakenodo, New Test Cases |
+| del Junco Obregón, Juan | 148 | 117 | 5856 | 88 | 24 | Fakenodo, New Test Cases |
 | González Marcos, Pedro | No procede | No procede | No procede | No procede | No procede | No procede |
-| Mejías Buitrago, Pablo | 96 | 78 | 2083 | 18 | 13 | View User Profile  |
-| Solís Alfonso, Julio | 62 | 11 | 1327 | 15 | 4 | Advanced Filtering |
-| **TOTAL** | 449 | 316 | 14528 | 191 | 69 | 6 |
+| Mejías Buitrago, Pablo | 96 | 80 | 2515 | 18 | 17 | View User Profile  |
+| Solís Alfonso, Julio | 62 | 13 | 1390 | 16 | 6 | Advanced Filtering |
+| **TOTAL** | 459 | 327 | 16177 | 192 | 77 | 6 |
 
 * **Advanced Filtering**: Como usuario quiero filtrar por número de características, números de productos, etc. para obtener datasets de acuerdo a mis necesidades.
 * **New Test Cases**: Crear nuevos tests unitarios, de interfaz, de carga y de integración en los distintos modulos que componen el proyecto para aumentar la cobertura total
