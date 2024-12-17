@@ -44,7 +44,7 @@
 | del Junco Obregón, Juan | 148 | 117 | 5338 | 88 | 24 | Fakenodo, New Test Cases |
 | González Marcos, Pedro | No procede | No procede | No procede | No procede | No procede | No procede |
 | Mejías Buitrago, Pablo | 96 | 78 | 2083 | 18 | 13 | View User Profile  |
-| Solís Alfonso, Julio | 52 | 4 | 691 | 15 | 2 | Advanced Filtering |
+| Solís Alfonso, Julio | 62 | 11 | 1327 | 15 | 4 | Advanced Filtering |
 | **TOTAL** | 449 | 316 | 14528 | 191 | 69 | 6 |
 
 * **Advanced Filtering**: Como usuario quiero filtrar por número de características, números de productos, etc. para obtener datasets de acuerdo a mis necesidades.
