@@ -11,7 +11,7 @@ from core.repositories.BaseRepository import BaseRepository
 class ExploreRepository(BaseRepository):
     def __init__(self):
         super().__init__(DataSet)
-        
+
     def filter(self, title="", author="", date_from=None, date_to=None,
                publication_doi="", files_count="", description="", size_from=None,
                size_to=None, publication_type="any",
