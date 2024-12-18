@@ -6,7 +6,7 @@ from app.modules.dataset.models import PublicationType  # Import PublicationType
 
 class ExploreForm(FlaskForm):
     title = StringField('Title', validators=[Optional()])
-    author = StringField('Author', validators=[Optional()])
+    author = StringField('User', validators=[Optional()])
     publication_doi = StringField('Publication DOI', validators=[Optional()])
     date_from = DateField('Date From', validators=[Optional()])
     date_to = DateField('Date To', validators=[Optional()])
